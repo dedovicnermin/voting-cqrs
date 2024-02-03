@@ -1,0 +1,14 @@
+kafka:
+  properties:
+    bootstrap.servers: bootstrap.dev.gke.confluentps.io:9092
+    security.protocol: SASL_SSL
+    sasl.mechanism: PLAIN
+    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="nermin" password="nermin-secret";
+    ssl.truststore.location: /Users/ndedovic/IdeaProjects/ps-cfk/ps-cfk-app/workshop/nermin/truststore.jks
+    ssl.truststore.password: mystorepassword
+  consumer:
+    group.id: event.sink
+    auto.offset.reset: earliest
+  consumer-topics:
+    - election.votes
+

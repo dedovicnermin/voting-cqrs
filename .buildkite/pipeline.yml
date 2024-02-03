@@ -1,0 +1,21 @@
+steps:
+  - group: ":java::building_construction: JAVA :hammer:"
+    steps:
+      - label: "Compile / Build / Test / Package :maven::java:"
+        commands:
+          - mvn clean install
+        plugins:
+          - docker#v5.8.0:
+              image: dedovicnermin/pscfk-buildkite:0.0.6
+              propagate-uid-gid: true
+
+
+  - group: ":k8s: Kustomization vote-integrity :hammer:"
+    steps:
+      - label: "Build Deployment :hero:"
+        commands:
+          - kustomize build deploy > /dev/null
+        plugins:
+          - docker#v5.8.0:
+              image: dedovicnermin/pscfk-buildkite:0.0.6
+              propagate-uid-gid: true

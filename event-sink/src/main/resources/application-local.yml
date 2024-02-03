@@ -1,0 +1,9 @@
+kafka:
+  properties:
+    bootstrap.servers: localhost:9092
+  consumer:
+    group.id: event.sink
+    auto.offset.reset: earliest
+  consumer-topics:
+    - election.votes
+
