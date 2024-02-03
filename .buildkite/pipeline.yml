@@ -4,18 +4,22 @@ steps:
       - label: "Compile / Build / Test / Package :maven::java:"
         commands:
           - mvn clean install
+        artifact_paths: "**/target/*.jar"
         plugins:
           - docker#v5.8.0:
-              image: dedovicnermin/pscfk-buildkite:0.0.6
+              image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
+              volumes:
+                - "/var/run/docker.sock:/var/run/docker.sock"
+                - "$HOME/.m2:$HOME/.m2"
 
 
-  - group: ":k8s: Kustomization vote-integrity :hammer:"
+  - group: ":k8s: Deploy validation :hammer:"
     steps:
-      - label: "Build Deployment :hero:"
+      - label: ":gandalf: Deploy-validation : vote-integrity :gandalf:"
         commands:
-          - kustomize build deploy > /dev/null
+          - kustomize build vote-integrity/deploy > /dev/null
         plugins:
           - docker#v5.8.0:
-              image: dedovicnermin/pscfk-buildkite:0.0.6
+              image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
