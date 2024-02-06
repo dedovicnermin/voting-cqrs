@@ -129,7 +129,4 @@ sketch
 *.iml
 **/*.pem
 **/.env
-query-service
-client
-client/**
 .buildkite/Dockerfile

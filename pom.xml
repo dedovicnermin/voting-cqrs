@@ -22,6 +22,7 @@
         <module>election-integrity</module>
         <module>event-sink</module>
         <module>vote-integrity</module>
+        <module>query-service</module>
     </modules>
 
     <properties>
