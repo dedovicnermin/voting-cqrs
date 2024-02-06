@@ -1,6 +1,8 @@
 # Voting CQRS
 
-An event-driven voting system adhering to the [CQRS design pattern](https://martinfowler.com/bliki/CQRS.html). 
+An event-driven voting system adhering to the [CQRS design pattern](https://martinfowler.com/bliki/CQRS.html).
+
+[![Build status](https://badge.buildkite.com/d750a8c7d7a696b2031ce9daa4f388be791369ab851270d920.svg)](https://buildkite.com/nerm/voting-cqrs)
 
 ## Components
 
