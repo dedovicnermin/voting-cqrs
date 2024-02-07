@@ -30,3 +30,4 @@ An event-driven voting system adhering to the [CQRS design pattern](https://mart
 ## Contributors
 
 Hirui Huang
+Sergei Kalachev
