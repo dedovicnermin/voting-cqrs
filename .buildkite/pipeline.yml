@@ -23,3 +23,11 @@ steps:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
+      - label: ":gandalf: Deploy-validation : election-integrity :gandalf:"
+        commands:
+          - kustomize build election-integrity/deploy/environments/local > /dev/null
+          - kustomize build election-integrity/deploy/environments/gke > /dev/null
+        plugins:
+          - docker#v5.8.0:
+              image: dedovicnermin/buildkite-j17:0.0.2
+              propagate-uid-gid: true
