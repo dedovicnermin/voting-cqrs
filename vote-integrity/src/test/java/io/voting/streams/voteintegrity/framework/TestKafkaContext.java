@@ -1,4 +1,4 @@
-package io.voting.streams.voteintegrity.topology;
+package io.voting.streams.voteintegrity.framework;
 
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;

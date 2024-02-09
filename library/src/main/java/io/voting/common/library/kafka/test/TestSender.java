@@ -1,4 +1,4 @@
-package io.voting.streams.voteintegrity.framework;
+package io.voting.common.library.kafka.test;
 
 import io.voting.common.library.kafka.clients.sender.EventSender;
 import org.apache.kafka.clients.producer.Producer;
