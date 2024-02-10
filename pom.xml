@@ -115,6 +115,11 @@
                 <artifactId>cloudevents-kafka</artifactId>
                 <version>${cloudevent.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.book</groupId>
+                <artifactId>spring-boot-starter-data-mongodb</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
 
             <!--     TEST DEPs       -->
             <dependency>
