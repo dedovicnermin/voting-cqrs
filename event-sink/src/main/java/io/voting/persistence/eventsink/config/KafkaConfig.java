@@ -43,7 +43,7 @@ public class KafkaConfig {
             .ifPresent(id -> config.put(ConsumerConfig.CLIENT_ID_CONFIG, id));
     config.putAll(consumer);
     config.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-    config.putIfAbsent("poll.duration", 1000L);
+    config.putIfAbsent("poll.duration", "1000");
     return config;
   }
 
@@ -51,7 +51,7 @@ public class KafkaConfig {
   public EventReceiver<String, CloudEvent> eventReceiver() {
     final Map<String, Object> configs = consumerConfigs();
     final KafkaConsumer<String, PayloadOrError<CloudEvent>> kafkaConsumer = new KafkaConsumer<>(configs, new StringDeserializer(), new CEPayloadDeserializer());
-    final CloudEventReceiver receiver = new CloudEventReceiver(kafkaConsumer, consumerTopics, Duration.ofMillis((Long) configs.get("poll.duration")));
+    final CloudEventReceiver receiver = new CloudEventReceiver(kafkaConsumer, consumerTopics, Duration.ofMillis(Long.parseLong((String) configs.get("poll.duration"))));
     Runtime.getRuntime().addShutdownHook(new Thread(new ReceiverCloser<>(receiver)));
     new Thread(receiver).start();
     return receiver;
