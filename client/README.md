@@ -50,7 +50,7 @@ value : {
 ```
 key : <userId>
 value : {
-  "author": "user_id",
+  "author": "username",
   "title": "election_name",
   "description": "additional context user can provide if necessary",
   "category": "election_category",
