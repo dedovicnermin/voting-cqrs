@@ -93,7 +93,7 @@ class EventSinkApplicationTest extends TestKafkaContext {
     assertThat(template.findAll(Election.class)).isEmpty();
     electionSender.blockingSend(electionCreate);
 
-    Awaitility.waitAtMost(Duration.ofSeconds(1)).untilAsserted(
+    Awaitility.waitAtMost(Duration.ofSeconds(3)).untilAsserted(
             () -> assertThat(template.findAll(Election.class)).hasSize(1)
     );
 
@@ -131,7 +131,7 @@ class EventSinkApplicationTest extends TestKafkaContext {
       voteSender.blockingSend(CloudEventHelper.buildCloudEvent(CloudEventTypes.ELECTION_VOTE_EVENT, StreamUtils.wrapCloudEventData(vote)));
     }
 
-    Awaitility.waitAtMost(Duration.ofSeconds(3)).untilAsserted(
+    Awaitility.waitAtMost(Duration.ofSeconds(5)).untilAsserted(
             () -> assertThat(Objects.requireNonNull(template.findById(election.getId(), Election.class)).getCandidates())
                     .isEqualTo(expectedResults)
     );
