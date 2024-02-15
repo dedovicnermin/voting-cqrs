@@ -1,0 +1,69 @@
+version: '3'
+services:
+
+  broker:
+    image: confluentinc/cp-server:7.5.0
+    hostname: broker
+    container_name: broker
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+      - "8090:8090"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_QUOTAS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_CONFLUENT_CLUSTER_LINK_ENABLE: 'false'
+      KAFKA_CONFLUENT_BALANCER_ENABLE: 'false'
+      KAFKA_KAFKA_REST_ENABLE: 'true'
+      CLUSTER_ID: 'GJjTu-METQy8Ud-d0EQ9ZA'
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:7.5.0
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - broker
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+
+
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    env_file:
+      - mongodb/.env
+    environment:
+      - MONGO_INITDB_DATABASE=edv
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin-secret
+    volumes:
+      - ./mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
