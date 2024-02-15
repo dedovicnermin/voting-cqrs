@@ -1,9 +1,13 @@
 package io.voting.query.queryservice;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
 public class QueryServiceApplication {
 
   public static void main(String[] args) {
-    System.out.println("Hello world!");
+    SpringApplication.run(QueryServiceApplication.class, args);
   }
 
 }
