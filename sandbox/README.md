@@ -5,5 +5,5 @@ cd scripts
 ./produce-elections.sh
 ```
 
-
-In UI : `localhost:9021`
+Create topics in UI:
+- `localhost:9021`
