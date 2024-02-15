@@ -60,5 +60,13 @@ class ElectionClient:
             print(f"Nothing found for given election_id ({election_id}) : {e}")
             return None
 
+    def print_elections(self):
+        for doc in self.elections.find():
+            print()
+            print()
+            pprint.pprint(doc)
+            print()
+            print()
+
     def close(self):
         self.conn.close()
