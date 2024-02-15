@@ -1,0 +1,5 @@
+confluent-kafka==2.3.0
+Faker==23.1.0
+pymongo==3.11.2
+python-dateutil==2.8.2
+six==1.16.0

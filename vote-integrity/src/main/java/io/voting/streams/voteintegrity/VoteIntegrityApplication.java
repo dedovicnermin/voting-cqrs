@@ -1,6 +1,5 @@
 package io.voting.streams.voteintegrity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.voting.streams.voteintegrity.config.Constants;
 import io.voting.streams.voteintegrity.topology.VoteIntegrityTopology;
 import lombok.extern.slf4j.Slf4j;
@@ -60,8 +59,8 @@ public class VoteIntegrityApplication {
     }
 
     final Topology topology = VoteIntegrityTopology
-            .buildTopology(new StreamsBuilder(), properties, new ObjectMapper());
-    log.info(" ::: App topology :::\n{}", topology.describe());
+            .buildTopology(new StreamsBuilder(), properties);
+    log.debug(" ::: App topology :::\n{}", topology.describe());
     return new KafkaStreams(topology, properties);
   }
 
