@@ -4,6 +4,17 @@ kafka:
   consumer:
     group.id: event.sink
     auto.offset.reset: earliest
+    enable.auto.commit: false
+    poll.duration: 500
   consumer-topics:
+    - election.requests
     - election.votes
 
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: edv
+      username: edv
+      password: edv-secret
