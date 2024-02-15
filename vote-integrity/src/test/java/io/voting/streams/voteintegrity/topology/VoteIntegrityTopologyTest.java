@@ -33,9 +33,6 @@ class VoteIntegrityTopologyTest {
   TestInputTopic<String, ElectionVote> inputTopic;
   TestOutputTopic<String, CloudEvent> outputTopic;
   static Properties properties;
-  static final Map<String, Object> config = Map.of(
-
-  );
   final static ObjectMapper objectMapper = new ObjectMapper();
   @BeforeAll
   static void buildTopology() {
@@ -45,7 +42,7 @@ class VoteIntegrityTopologyTest {
     properties.put(Constants.OUTPUT_TOPIC_CONFIG, "output");
 
     final StreamsBuilder streamsBuilder = new StreamsBuilder();
-    topology = VoteIntegrityTopology.buildTopology(streamsBuilder, properties, objectMapper);
+    topology = VoteIntegrityTopology.buildTopology(streamsBuilder, properties);
   }
 
   @BeforeEach
@@ -89,9 +86,7 @@ class VoteIntegrityTopologyTest {
     assertThat(outputEvent.key).isEqualTo(ELECTION);
     assertThat(outputEvent.value.getSubject()).isEqualTo(ELECTION);
     assertThat(outputEvent.value.getData()).isNotNull();
-    final ElectionVote actualEvent = PojoCloudEventDataMapper.from(objectMapper, ElectionVote.class)
-            .map(outputEvent.value.getData())
-            .getValue();
+    final ElectionVote actualEvent = StreamUtils.unwrapCloudEventData(outputEvent.value.getData(), ElectionVote.class);
 
     System.out.println();
     System.out.println(outputEvent);

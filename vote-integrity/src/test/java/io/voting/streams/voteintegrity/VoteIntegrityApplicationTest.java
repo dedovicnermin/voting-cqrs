@@ -3,10 +3,10 @@ package io.voting.streams.voteintegrity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import io.cloudevents.CloudEvent;
-import io.cloudevents.jackson.PojoCloudEventDataMapper;
 import io.voting.common.library.kafka.clients.sender.EventSender;
 import io.voting.common.library.kafka.models.PayloadOrError;
 import io.voting.common.library.kafka.models.ReceiveEvent;
+import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionVote;
 import io.voting.streams.voteintegrity.config.Constants;
 import io.voting.streams.voteintegrity.framework.TestConsumerHelper;
@@ -47,9 +47,6 @@ class VoteIntegrityApplicationTest extends TestKafkaContext {
   private static TestConsumerHelper consumerHelper;
   private static KafkaStreams app;
 
-  final PojoCloudEventDataMapper<ElectionVote> dataMapper = PojoCloudEventDataMapper.from(objectMapper, ElectionVote.class);
-
-
   @BeforeAll
   static void init() {
     consumerHelper = new TestConsumerHelper(kafkaContainer);
@@ -66,7 +63,7 @@ class VoteIntegrityApplicationTest extends TestKafkaContext {
     properties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
     properties.put("cache.max.bytes.buffering", 0);
     properties.put("commit.interval.ms", 1000);
-    final Topology topology = VoteIntegrityTopology.buildTopology(new StreamsBuilder(), properties, objectMapper);
+    final Topology topology = VoteIntegrityTopology.buildTopology(new StreamsBuilder(), properties);
     app = new KafkaStreams(topology, properties);
     app.start();
 
@@ -122,7 +119,7 @@ class VoteIntegrityApplicationTest extends TestKafkaContext {
             .map(ReceiveEvent::getPOrE)
             .map(PayloadOrError::getPayload)
             .map(CloudEvent::getData)
-            .map(data -> dataMapper.map(data).getValue())
+            .map(data -> StreamUtils.unwrapCloudEventData(data, ElectionVote.class))
             .map(ElectionVote::getVotedFor)
             .collect(Collectors.toSet());
     assertThat(actualVotedFor).hasSize(1).containsOnly(eCandidate);
