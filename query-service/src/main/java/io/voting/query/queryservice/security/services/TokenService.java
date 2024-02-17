@@ -1,5 +1,6 @@
-package io.voting.query.queryservice.service;
+package io.voting.query.queryservice.security.services;
 
+import io.voting.query.queryservice.payload.response.JwtResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +19,8 @@ public class TokenService {
 
   private final JwtEncoder jwtEncoder;
 
-  public String generateToken(final Authentication authentication) {
+  public JwtResponse generateJwtResponse(final Authentication authentication) {
+    final EdvUserDetails userPrincipal = (EdvUserDetails) authentication.getPrincipal();
     final Instant now = Instant.now();
     final String scope = authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
@@ -27,9 +29,10 @@ public class TokenService {
             .issuer("self")
             .issuedAt(now)
             .expiresAt(now.plus(1, ChronoUnit.HOURS))
-            .subject(authentication.getName())
+            .subject(userPrincipal.getUsername())
             .claim("scope", scope)
             .build();
-    return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    final String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    return new JwtResponse(token, userPrincipal.getId(), userPrincipal.getUsername());
   }
 }
