@@ -127,6 +127,5 @@ sketch
 
 # misc
 *.iml
-**/*.pem
 **/.env
 .buildkite/Dockerfile
