@@ -2,7 +2,7 @@ const mockData = () => {
     return ([
         {
             "id": "0",
-            "title": "Is hotdog a sandwitch?",
+            "title": "Is a hotdog a sandwich?",
             "author": "Author 1",
             "description": "Really. Is it?",
             "category": "Social",
