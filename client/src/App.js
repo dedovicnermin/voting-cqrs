@@ -1,24 +1,34 @@
-import logo from './logo.svg';
 import './App.css';
+import '../node_modules/bootstrap/dist/css/bootstrap.css'
+import { useAuthContext } from './services/useAuthContext';
+import { BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
+import Header from './components/Header'
+import AllElections from './components/AllElections'
+import MyElections from './components/MyElections'
+import LoginPage from './components/LoginPage';
+import ElectionView from './components/ElectionView';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+const App = () => {
+
+  // const {user} = useAuthContext();
+  const user = true;
+
+  return(
+      <div className="App">
+        <BrowserRouter>
+          <Header/>
+            <main>
+              <Routes>
+                <Route path = "/" element={user ? <AllElections/> : <Navigate to="/login"/>}/>
+                <Route path = "/all-elections" element = {user ? <AllElections/> : <Navigate to = "/login"/>}/>
+                <Route path = "/my-elections" element = {user ? <MyElections/> : <Navigate to = "/login"/>}/>
+                <Route path = "/login" element={!user ? <LoginPage/> : <Navigate to={"/"}/>}/>
+                <Route path = "/all-elections/:id" element = {user ? <ElectionView/> : <Navigate to = "/login"/>}/>
+              </Routes>
+            </main>
+        </BrowserRouter>
+      </div>
   );
 }
 
