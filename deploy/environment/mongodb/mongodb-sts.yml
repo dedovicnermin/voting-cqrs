@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  annotations:
+    prometheus.io/port: "7778"
+    prometheus.io/scrape: "true"
+spec:
+  replicas: 1
+  serviceName: mongodb
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "7778"
+        prometheus.io/scrape: "true"
+      labels:
+        app: mongodb
+        selector: mongodb
+    spec:
+      securityContext:
+        fsGroup: 54321
+      containers:
+        - name: mongodb
+          image: mongo:7.0
+          ports:
+            - containerPort: 27017
+          envFrom:
+            - configMapRef:
+                name: mongodb-env
+          volumeMounts:
+            - name: mongo-state
+              mountPath: /data/db
+            - name: mongo-init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mongo-init
+          configMap:
+            name: mongodb-scripts
+
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-state
+      spec:
+        storageClassName: cfk-storage-delete
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 256Mi

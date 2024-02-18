@@ -1,0 +1,25 @@
+kafka:
+  properties:
+    bootstrap.servers: kafka:9094
+    security.protocol: SASL_SSL
+    sasl.mechanism: PLAIN
+    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="nermin" password="nermin-secret";
+    ssl.truststore.location: /mnt/ssl/truststore.jks
+    ssl.truststore.password: mystorepassword
+  consumer:
+    group.id: event.sink
+    auto.offset.reset: earliest
+    enable.auto.commit: false
+    poll.duration: 500
+  consumer-topics:
+    - election.requests
+    - election.votes
+
+spring:
+  data:
+    mongodb:
+      host: mongodb-0.mongodb
+      port: 27017
+      database: edv
+      username: edv
+      password: edv-secret

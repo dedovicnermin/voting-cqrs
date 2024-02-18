@@ -89,4 +89,8 @@
 
     </dependencies>
 
+    <build>
+        <finalName>event-sink</finalName>
+    </build>
+
 </project>
