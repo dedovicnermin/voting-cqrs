@@ -12,8 +12,8 @@ class ElectionClient:
     user_name = "edv"
     password = "edv-secret"
 
-    def __init__(self):
-        self.conn = MongoClient('mongodb://edv:edv-secret@localhost:27017/edv')
+    def __init__(self, mongo_url='mongodb://edv:edv-secret@localhost:27017/edv'):
+        self.conn = MongoClient(mongo_url)
         db = self.conn.edv
         self.elections = db.election
 

@@ -2,6 +2,7 @@ import argparse
 
 from helpers.dao import DaoHelper
 from helpers.electionclient import ElectionClient
+from helpers.helperutils import read_properties_file
 from helpers.votesender import VoteSender
 
 parser = argparse.ArgumentParser(description="Produce election vote events")
@@ -10,10 +11,16 @@ parser.add_argument("--candidate", "-c", help="Election candidate to vote for", 
 parser.add_argument("--number", "-n", help="Number of times to produce event", default=1)
 parser.add_argument("--unique", "-u", help="Should vote events contain unique user Ids", default=True,
                     type=lambda x: x != 'False')
+parser.add_argument("--properties", "-p", default=None, help="Path to configuration properties")
 args = parser.parse_args()
 
-election_client = ElectionClient()
-vote_sender = VoteSender()
+config = read_properties_file(args.properties)
+
+election_client = ElectionClient(config['mongo_url'])
+config.pop('mongo_url')
+
+# vote_sender = VoteSender(config, "test")
+vote_sender = VoteSender(config)
 dao = DaoHelper(election_client, vote_sender)
 
 # election_client.query_and_print_all_election_details()

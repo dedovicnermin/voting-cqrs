@@ -9,12 +9,8 @@ def acked(err, msg):
 
 class ElectionSender:
 
-    def __init__(self, topic='election.requests.raw'):
+    def __init__(self, config, topic='election.requests.raw'):
         self.topic = topic
-        config = {
-            'bootstrap.servers': 'localhost:9092',
-            'client.id': socket.gethostname()
-        }
         self.producer = Producer(config)
 
     def send(self, election_create):
