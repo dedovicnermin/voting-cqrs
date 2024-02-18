@@ -12,7 +12,7 @@ const ElectionListItem = (props) => {
     }
 
     return (
-        <div className="card" style={{width: "18rem"}} onClick={openElectionDetails}>
+        <div className="card" style={{width: "25rem"}} onClick={openElectionDetails}>
             <div className="card-body">
                 <h5 className="card-title text-truncate">{title}</h5>
                 <p className="card-text">{category}</p>

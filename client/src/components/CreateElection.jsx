@@ -58,11 +58,12 @@ const CreateElection = () => {
                         <div className="mb-3">
                             <label for="category">Category</label>
                             <select className="form-select" id="category" aria-label="Choose a category">
-                                <option value="1">Music</option>
-                                <option value="2">Sports</option>
-                                <option value="3">Politics</option>
-                                <option value="4">Gaming</option>
-                                <option value="5">Whatever...</option>
+                                <option value="1">Social</option>
+                                <option value="2">Music</option>
+                                <option value="3">Sports</option>
+                                <option value="4">Politics</option>
+                                <option value="5">Gaming</option>
+                                <option value="6">Whatever...</option>
                             </select>
                         </div>
                         <div className="mb-3">

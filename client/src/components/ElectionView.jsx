@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
+import MockData from '../MockData'
 
 const ElectionView = () => {
     // const {user} = useAuthContext();
@@ -67,9 +68,15 @@ const ElectionView = () => {
     }
 
     useEffect(() => {
-        if(user) {
-            fetchData();
-        }
+        // if(user) {
+        //     fetchData();
+        // }
+        const data = MockData()[id];
+        setTitle(data.title);
+        setAuthor(data.author);
+        setCategory(data.category);
+        setDescription(data.description);
+        setCandidates(data.candidates)
     })
 
     return (

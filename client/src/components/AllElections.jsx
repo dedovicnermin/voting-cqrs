@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import ElectionTile from '../components/ElectionTile';
 import axios from 'axios';
+import MockData from '../MockData'
 
 const AllElections = () => {
     // const {user} = useAuthContext();
@@ -14,10 +15,10 @@ const AllElections = () => {
             `http://localhost:8080/api/elections`
         );
         setElections(response.data);
-    }
-    catch (error) {
-        console.log("Something went wrong");
-        console.log(error);  
+        }
+        catch (error) {
+            console.log("Something went wrong");
+            console.log(error);  
         }
     }
 
@@ -26,13 +27,14 @@ const AllElections = () => {
     // console.log(es)
     
     useEffect(() => {
-        if(user) {
-            fetchData();
-            const refresh = setInterval(() => {
-                fetchData();
-            }, 10000)
-            return () => clearInterval(refresh);
-        }
+        // if(user) {
+        //     fetchData();
+        //     const refresh = setInterval(() => {
+        //         fetchData();
+        //     }, 10000)
+        //     return () => clearInterval(refresh);
+        // }
+        setElections(MockData);
     }, [])
 
     const displayElections = () => {
