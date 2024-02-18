@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import ElectionTile from '../components/ElectionTile';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 const MyElections = () => {
@@ -7,11 +8,36 @@ const MyElections = () => {
     // const {user} = useAuthContext();
     let user = true;
 
+    const navigate = useNavigate();
+
     const [myElections, setMyElections] = useState([]);
 
+    const fetchData = async () => {
+        try {
+        const response = await axios.get(
+            `http://localhost:8080/api/users/1/elections`
+        );
+        setMyElections(response.data);
+    }
+    catch (error) {
+        console.log("Something went wrong");
+        console.log(error);  
+        }
+    }
+
     useEffect(() => {
-        setMyElections([]);
+        if(user) {
+            fetchData();
+            const refresh = setInterval(() => {
+                fetchData();
+            }, 10000)
+            return () => clearInterval(refresh);
+        }
     }, [])
+
+    const navigateToCreateNewElection = () => {
+        navigate("/create/");
+    }
 
     const displayElections = () => {
         if(!user) {
@@ -36,9 +62,16 @@ const MyElections = () => {
         else {
             return (
                 <div className="text-center mt-5">
-                    <h3 className="">You have not created any elections yet.</h3>
+                    <div className="row mt-3 mb-3">
+                        <h3 className="">You have not created any elections yet.</h3>
+                    </div>
+                    <div className="row mt-3 mb-3">
+                        <h6>
+                            <span>Try to</span>
+                            <button className="h6 create-new-btn" onClick={navigateToCreateNewElection}>create new election</button>
+                        </h6>
+                    </div>
                 </div>
-    
             )
         }
     }
@@ -59,9 +92,7 @@ const MyElections = () => {
                     </div>
                 </div>
                 {displayElections()}
-                <div className="row mt-3 mb-3">
-                    <button className=" w-50">create election</button>
-                </div>
+                
             </div>
         </div>
     );

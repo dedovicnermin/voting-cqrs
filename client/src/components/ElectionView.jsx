@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 const ElectionView = () => {
     // const {user} = useAuthContext();
-    const user = true;
+    const user = "Test user";
+
     const navigate = useNavigate();
     const { id } = useParams();
     const [title, setTitle] = useState();
@@ -15,40 +16,28 @@ const ElectionView = () => {
     const [candidates, setCandidates] = useState();
     
     const fetchData = async () => {
-        const response = await fetch(`http://localhost:8080/api/elections/${id}`, {
-            method: "GET"
-            // headers: {
-            //     "Content-type": "application/json",
-            //     "Authorization": `Bearer ${user.token}`
-            // }
-        });
-        if(response?.status === 403) {
-            // logout();
-            console.log(' 403 !!!! logout ');
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/api/elections/${id}`
+            );
+            setTitle(response.data.title);
+            setAuthor(response.data.author);
+            setCategory(response.data.category);
+            setDescription(response.data.description);
+            setCandidates(response.data.candidates)
         }
-        const data = await response.json();
-        setTitle(data.title);
-        setAuthor(data.author);
-        setCategory(data.category);
-        setDescription(data.description);
-        setCandidates(data.candidates)
-        return data;
-
-        // axios.get("http://localhost:8080/api/elections/" + id)
-        // .then((response) => {
-        // console.log(response.data);
-        // setTitle(response.data.title);
-        // setAuthor(response.data.author);
-        // setCategory(response.data.category);
-        // setDescription(response.data.description);
-        // setCandidates(response.data.candidates);
-        // })
-        // .catch(function(error) {
-        //     console.log(error);
-        //   });
+        catch (error) {
+            console.log("Something went wrong");
+            console.log(error);  
+        }
     }
 
     const goBack = () => {
+        navigate("/all-elections/");
+    }
+
+    const submitVote = () => {
+        alert("[Your vote has been counted] dummy");
         navigate("/all-elections/");
     }
 
@@ -60,12 +49,12 @@ const ElectionView = () => {
                     {Object.keys(parsedJson).map(
                             x =>
                             <div className="row mb-3 form-check">
-                                <input type="radio" className="btn-check" name="options-outlined" id={x} autocomplete="off"></input>
+                                <input type="radio" class="btn-check" name="options-outlined" id={x} autocomplete="off"></input>
                                 <label className="btn btn-outline-success" for={x}>{x}</label>
                             </div>
                         )}
                         <div className="d-flex justify-content-center">
-                            <button type="submit" className="btn btn-primary mt-5 w-50">Submit</button>
+                            <button type="reset" className="btn btn-warning mt-5 w-50" onClick={submitVote}>Vote!</button>
                         </div>
               </form>
         )
@@ -87,9 +76,9 @@ const ElectionView = () => {
         <div className="container">
             <div className="row mt-3 mb-3">
                 <div className="col">
-                        <button className="btn btn-secondary" onClick={goBack}>&lt; go back</button> 
-                    </div>
+                    <button className="btn btn-secondary" onClick={goBack}>&lt; go back</button> 
                 </div>
+            </div>
             <div className="card p-3">
                 <div class="card-body">
                     <h3 class="card-title text-center">{title}</h3>

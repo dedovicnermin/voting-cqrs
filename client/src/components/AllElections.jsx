@@ -4,33 +4,28 @@ import axios from 'axios';
 
 const AllElections = () => {
     // const {user} = useAuthContext();
-    let user = true;
+    let user = "Test user";
 
     const [elections, setElections] = useState([]);
 
-    const fetchData = () => {
-        axios.get("http://localhost:8080/api/elections")
-        .then((response) => {
+    const fetchData = async () => {
+        try {
+        const response = await axios.get(
+            `http://localhost:8080/api/elections`
+        );
         setElections(response.data);
-        // console.log(response.status);
-        // console.log(response.statusText);
-        // console.log(response.headers);
-        // console.log(response.config);
-        })
-        .catch(function(error) {
-            console.log(error);
-          });
+    }
+    catch (error) {
+        console.log("Something went wrong");
+        console.log(error);  
+        }
     }
 
     // this is for filtering. Use later
     // const es = elections.filter((x) => x.electionCategory == 'Politics')
     // console.log(es)
-
-
-    // fetchData();
     
     useEffect(() => {
-        
         if(user) {
             fetchData();
             const refresh = setInterval(() => {
@@ -39,16 +34,6 @@ const AllElections = () => {
             return () => clearInterval(refresh);
         }
     }, [])
-
-    const testFunction = ()=> {
-        // console.log('window.location.href')
-        // console.log(window.location.href)
-        // console.log('window.location.pathname')
-        // console.log(window.location.pathname)
-        const candidates = '{"Candidate 1": 2, "Candidate Two": 34}'
-        const obj1 = JSON.parse(candidates)
-        console.log(obj1);
-    }
 
     const displayElections = () => {
         if(!user) {

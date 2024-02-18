@@ -29,6 +29,12 @@ header {
     gap:3rem;
   }
 
+.create-new-btn{
+    color: blue !important;
+    border: 0;
+    background: none;
+}
+
 /* .button-1{
     display: flex;
     border: solid 2.5px red;
