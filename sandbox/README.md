@@ -22,5 +22,5 @@ java -jar election-integrity/target/election-integrity.jar election-integrity/sr
 
 java -jar vote-integrity/target/vote-integrity.jar vote-integrity/src/main/resources/application-sandbox.properties
 
-java -jar -Dspring.profiles.active=sandbox event-sink/target/event-sink-0.0.1-SNAPSHOT.jar
+java -jar -Dspring.profiles.active=sandbox event-sink/target/event-sink.jar
 ```

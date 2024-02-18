@@ -82,4 +82,8 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <finalName>query-service</finalName>
+    </build>
+
 </project>

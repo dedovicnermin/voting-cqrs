@@ -1,0 +1,8 @@
+spring:
+  data:
+    mongodb:
+      host: mongodb-0.mongodb
+      port: 27017
+      database: edv
+      username: edv
+      password: edv-secret

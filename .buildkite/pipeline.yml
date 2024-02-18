@@ -14,19 +14,53 @@ steps:
                 - "$HOME/.m2:$HOME/.m2"
 
 
-  - group: ":k8s: Deploy validation :hammer:"
+  - group: ":k8s: Component deployment validation :hammer:"
     steps:
       - label: ":gandalf: Deploy-validation : vote-integrity :gandalf:"
         commands:
-          - kustomize build vote-integrity/deploy > /dev/null
+          - kustomize build deploy/overlay/gke/vote-integrity > /dev/null
+          - kustomize build deploy/overlay/local/vote-integrity > /dev/null
         plugins:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
       - label: ":gandalf: Deploy-validation : election-integrity :gandalf:"
         commands:
-          - kustomize build election-integrity/deploy/environments/local > /dev/null
-          - kustomize build election-integrity/deploy/environments/gke > /dev/null
+          - kustomize build deploy/overlay/gke/election-integrity > /dev/null
+          - kustomize build deploy/overlay/local/election-integrity > /dev/null
+        plugins:
+          - docker#v5.8.0:
+              image: dedovicnermin/buildkite-j17:0.0.2
+              propagate-uid-gid: true
+      - label: ":gandalf: Deploy-validation : event-sink :gandalf:"
+        commands:
+          - kustomize build deploy/overlay/gke/event-sink > /dev/null
+          - kustomize build deploy/overlay/local/event-sink > /dev/null
+        plugins:
+          - docker#v5.8.0:
+              image: dedovicnermin/buildkite-j17:0.0.2
+              propagate-uid-gid: true
+      - label: ":gandalf: Deploy-validation : query-service :gandalf:"
+        commands:
+          - kustomize build deploy/overlay/gke/query-service > /dev/null
+          - kustomize build deploy/overlay/local/query-service > /dev/null
+        plugins:
+          - docker#v5.8.0:
+              image: dedovicnermin/buildkite-j17:0.0.2
+              propagate-uid-gid: true
+
+  - group: ":k8s: Environment deployment validation :hammer:"
+    steps:
+      - label: ":gandalf: GKE environment :gandalf:"
+        commands:
+          - kustomize build deploy/environment/gke > /dev/null
+        plugins:
+          - docker#v5.8.0:
+              image: dedovicnermin/buildkite-j17:0.0.2
+              propagate-uid-gid: true
+      - label: ":gandalf: local environment :gandalf:"
+        commands:
+          - kustomize build deploy/environment/local > /dev/null
         plugins:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2

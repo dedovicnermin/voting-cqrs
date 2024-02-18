@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eintegrity
+  annotations:
+    prometheus.io/port: "7778"
+    prometheus.io/scrape: "true"
+  labels:
+    app: eintegrity
+spec:
+  selector:
+    matchLabels:
+      app: eintegrity
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "7778"
+        prometheus.io/scrape: "true"
+      labels:
+        app: eintegrity
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - eintegrity
+              topologyKey: "kubernetes.io/hostname"
+      securityContext:
+        fsGroup: 54321
+        runAsUser: 1000
+      containers:
+        - name: eintegrity
+          image: dedovicnermin/election-integrity
+          args:
+            - /mnt/application/application.properties
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: app-config
+              mountPath: /mnt/application
+            - name: tls
+              mountPath: /mnt/sslcerts
+          resources:
+            requests:
+              cpu: 100m
+              memory: 132Mi
+            limits:
+              cpu: 100m
+              memory: 132Mi
+      volumes:
+        - name: app-config
+          configMap:
+            name: ei-cfg
+        - name: tls
+          secret:
+            secretName: tls-nermin

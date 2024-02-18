@@ -17,14 +17,14 @@ class ElectionCreate:
     def __init__(self, author, title, desc, candidates):
         self.author = author
         self.title = title
-        self.desc = desc
+        self.description = desc
         self.category = 'python'
         self.candidates = candidates
 
     def value(self):
         if len(self.candidates) < 2:
             for _ in range(0, random.randint(2, 5)):
-                self.candidates.append(fake.name())
+                self.candidates.append(fake.name().replace(".", "_"))
 
         return json.dumps(self, default=vars)
 
