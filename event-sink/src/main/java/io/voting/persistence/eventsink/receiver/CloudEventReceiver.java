@@ -32,7 +32,7 @@ public class CloudEventReceiver extends AbstractEventReceiver<String, CloudEvent
       final ConsumerRecords<String, PayloadOrError<CloudEvent>> cRecords = consumer.poll(duration);
       if (cRecords.isEmpty()) continue;
       for (final ConsumerRecord<String, PayloadOrError<CloudEvent>> cRecord : cRecords) {
-        log.debug("Received event record : {}", cRecord);
+        log.trace("Received event record : {}", cRecord);
         final ReceiveEvent<String, CloudEvent> receiveEvent = new ReceiveEvent<>(
                 cRecord.topic(), cRecord.partition(), cRecord.offset(), cRecord.timestamp(), cRecord.key(), cRecord.value()
         );

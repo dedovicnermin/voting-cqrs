@@ -39,8 +39,8 @@ public class ReceiverRebalanceListener<K, V> implements ConsumerRebalanceListene
   public void onPartitionsRevoked(Collection<TopicPartition> collection) {
     log.info("Receiver partitions revoked : committing consumed offsets for the following partitions (Revoked): {}", collection);
     for (final TopicPartition tp : collection) {
-      log.debug("Committing offsets prior to revoke : {}", progress);
       if (Objects.isNull(progress.get(tp))) continue;
+      log.debug("--- Committing : {} ---", Map.of(tp, progress.get(tp)));
       consumer.commitSync(Map.of(tp, progress.get(tp)));
       progress.remove(tp);
     }
@@ -57,7 +57,10 @@ public class ReceiverRebalanceListener<K, V> implements ConsumerRebalanceListene
 
   private void initOffset(final Set<TopicPartition> assignment) {
     for (final TopicPartition tp : assignment) {
-      addOffsetsToTrack(tp.topic(), tp.partition(), consumer.position(tp));
+      progress.put(
+              new TopicPartition(tp.topic(), tp.partition()),
+              new OffsetAndMetadata(consumer.position(tp), null)
+      );
     }
   }
 }
