@@ -27,14 +27,13 @@ const AllElections = () => {
     // console.log(es)
     
     useEffect(() => {
-        // if(user) {
-        //     fetchData();
-        //     const refresh = setInterval(() => {
-        //         fetchData();
-        //     }, 10000)
-        //     return () => clearInterval(refresh);
-        // }
-        setElections(MockData);
+        if(user) {
+            fetchData();
+            const refresh = setInterval(() => {
+                fetchData();
+            }, 10000)
+            return () => clearInterval(refresh);
+        }
     }, [])
 
     const displayElections = () => {

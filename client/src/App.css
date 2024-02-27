@@ -55,3 +55,100 @@ header {
     font-size: 2rem;
 } 
 */
+
+.e-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*background: gray;*/
+    width: 50%;
+    margin: 2rem;
+
+}
+
+.election {
+    /*background-color: orange;*/
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 4rem;
+    height: 50vh;
+    border: 1px black solid;
+
+}
+
+.election_header {
+    /*background-color: green;*/
+    display: flex;
+    flex-direction: column;
+    margin: 1rem;
+    justify-content: center;
+    align-items: center;
+    border: 1px black dashed;
+}
+
+#election_header-title {
+    margin: 1rem;
+    display: flex;
+    justify-content: center;
+    border: 1px black solid;
+}
+
+.election_header_meta {
+    /*background-color: aliceblue;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1rem;
+    border: 1px black solid;
+
+}
+
+#election_header-author {
+    display: flex;
+    margin: 0.5rem;
+}
+
+#election_header-category {
+    display: flex;
+    margin: 0.5rem;
+}
+
+#election_header-description {
+    display: flex;
+    margin: 0.5rem;
+}
+
+.election_body {
+    /*background-color: lightblue;*/
+    margin: 1rem;
+    display: flex;
+    border: 1px black dashed;
+    /*flex-direction: column;*/
+
+}
+
+.election_body-candidate {
+    background-color: cyan;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1rem;
+    border: 1px black solid;
+}
+
+.election_foot {
+    /*display: flex;*/
+    margin: 1rem;
+    border: 1px black dashed;
+
+}
+
+
+
+
+#root {
+    background-color: dodgerblue;
+    height: 100vh;
+}
