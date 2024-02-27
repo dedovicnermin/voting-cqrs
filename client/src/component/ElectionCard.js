@@ -1,12 +1,8 @@
-import {useContext} from "react";
-import {StateContext} from "../context/context";
 import {useNavigate} from "react-router-dom";
-import {Button, Card, Container} from "react-bootstrap";
+import {Card, Container} from "react-bootstrap";
 
 export default function ElectionCard({election}) {
 
-    const { state, dispatch } = useContext(StateContext)
-    const { user, elections } = state
     const navigate = useNavigate()
 
     const navigateToElectionDetails = () => {
@@ -23,8 +19,5 @@ export default function ElectionCard({election}) {
             </Card>
         </Container>
     )
-
-
-
 
 }
