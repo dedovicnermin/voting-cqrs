@@ -1,4 +1,4 @@
-import {useLocation, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {useContext, useEffect} from "react";
 import {StateContext} from "../../context/context";
 import {Container, Form} from "react-bootstrap";
@@ -8,9 +8,11 @@ import ElectionFoot from "./ElectionFoot";
 
 export default function Election() {
 
-    const {state, dispatch} = useContext(StateContext)
+    const {state, dispatch} = useContext(StateContext);
     const {user, elections} = state;
-    const {id} = useParams()
+    const navigate = useNavigate();
+    const {id} = useParams();
+
     let election = useLocation().state;
 
     const refreshElection = () => {
@@ -22,19 +24,26 @@ export default function Election() {
      */
     useEffect(() => {
         refreshElection()
-        console.log("INVOKED REFRESH ON ELECTION")
     }, [elections]);
 
+    const handleBackButtonClick = () => {
+        navigate("/elections")
+    }
+
     return (
-        <Container className="e-wrapper">
-            <Container className="election">
-                <ElectionHeader election={election}/>
-                <ElectionBody election={election}/>
-                <ElectionFoot election={election}/>
+        <>
+            <Container className="mt-4 ml-2">
+                <Container>
+                    <button className="btn btn-secondary" onClick={handleBackButtonClick}>&lt; Back</button>
+                </Container>
             </Container>
-        </Container>
-
+            <Container className="e-wrapper">
+                <Container className="election">
+                    <ElectionHeader election={election}/>
+                    <ElectionBody election={election}/>
+                    <ElectionFoot election={election}/>
+                </Container>
+            </Container>
+        </>
     )
-
-
 }

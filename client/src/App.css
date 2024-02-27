@@ -60,10 +60,7 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-    /*background: gray;*/
     width: 50%;
-    margin: 2rem;
-
 }
 
 .election {
@@ -85,7 +82,6 @@ header {
     margin: 1rem;
     justify-content: center;
     align-items: center;
-    border: 1px black dashed;
 }
 
 #election_header-title {
@@ -96,7 +92,6 @@ header {
 }
 
 .election_header_meta {
-    /*background-color: aliceblue;*/
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -121,12 +116,18 @@ header {
 }
 
 .election_body {
-    /*background-color: lightblue;*/
     margin: 1rem;
     display: flex;
-    border: 1px black dashed;
-    /*flex-direction: column;*/
+    flex-direction: column;
+}
 
+#election_body-title {
+    display: flex;
+    justify-content: center;
+}
+
+#election_body-results {
+    display: flex;
 }
 
 .election_body-candidate {
@@ -156,9 +157,6 @@ header {
     justify-content: center;
     margin: 1rem
 }
-
-
-
 
 #root {
     background-color: dodgerblue;

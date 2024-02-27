@@ -19,9 +19,6 @@ export default function ElectionCard({election}) {
                 <Card.Body>
                     <Card.Title>{election.title}</Card.Title>
                     <Card.Subtitle>{election.category}</Card.Subtitle>
-                    {/*<Card.Footer>*/}
-                    {/*    <Button variant="primary">Details</Button>*/}
-                    {/*</Card.Footer>*/}
                 </Card.Body>
             </Card>
         </Container>

@@ -39,7 +39,7 @@ export default function ElectionFoot({election}) {
 
     return (
         <Container className="election_foot">
-            <div id="election_foot-title"><h3>VOTE</h3></div>
+            <div id="election_foot-title"><h4>VOTE</h4></div>
             <Form onSubmit={handleSubmitVote}>
                 <Form.Group controlId="formSelectCandidate">
                     <Form.Select onChange={handleSelectChange} value={selectedCandidate}>

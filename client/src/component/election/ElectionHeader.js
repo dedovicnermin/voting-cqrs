@@ -5,7 +5,7 @@ export default function ElectionHeader({election}) {
     return (
         <Container className="election_header">
             <Container id="election_header-title">
-                <div><b>{election.title}</b></div>
+                <div><h3>{election.title}</h3></div>
             </Container>
             <Container className="election_header_meta">
                 <Container id="election_header-author">
