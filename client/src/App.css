@@ -73,7 +73,7 @@ header {
     justify-content: center;
     align-items: center;
     margin: 4rem;
-    height: 50vh;
+    /*height: 50vh;*/
     border: 1px black solid;
 
 }
@@ -139,10 +139,22 @@ header {
 }
 
 .election_foot {
-    /*display: flex;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin: 1rem;
     border: 1px black dashed;
 
+}
+
+#election_foot-title {
+    margin: 1rem
+}
+
+#election_foot-button {
+    display: flex;
+    justify-content: center;
+    margin: 1rem
 }
 
 
