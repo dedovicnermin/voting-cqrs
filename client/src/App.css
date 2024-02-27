@@ -56,6 +56,17 @@ header {
 } 
 */
 
+.election_list {
+    margin: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.election_list>* {
+    flex: 1 1 260px;
+    margin: 1rem;
+}
+
 .e-wrapper {
     display: flex;
     justify-content: center;
@@ -64,19 +75,16 @@ header {
 }
 
 .election {
-    /*background-color: orange;*/
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     margin: 4rem;
-    /*height: 50vh;*/
     border: 1px black solid;
 
 }
 
 .election_header {
-    /*background-color: green;*/
     display: flex;
     flex-direction: column;
     margin: 1rem;
@@ -145,7 +153,6 @@ header {
     align-items: center;
     margin: 1rem;
     border: 1px black dashed;
-
 }
 
 #election_foot-title {

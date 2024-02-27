@@ -11,7 +11,7 @@ export default function ElectionCard({election}) {
 
     return (
         <Container onClick={navigateToElectionDetails}>
-            <Card style={{ width: '18rem' }}>
+            <Card style={{ width: '25rem', height: '5rem' }}>
                 <Card.Body>
                     <Card.Title>{election.title}</Card.Title>
                     <Card.Subtitle>{election.category}</Card.Subtitle>

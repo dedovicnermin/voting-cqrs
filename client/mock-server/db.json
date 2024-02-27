@@ -39,6 +39,34 @@
       "description": "copy paste from wiki",
       "category": "Sports",
       "candidates": {"Edmonton Oilers": 0,"Los Angeles Kings": 12,"Minnesota Wild": 12,"New York Islanders": 12,"Ottawa Senators":0}
+    },
+    {
+      "id": "5",
+      "title": "NBA MVP (2024)",
+      "author": "the_basketball_man",
+      "description": "Who do you think will win MVP this season?",
+      "category": "Sports",
+      "candidates": {
+        "LeBron James": 1,
+        "Kevin Durant": 3,
+        "Nikola Jokic": 1,
+        "Luka Doncic": 4,
+        "Joel Embid": 2,
+        "Jayson Tatum": 0,
+        "Giannis Antetokounmpo": 2,
+        "Coby White": 0
+      }
+    },
+    {
+      "id": "6",
+      "title": "Berkins or Crocs",
+      "author": "the_basketball_man",
+      "description": "Which one do you prefer",
+      "category": "Random",
+      "candidates": {
+        "Berkins": 5,
+        "Crocs": 4
+      }
     }
   ]
 }

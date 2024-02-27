@@ -9,7 +9,7 @@ export default function ElectionList() {
     const {elections} = state;
 
     return (
-        <Container>
+        <Container className="election_list">
             {
                 elections?.length > 0 && elections.map((election) => (
                     <Container key={election.id}>
