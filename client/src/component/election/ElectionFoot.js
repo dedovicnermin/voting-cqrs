@@ -1,5 +1,5 @@
 import {Button, Container, Form} from "react-bootstrap";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 
 export default function ElectionFoot({election}) {

@@ -67,6 +67,17 @@ header {
     margin: 1rem;
 }
 
+.election_filter-category {
+    display: flex;
+    justify-content: right;
+}
+
+.election_filter-label {
+    margin-right: 1rem;
+}
+
+
+
 .e-wrapper {
     display: flex;
     justify-content: center;

@@ -1,15 +1,15 @@
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {useContext, useEffect} from "react";
 import {StateContext} from "../../context/context";
-import {Container, Form} from "react-bootstrap";
+import {Container} from "react-bootstrap";
 import ElectionHeader from "./ElectionHeader";
 import ElectionBody from "./ElectionBody";
 import ElectionFoot from "./ElectionFoot";
 
 export default function Election() {
 
-    const {state, dispatch} = useContext(StateContext);
-    const {user, elections} = state;
+    const {state} = useContext(StateContext);
+    const {elections} = state;
     const navigate = useNavigate();
     const {id} = useParams();
 
