@@ -14,11 +14,11 @@ const axiosInstance = axios.create({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-      <BrowserRouter>
-          <RequestProvider value={axiosInstance}>
-              <App />
-          </RequestProvider>
-      </BrowserRouter>
+      <RequestProvider value={axiosInstance}>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+      </RequestProvider>
   </React.StrictMode>
 );
 

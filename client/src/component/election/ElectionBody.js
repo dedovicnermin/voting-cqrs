@@ -1,7 +1,13 @@
 import {Container} from "react-bootstrap";
+import {useContext} from "react";
+import {StateContext} from "../../context/context";
 
-export default function ElectionBody({election}) {
+export default function ElectionBody({id}) {
 
+    const { state } = useContext(StateContext);
+    const { elections } = state;
+
+    const election = elections.filter(c => c.id === id)[0];
 
     return (
         <Container className="election_body">
