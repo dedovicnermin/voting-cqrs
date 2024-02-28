@@ -1,0 +1,108 @@
+{
+  "users": [
+    {
+      "email": "test@email.com",
+      "password": "$2a$10$3D6s3v.rqPZPMhrlcu.pFuuuokfqw9OHqcwXZgJnWWeZyUuXtTA3G",
+      "id": "1000",
+      "username": "test"
+    },
+    {
+      "email": "nermin@email.com",
+      "password": "$2a$10$/C1apIr0LTRtvM2hg3Xe..Swd59zprSBP6NA0a64PLPH4Hv.rLuuq",
+      "id": "1001",
+      "username": "nermin"
+    }
+  ],
+  "elections": [
+    {
+      "id": "0",
+      "author": "mockuser_000",
+      "title": "Is a hotdog a sandwich?",
+      "description": "Really. Is it?",
+      "category": "Social",
+      "candidates": {
+        "Yes, of course": 0,
+        "Absolutely not": 0
+      }
+    },
+    {
+      "id": "1",
+      "title": "The best music artist from 2000s",
+      "author": "Author 2",
+      "description": "Your personal music taste, not the objective data like a number if copies sold, etc.",
+      "category": "Music",
+      "candidates": {
+        "Avril Lavigne": 0,
+        "The Offspring": 0,
+        "Slipknot": 0,
+        "Eminem": 0,
+        "Linkin Park": 0
+      }
+    },
+    {
+      "id": "2",
+      "title": "To be or not to be",
+      "author": "Author 2",
+      "description": "",
+      "category": "Social",
+      "candidates": {
+        "To be": 1,
+        "Not to be": 12
+      }
+    },
+    {
+      "id": "3",
+      "title": "Select school principal 2024",
+      "author": "Author 2",
+      "description": "School distric 299",
+      "category": "Social",
+      "candidates": {
+        "Candidate 1": 0,
+        "Candidate 2": 12,
+        "Candidate 3": 12
+      }
+    },
+    {
+      "id": "4",
+      "title": "NHL 23-24?",
+      "author": "Author 1",
+      "description": "copy paste from wiki",
+      "category": "Sports",
+      "candidates": {
+        "Edmonton Oilers": 0,
+        "Los Angeles Kings": 12,
+        "Minnesota Wild": 12,
+        "New York Islanders": 12,
+        "Ottawa Senators": 0
+      }
+    },
+    {
+      "id": "5",
+      "title": "NBA MVP (2024)",
+      "author": "the_basketball_man",
+      "description": "Who do you think will win MVP this season?",
+      "category": "Sports",
+      "candidates": {
+        "LeBron James": 1,
+        "Kevin Durant": 3,
+        "Nikola Jokic": 1,
+        "Luka Doncic": 4,
+        "Joel Embid": 2,
+        "Jayson Tatum": 0,
+        "Giannis Antetokounmpo": 2,
+        "Coby White": 0
+      }
+    },
+    {
+      "id": "6",
+      "title": "Berkins or Crocs",
+      "author": "the_basketball_man",
+      "description": "Which one do you prefer",
+      "category": "Random",
+      "candidates": {
+        "Berkins": 5,
+        "Crocs": 4
+      }
+    }
+  ]
+}
