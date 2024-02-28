@@ -6,7 +6,8 @@ export const ELECTION_CATEGORIES = {
     SPORTS: "Sports",
     POLITICS: "Politics",
     GAMING: "Gaming",
-    RANDOM: "Random"
+    RANDOM: "Random",
+    PYTHON: "python"
 }
 export default function CategoryDDItems() {
     return (
@@ -17,6 +18,7 @@ export default function CategoryDDItems() {
             <Dropdown.Item eventKey={ELECTION_CATEGORIES.POLITICS}>{ELECTION_CATEGORIES.POLITICS}</Dropdown.Item>
             <Dropdown.Item eventKey={ELECTION_CATEGORIES.GAMING}>{ELECTION_CATEGORIES.GAMING}</Dropdown.Item>
             <Dropdown.Item eventKey={ELECTION_CATEGORIES.RANDOM}>{ELECTION_CATEGORIES.RANDOM}</Dropdown.Item>
+            <Dropdown.Item eventKey={ELECTION_CATEGORIES.PYTHON}>{ELECTION_CATEGORIES.PYTHON}</Dropdown.Item>
         </>
     )
 }
