@@ -82,7 +82,7 @@ const CreateElection = () => {
                             </fieldset>
                         </div>
                         <div className="d-flex justify-content-center">
-                            <button type="reset" className="btn btn-warning mt-5 w-50" onClick={submit}>Create</button>
+                            <button type="reset" className="btn btn-warning mt-3 mb-5 w-50" onClick={submit}>Create</button>
                         </div>
                     </form>
                 </div>
