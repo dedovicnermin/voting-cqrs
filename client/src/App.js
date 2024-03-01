@@ -6,13 +6,20 @@ import AllElections from './components/AllElections'
 import MyElections from './components/MyElections'
 import CreateElection from './components/CreateElection';
 import ElectionView from './components/ElectionView';
+
+
+
 import {useEffect, useReducer} from "react";
 import AppReducer, {ELECTION_EVENTS} from "./context/reducer";
 import {useResource} from "react-request-hook";
 import {StateContext} from "./context/context";
 import ElectionList from "./component/ElectionList";
 import Election from "./component/election/Election";
-import LoginOrRegister from "./component/user/LoginOrRegister";
+
+
+import Login from './components/Login';
+import Register from './components/Register';
+
 
 
 const App = () => {
@@ -59,9 +66,15 @@ const App = () => {
                 {/*<Route path = "/login" element={!user ? <LoginPage/> : <Navigate to={"/"}/>}/>*/}
                 <Route path = "/all-elections/:id" element = {user ? <ElectionView/> : <Navigate to = "/login"/>}/>
 
-                <Route path = "/login" element={state.user?.id ? <Navigate to="/elections"/> : <LoginOrRegister/> } />
                 <Route path = "/elections" element={state.user?.id ? <ElectionList/> : <Navigate to="/login"/>}/>
                 <Route path = "/elections/:id" element={state.user?.id ? <Election /> : <Navigate to="/login"/> }/>
+
+                <Route path = "/elections" element={state.user?.id ? <ElectionList/> : <Navigate to="/login"/>}/>
+                <Route path = "/elections/:id" element={state.user?.id ? <Election /> : <Navigate to="/login"/> }/>
+
+                <Route path = "/login" element={user?.id ? <Navigate to="/elections"/> : <Login/> }/>
+                <Route path = "/register" element={user?.id ? <Navigate to="/elections"/> : <Register/> }/>
+
               </Routes>
             </main>
         </StateContext.Provider>
