@@ -55,28 +55,6 @@ header {
     font-size: 2rem;
 } 
 */
-<<<<<<< Updated upstream
-=======
-
-/* The style below is replaced with bootstrap classes. Marked for deletion */
-/* .login_or_register_wrapper {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.login_wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.register_wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-} */
-
 
 .election_list {
     margin: 2rem;
@@ -201,9 +179,7 @@ header {
 #root {
     background-color: dodgerblue;
     height: 100vh;
-}
 
 main {
     background-color: dodgerblue;
 }
->>>>>>> Stashed changes

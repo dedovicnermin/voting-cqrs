@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-sink
+  annotations:
+    prometheus.io/port: "7778"
+    prometheus.io/scrape: "true"
+  labels:
+    app: event-sink
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-sink
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "7778"
+        prometheus.io/scrape: "true"
+      labels:
+        app: event-sink
+    spec:
+      containers:
+        - name: event-sink
+          image: dedovicnermin/event-sink
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+          volumeMounts:
+            - name: tls
+              mountPath: /mnt/ssl
+          resources:
+            requests:
+              cpu: 100m
+              memory: 132Mi
+            limits:
+              cpu: 100m
+              memory: 132Mi
+      volumes:
+        - name: tls
+          secret:
+            secretName: tls-nermin

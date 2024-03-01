@@ -1,0 +1,3 @@
+000|{"id": null, "author": "admin", "title": "Best Pizza in Chicago", "description": "Which pizza place in Chicago is the ideal choice", "category": "FOOD", "candidates": ["Giordanos", "Loumanatis", "Foo's Pizza", "Bar's pizza"]}
+000|{"id": null, "author": "admin", "title": "Best Fast Food", "description": "Which is the best fast food", "category": "FOOD", "candidates": ["Subway", "McDonald's", "Burger King", "Portillos", "Culvers", "Chik Fil A"]}
+000|{"id": null, "author": "admin", "title": "Favority Naruto Shippuden Character", "description": "Select your favorite character", "category": "ANIME", "candidates": ["Naruto Uzumaki", "Sasuke Uchiha", "Tsunade", "Jiraiya", "Orocimaru", "Killer Bee", "Might Guy", "Rock Lee"]}

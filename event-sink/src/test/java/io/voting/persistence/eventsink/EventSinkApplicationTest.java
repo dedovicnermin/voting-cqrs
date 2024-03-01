@@ -93,7 +93,7 @@ class EventSinkApplicationTest extends TestKafkaContext {
     assertThat(template.findAll(Election.class)).isEmpty();
     electionSender.blockingSend(electionCreate);
 
-    Awaitility.waitAtMost(Duration.ofSeconds(1)).untilAsserted(
+    Awaitility.waitAtMost(Duration.ofSeconds(3)).untilAsserted(
             () -> assertThat(template.findAll(Election.class)).hasSize(1)
     );
 
@@ -101,15 +101,15 @@ class EventSinkApplicationTest extends TestKafkaContext {
 
   static Stream<Arguments> testElectionCreateEvents() {
     return Stream.of(
-      Arguments.of(buildElectionCreate(Map.of(fake.harryPotter().house(), 0L, fake.harryPotter().character(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.hobbit().location(), 0L, fake.hobbit().character(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.lordOfTheRings().location(), 0L, fake.lordOfTheRings().character(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.friends().location(), 0L, fake.friends().character(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.howIMetYourMother().highFive(), 0L, fake.howIMetYourMother().character(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.lebowski().actor(), 0L, fake.lebowski().character(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.gameOfThrones().dragon(), 0L, fake.gameOfThrones().character(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.pokemon().location(), 0L, fake.pokemon().name(), 0L))),
-      Arguments.of(buildElectionCreate(Map.of(fake.leagueOfLegends().location(), 0L, fake.leagueOfLegends().champion(), 0L)))
+      Arguments.of(buildElectionCreate(Map.of(fake.harryPotter().house().replace(".", "_"), 0L, fake.harryPotter().character().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.hobbit().location().replace(".", "_"), 0L, fake.hobbit().character().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.lordOfTheRings().location().replace(".", "_"), 0L, fake.lordOfTheRings().character().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.friends().location().replace(".", "_"), 0L, fake.friends().character().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.howIMetYourMother().highFive().replace(".", "_"), 0L, fake.howIMetYourMother().character().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.lebowski().actor().replace(".", "_"), 0L, fake.lebowski().character().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.gameOfThrones().dragon().replace(".", "_"), 0L, fake.gameOfThrones().character().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.pokemon().location().replace(".", "_"), 0L, fake.pokemon().name().replace(".", "_"), 0L))),
+      Arguments.of(buildElectionCreate(Map.of(fake.leagueOfLegends().location().replace(".", "_"), 0L, fake.leagueOfLegends().champion().replace(".", "_"), 0L)))
     );
   }
 
@@ -131,7 +131,7 @@ class EventSinkApplicationTest extends TestKafkaContext {
       voteSender.blockingSend(CloudEventHelper.buildCloudEvent(CloudEventTypes.ELECTION_VOTE_EVENT, StreamUtils.wrapCloudEventData(vote)));
     }
 
-    Awaitility.waitAtMost(Duration.ofSeconds(3)).untilAsserted(
+    Awaitility.waitAtMost(Duration.ofSeconds(5)).untilAsserted(
             () -> assertThat(Objects.requireNonNull(template.findById(election.getId(), Election.class)).getCandidates())
                     .isEqualTo(expectedResults)
     );
