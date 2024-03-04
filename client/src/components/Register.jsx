@@ -33,7 +33,10 @@ const Register = () => {
             if (registerResp.error) {
                 setStatus(`Registration failed : ${registerResp.error.data.message}`);
             } else {
-                setStatus("Registration successful. You may now login.");
+                setStatus("Registration successful.");
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
             }
         }
     }, [registerResp]);
