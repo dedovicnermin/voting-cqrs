@@ -7,11 +7,11 @@ commonLabels:
   project: edv
 
 resources:
-  - ../../overlay/local/topics
-  - ../../overlay/local/election-integrity
-  - ../../overlay/local/vote-integrity
-  - ../../overlay/local/event-sink
-  - ../../overlay/local/query-service
+  - ../../../overlay/gke/topics
+  - ../../../overlay/gke/election-integrity
+  - ../../../overlay/gke/vote-integrity
+  - ../../../overlay/gke/event-sink
+  - ../../../overlay/gke/query-service
 
 images:
   - name: dedovicnermin/election-integrity
@@ -21,5 +21,5 @@ images:
   - name: dedovicnermin/event-sink
     newTag: 0.0.1
   - name: dedovicnermin/query-service
-    newTag: 0.0.1
+    newTag: 0.0.2
 
