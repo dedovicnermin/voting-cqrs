@@ -24,6 +24,7 @@ steps:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
+
       - label: ":gandalf: Deploy-validation : election-integrity :gandalf:"
         commands:
           - kustomize build deploy/overlay/gke/election-integrity > /dev/null
@@ -32,6 +33,7 @@ steps:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
+
       - label: ":gandalf: Deploy-validation : event-sink :gandalf:"
         commands:
           - kustomize build deploy/overlay/gke/event-sink > /dev/null
@@ -40,6 +42,7 @@ steps:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
+
       - label: ":gandalf: Deploy-validation : query-service :gandalf:"
         commands:
           - kustomize build deploy/overlay/gke/query-service > /dev/null
@@ -49,18 +52,27 @@ steps:
               image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
 
-  - group: ":k8s: Environment deployment validation :hammer:"
+  - group: ":k8s: Environment deploy validation :hammer:"
     steps:
       - label: ":gandalf: GKE environment :gandalf:"
         commands:
-          - kustomize build deploy/environment/gke > /dev/null
+          - echo "edv" > /tmp/gib.txt
+          - kubectl create secret generic license-secret -n cfk-operator --from-file=license.txt=/tmp/gib.txt --dry-run=client -o yaml > deploy/base/infra/operator/license-secret.yml
+          - kustomize build --enable-helm deploy/environment/gke/00_infra_init > /dev/null
+          - kustomize build deploy/environment/gke/01_infra > /dev/null
+          - kustomize build deploy/environment/gke/02_apps > /dev/null
         plugins:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2
               propagate-uid-gid: true
+
       - label: ":gandalf: local environment :gandalf:"
         commands:
-          - kustomize build deploy/environment/local > /dev/null
+          - echo "edv" > /tmp/gib.txt
+          - kubectl create secret generic license-secret -n cfk-operator --from-file=license.txt=/tmp/gib.txt --dry-run=client -o yaml > deploy/base/infra/operator/license-secret.yml
+          - kustomize build --enable-helm deploy/environment/local/00_infra_init > /dev/null
+          - kustomize build deploy/environment/local/01_infra > /dev/null
+          - kustomize build deploy/environment/local/02_apps > /dev/null
         plugins:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2

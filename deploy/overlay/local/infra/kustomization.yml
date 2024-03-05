@@ -1,0 +1,95 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base/infra/observability/kraft
+  - ../../../base/infra/observability/kafka
+  - ../../../base/infra/observability/c3
+  - svc/bootstrap.yml
+  - svc/mds.yml
+
+patches:
+  - target:
+      group: platform.confluent.io
+      version: v1beta1
+      kind: ControlCenter
+    patch: |-
+      - op: add
+        path: /spec/configOverrides
+        value:
+          server:
+            - confluent.controlcenter.mds.client.max.requests.queued.per.destination=2048
+            - confluent.controlcenter.mode.enable=management
+            - confluent.controlcenter.command.topic.replication=1
+            - confluent.controlcenter.replication.factor=1
+            - confluent.metrics.reporter.topic.replicas=1
+            - confluent.metrics.topic.replication=1
+            - confluent.monitoring.interceptor.topic.replication=1
+            - confluent.controlcenter.internal.topics.replication=1
+
+  - target:
+      group: platform.confluent.io
+      version: v1beta1
+      kind: KRaftController
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  - target:
+      group: platform.confluent.io
+      version: v1beta1
+      kind: Kafka
+    patch: |-
+      - op: remove
+        path: /spec/services/mds/externalAccess
+      - op: remove
+        path: /spec/listeners/external/externalAccess
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/dataVolumeCapacity
+        value: 25Gi
+      - op: add
+        path: /spec/podTemplate/resources/limits
+        value:
+          cpu: 1.0
+          memory: 1Gi
+      - op: add
+        path: /spec/configOverrides
+        value: 
+          server:
+            - kafka.rest.client.client.id=dev.kafkarestclient
+            - kafka.rest.admin.client.id=dev.kafkarestadmin
+            - kafka.rest.admin.ssl.keystore.location=/mnt/sslcerts/keystore.p12
+            - kafka.rest.admin.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+            - kafka.rest.admin.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+            - kafka.rest.admin.ssl.truststore.location=/mnt/sslcerts/truststore.p12
+            - kafka.rest.admin.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+            - auto.create.topics.enable=true
+            - confluent.cluster.link.enable=true
+            - confluent.balancer.enable=false
+            - confluent.license.topic.replication.factor=1
+            - confluent.metrics.reporter.topic.replicas=1
+            - confluent.metrics.reporter.publish.ms=60000
+            - confluent.metrics.reporter.topic.retention.ms=7200000
+            - confluent.tier.metadata.replication.factor=1
+            - confluent.metadata.topic.replication.factor=1
+            - confluent.durability.topic.replication.factor=1
+            - confluent.balancer.topic.replication.factor=1
+            - confluent.security.event.logger.exporter.kafka.topic.replicas=1
+            - event.logger.exporter.kafka.topic.replicas=1
+            - offsets.topic.replication.factor=1
+            - min.insync.replicas=1
+            - transaction.state.log.replication.factor=1
+            - transaction.state.log.min.isr=1
+            - quotas.topic.replication.factor=1
+            - confluent.cluster.link.metadata.topic.replication.factor=1
+            - default.replication.factor=1
+            - log.retention.hours=3
+      - op: add
+        path: /spec/telemetry
+        value:
+          global: false
+
