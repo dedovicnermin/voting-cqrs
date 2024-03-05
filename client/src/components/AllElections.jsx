@@ -10,16 +10,17 @@ const AllElections = () => {
     const [elections, setElections] = useState([]);
 
     const fetchData = async () => {
-        try {
-        const response = await axios.get(
-            `http://localhost:8080/api/elections`
-        );
-        setElections(response.data);
-        }
-        catch (error) {
-            console.log("Something went wrong");
-            console.log(error);  
-        }
+        // try {
+        // const response = await axios.get(
+        //     `http://localhost:8080/api/elections`
+        // );
+        // setElections(response.data);
+        // }
+        // catch (error) {
+        //     console.log("Something went wrong");
+        //     console.log(error);  
+        // }
+        setElections(MockData)
     }
 
     // this is for filtering. Use later
@@ -27,14 +28,13 @@ const AllElections = () => {
     // console.log(es)
     
     useEffect(() => {
-        // if(user) {
-        //     fetchData();
-        //     const refresh = setInterval(() => {
-        //         fetchData();
-        //     }, 10000)
-        //     return () => clearInterval(refresh);
-        // }
-        setElections(MockData);
+        if(user) {
+            fetchData();
+            const refresh = setInterval(() => {
+                fetchData();
+            }, 10000)
+            return () => clearInterval(refresh);
+        }
     }, [])
 
     const displayElections = () => {

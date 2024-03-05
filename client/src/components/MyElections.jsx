@@ -68,7 +68,7 @@ const MyElections = () => {
                     <div className="row mt-3 mb-3">
                         <h6>
                             <span>Try to</span>
-                            <button className="h6 create-new-btn" onClick={navigateToCreateNewElection}>create new election</button>
+                            <button className="h6 link-button" onClick={navigateToCreateNewElection}>create new election</button>
                         </h6>
                     </div>
                 </div>
