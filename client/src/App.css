@@ -35,29 +35,8 @@ header {
     background: none;
 }
 
-/* .button-1{
-    display: flex;
-    border: solid 2.5px red;
-    color: red;
-    padding: 1rem;
-    margin-right: 1rem;
-    font-size: 1rem;
-    transition: font-size 0.25s 0s;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 700;
-    align-items: center;
-    height: 2rem; 
-    width: 10rem;
-    justify-content: center;
-}
-.button-1:hover, .button-2:hover{
-    font-size: 2rem;
-} 
-*/
-
-.election_list {
-    margin: 2rem;
+/* .election_list {
+    margin: 1rem;
     display: flex;
     flex-wrap: wrap;
 }
@@ -65,7 +44,7 @@ header {
 .election_list>* {
     flex: 1 1 260px;
     margin: 1rem;
-}
+} */
 
 .election_filter-category {
     display: flex;
@@ -78,7 +57,7 @@ header {
 
 
 
-.e-wrapper {
+/* .e-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -93,9 +72,12 @@ header {
     margin: 4rem;
     border: 1px black solid;
 
-}
+} */
 
-.election_header {
+.election Row {
+    border: 1px black;
+}
+/* .election_header {
     display: flex;
     flex-direction: column;
     margin: 1rem;
@@ -157,13 +139,13 @@ header {
     margin: 1rem;
     border: 1px black solid;
 }
-
+*/
 .election_foot {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 1rem;
-    border: 1px black dashed;
+    /* margin: 1rem;
+    border: 1px black dashed; */
 }
 
 #election_foot-title {
@@ -171,15 +153,35 @@ header {
 }
 
 #election_foot-button {
-    display: flex;
+    /* display: flex; */
     justify-content: center;
-    margin: 1rem
+    /* margin: 1rem */
+}
+
+.election, .election .card {
+    cursor:auto;
+}
+
+.election_body-candidate{
+    width: 15rem;
 }
 
 #root {
-    background-color: dodgerblue;
+    background-color: rgb(80, 160, 235);
     height: 100vh;
+}
 
 main {
-    background-color: dodgerblue;
+    background-color: rgb(80, 160, 235);
 }
+/* dodgerblue */
+
+
+.score {
+    width: 10%;
+    height: 25px;
+    background-color: rgb(13, 110, 253);
+    text-align: center; /* To center it horizontally (if you want) */
+    line-height: 25px; /* To center it vertically */
+    color: white;
+  }

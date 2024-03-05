@@ -1,4 +1,4 @@
-import {Button, Container, Form} from "react-bootstrap";
+import {Button, Container, Form, Row, Col} from "react-bootstrap";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 
@@ -39,20 +39,27 @@ export default function ElectionFoot({election}) {
 
     return (
         <Container className="election_foot">
-            <div id="election_foot-title"><h4>VOTE</h4></div>
+            <Row id="election_foot-title">
+                <Col className="text-center">
+                    <h4>VOTE</h4>
+                </Col>
+            </Row>
             <Form onSubmit={handleSubmitVote}>
                 <Form.Group controlId="formSelectCandidate">
-                    <Form.Select onChange={handleSelectChange} value={selectedCandidate}>
-                        <option key={DEFAULT_SELECTION} value={DEFAULT_SELECTION}>{DEFAULT_SELECTION}</option>
-                        {
-                            Object.keys(election.candidates).map(candidate =>
-                                <option key={candidate} value={candidate}>{candidate}</option>
-                            )
-                        }
-                    </Form.Select>
+                    <div className="d-flex">
+                        <Form.Select className="align-items-center" onChange={handleSelectChange} value={selectedCandidate}>
+                            <option key={DEFAULT_SELECTION} value={DEFAULT_SELECTION}>{DEFAULT_SELECTION}</option>
+                            {
+                                Object.keys(election.candidates).map(candidate =>
+                                    <option key={candidate} value={candidate}>{candidate}</option>
+                                )
+                            }
+                        </Form.Select>   
+                    </div>
+                                
                     <Form.Text muted>Only one vote will be counted per election</Form.Text>
                 </Form.Group>
-                <div id="election_foot-button">
+                <div id="election_foot-button" className="text-center">
                     <Button variant="primary" disabled={displayVoteButton() === false} type="submit" size="md">Submit</Button>
                 </div>
             </Form>

@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import ElectionTile from '../components/ElectionTile';
+// import ElectionTile from './ElectionTile';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 const MyElections = () => {
-
-    // const {user} = useAuthContext();
-    let user = true;
 
     const navigate = useNavigate();
 
@@ -26,13 +23,13 @@ const MyElections = () => {
     }
 
     useEffect(() => {
-        if(user) {
+        // if(user) {
             fetchData();
             const refresh = setInterval(() => {
                 fetchData();
             }, 10000)
             return () => clearInterval(refresh);
-        }
+        // }
     }, [])
 
     const navigateToCreateNewElection = () => {
@@ -40,26 +37,26 @@ const MyElections = () => {
     }
 
     const displayElections = () => {
-        if(!user) {
-            return (
-                <div className="text-center mt-5">
-                    <h3 className="">Nothing to see here</h3>
-                </div>
-            );
-        }
-        if (myElections.length > 0) {
-            return (
-                <div className="electionsList">
-                    <div className="d-flex flex-wrap justify-content-start">
-                        {myElections.map(
-                            x =>
-                            <ElectionTile key={x.id} id={x.id} title={x.title} category={x.category}/>
-                        )}
-                    </div>
-                </div>
-            )
-        }
-        else {
+        // if(!user) {
+        //     return (
+        //         <div className="text-center mt-5">
+        //             <h3 className="">Nothing to see here</h3>
+        //         </div>
+        //     );
+        // }
+        // if (myElections.length > 0) {
+        //     return (
+        //         <div className="electionsList">
+        //             <div className="d-flex flex-wrap justify-content-start">
+        //                 {myElections.map(
+        //                     x =>
+        //                     <ElectionTile key={x.id} id={x.id} title={x.title} category={x.category}/>
+        //                 )}
+        //             </div>
+        //         </div>
+        //     )
+        // }
+        // else {
             return (
                 <div className="text-center mt-5">
                     <div className="row mt-3 mb-3">
@@ -73,7 +70,7 @@ const MyElections = () => {
                     </div>
                 </div>
             )
-        }
+        // }
     }
 
     return (

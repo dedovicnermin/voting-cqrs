@@ -1,6 +1,6 @@
 import {useContext, useState} from "react";
 import {StateContext} from "../context/context";
-import {Container} from "react-bootstrap";
+import {Container, Col, Row} from "react-bootstrap";
 import ElectionCard from "./ElectionCard";
 import ElectionCategoryDD from "./dropdown/ElectionCategoryDD";
 
@@ -23,20 +23,23 @@ export default function ElectionList() {
 
     return (
         <>
-            <Container className="mt-4">
-                <ElectionCategoryDD category={category} onSelect={handleOnSelect}/>
-            </Container>
-            <Container className="election_list">
-                {
-                    elections &&
-                    elections.filter(filterSwitch).map((election) => (
-                        <Container key={election.id}>
-                            <ElectionCard election={election}/>
-                        </Container>
-                    ))
-                }
+            <Container>
+                <Row className="mt-3 mb-3">
+                    <Col>
+                        <ElectionCategoryDD category={category} onSelect={handleOnSelect}/>
+                    </Col>
+                </Row>
+                <div className="d-flex flex-wrap justify-content-start">
+                    {
+                        elections &&
+                        elections.filter(filterSwitch).map((election) => (
+                            <div key={election.id}>
+                                <ElectionCard election={election}/>
+                            </div>
+                        ))
+                    }
+                </div>
             </Container>
         </>
     )
-
 }

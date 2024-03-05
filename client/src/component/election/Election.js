@@ -1,5 +1,5 @@
 import {useLocation, useNavigate} from "react-router-dom";
-import {Container} from "react-bootstrap";
+import {Container, Col, Row, Card} from "react-bootstrap";
 import ElectionHeader from "./ElectionHeader";
 import ElectionBody from "./ElectionBody";
 import ElectionFoot from "./ElectionFoot";
@@ -15,7 +15,7 @@ export default function Election() {
 
     return (
         <>
-            <Container className="mt-4 ml-2">
+            {/* <Container className="mt-4 ml-2">
                 <Container>
                     <button className="btn btn-secondary" onClick={handleBackButtonClick}>&lt; Back</button>
                 </Container>
@@ -26,6 +26,24 @@ export default function Election() {
                     <ElectionBody id={election.id}/>
                     <ElectionFoot election={election}/>
                 </Container>
+            </Container> */}
+            
+            <Container>
+                <Row  className="mt-3 mb-3">
+                    <Col>
+                        <button className="btn btn-secondary" onClick={handleBackButtonClick}>&lt; Back</button>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Card className="election p-3">
+                            <ElectionHeader election={election}/>
+                            <ElectionBody id={election.id}/>
+                            <ElectionFoot election={election}/>
+                        </Card>
+                    </Col>
+                </Row>
+                
             </Container>
         </>
     )

@@ -7,8 +7,6 @@ export const USER_EVENTS = {
 export const ELECTION_EVENTS = {
     CREATE_ELECTION: "create_election",
     FETCH_ELECTIONS: "fetch_elections"
-
-
 }
 
 function userDispatch(user, action) {
