@@ -16,13 +16,17 @@ export default function ElectionBody({id}) {
         console.log(totalScore)
         let allCandidates = document.getElementsByClassName("score")
         console.log(allCandidates)
-        Array.prototype.forEach.call(allCandidates, function(x) {
-            // Do stuff here
-            console.log(x);
+        Array.prototype.forEach.call(allCandidates, function(elem) {
+            let share = (totalScore > 0) ? parseInt(elem.textContent) / totalScore * 100 : 0
+            elem.style.width = share + "%";
+            if (share < 5) {
+                elem.style.color = "black";
+            }
+            else {
+                elem.style.color = "white";
+            }
+            
         });
-        // let element = e.target
-        // let share = (totalScore > 0) ? parseInt(element.textContent) / totalScore * 100 : 0;
-        // element.style.width = share + "%"
     }
 
     useEffect(() => {
@@ -31,7 +35,7 @@ export default function ElectionBody({id}) {
 
     return (
         <Container className="election_body border pt-1 pb-3">
-            <div id="election_body-title" className="text-center">
+            <div className="text-center">
                 <h4>LIVE RESULTS</h4>
             </div>
             <div id="election_body-results" className="d-flex flex-row flex-wrap justify-content-evenly">
@@ -39,7 +43,7 @@ export default function ElectionBody({id}) {
                     Object.entries(election.candidates).map(([candidate, score]) => (
                         <Card className="election_body-candidate p-1" key={candidate}>
                             <CardSubtitle className="text-center mt-1 mb-1">{candidate}</CardSubtitle>
-                            <div className="text-center border">
+                            <div className="score-bg text-center border">
                                 <div className="score" onChange={updateScore}>{score}</div>
                             </div>
                         </Card>

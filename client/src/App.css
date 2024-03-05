@@ -140,23 +140,23 @@ header {
     border: 1px black solid;
 }
 */
-.election_foot {
+/* .election_foot {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; */
     /* margin: 1rem;
     border: 1px black dashed; */
-}
+/* } */
 
-#election_foot-title {
+/* #election_foot-title {
     margin: 1rem
-}
+} */
 
-#election_foot-button {
+/* #election_foot-button { */
     /* display: flex; */
-    justify-content: center;
+    /* justify-content: center; */
     /* margin: 1rem */
-}
+/* } */
 
 .election, .election .card {
     cursor:auto;
@@ -176,12 +176,13 @@ main {
 }
 /* dodgerblue */
 
+.score-bg {
+    background-color: rgb(151, 183, 230);
+}
 
 .score {
-    width: 10%;
     height: 25px;
     background-color: rgb(13, 110, 253);
-    text-align: center; /* To center it horizontally (if you want) */
-    line-height: 25px; /* To center it vertically */
-    color: white;
+    text-align: center;
+    line-height: 25px;
   }

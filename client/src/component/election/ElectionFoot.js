@@ -38,29 +38,28 @@ export default function ElectionFoot({election}) {
 
 
     return (
-        <Container className="election_foot">
-            <Row id="election_foot-title">
-                <Col className="text-center">
-                    <h4>VOTE</h4>
-                </Col>
-            </Row>
+        <Container className="election_foot border">
+            <div className="text-center">
+                <h4>VOTE</h4>
+            </div>
             <Form onSubmit={handleSubmitVote}>
                 <Form.Group controlId="formSelectCandidate">
-                    <div className="d-flex">
-                        <Form.Select className="align-items-center" onChange={handleSelectChange} value={selectedCandidate}>
+                    <div className="d-flex justify-content-center">
+                        <Form.Select className="w-50 " onChange={handleSelectChange} value={selectedCandidate}>
                             <option key={DEFAULT_SELECTION} value={DEFAULT_SELECTION}>{DEFAULT_SELECTION}</option>
                             {
                                 Object.keys(election.candidates).map(candidate =>
                                     <option key={candidate} value={candidate}>{candidate}</option>
                                 )
                             }
-                        </Form.Select>   
+                        </Form.Select> 
                     </div>
-                                
-                    <Form.Text muted>Only one vote will be counted per election</Form.Text>
+                    <div className="d-flex justify-content-center">
+                        <Form.Text muted>Only one vote will be counted per election</Form.Text>
+                    </div>
                 </Form.Group>
-                <div id="election_foot-button" className="text-center">
-                    <Button variant="primary" disabled={displayVoteButton() === false} type="submit" size="md">Submit</Button>
+                <div id="election_foot-button" className="text-center d-flex justify-content-center">
+                    <Button variant="primary" disabled={displayVoteButton() === false} type="submit" size="md" className="mt-1 mb-3">Submit</Button>
                 </div>
             </Form>
         </Container>
