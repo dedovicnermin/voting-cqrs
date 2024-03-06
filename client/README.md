@@ -57,3 +57,10 @@ value : {
   "candidates": ["Bob", "Foo", "Bar", "XYZ"]
 }
 ```
+
+
+## Encountering CORS issue:
+
+```
+open -n -a /Applications/Google\ Chrome.app --args --user-data-dir="/tmp/disableSecChrome" --disable-web-security
+```

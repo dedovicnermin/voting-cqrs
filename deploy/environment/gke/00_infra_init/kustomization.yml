@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base/infra/storageclass/gke
+  - ../../../base/infra/openldap
+  - ../../../base/infra/prometheus
+  - ../../../base/infra/grafana
+  - ../../../base/infra/operator
+  - ../../../base/infra/mongodb

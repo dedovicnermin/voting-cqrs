@@ -1,0 +1,6 @@
+base/infra/cp
+base/infra/operator/charts
+base/infra/operator/license-secret.yml
+base/infra/prometheus/charts
+tf
+
