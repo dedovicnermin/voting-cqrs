@@ -1,3 +1,12 @@
+#root {
+    background-color: rgb(80, 160, 235);
+    height: 100vh;
+}
+
+main {
+    background-color: rgb(80, 160, 235);
+}
+
 header {
     position: sticky;
     top: 0;
@@ -25,26 +34,15 @@ header {
     cursor: pointer;
 }
 
-.d-flex{
+.d-flex {
     gap:3rem;
-  }
+}
 
-.link-button{
+.link-button {
     color: blue !important;
     border: 0;
     background: none;
 }
-
-/* .election_list {
-    margin: 1rem;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.election_list>* {
-    flex: 1 1 260px;
-    margin: 1rem;
-} */
 
 .election_filter-category {
     display: flex;
@@ -55,108 +53,9 @@ header {
     margin-right: 1rem;
 }
 
-
-
-/* .e-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50%;
-}
-
-.election {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 4rem;
-    border: 1px black solid;
-
-} */
-
 .election Row {
     border: 1px black;
 }
-/* .election_header {
-    display: flex;
-    flex-direction: column;
-    margin: 1rem;
-    justify-content: center;
-    align-items: center;
-}
-
-#election_header-title {
-    margin: 1rem;
-    display: flex;
-    justify-content: center;
-    border: 1px black solid;
-}
-
-.election_header_meta {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 1rem;
-    border: 1px black solid;
-
-}
-
-#election_header-author {
-    display: flex;
-    margin: 0.5rem;
-}
-
-#election_header-category {
-    display: flex;
-    margin: 0.5rem;
-}
-
-#election_header-description {
-    display: flex;
-    margin: 0.5rem;
-}
-
-.election_body {
-    margin: 1rem;
-    display: flex;
-    flex-direction: column;
-}
-
-#election_body-title {
-    display: flex;
-    justify-content: center;
-}
-
-#election_body-results {
-    display: flex;
-}
-
-.election_body-candidate {
-    background-color: cyan;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 1rem;
-    border: 1px black solid;
-}
-*/
-/* .election_foot {
-    display: flex;
-    flex-direction: column;
-    align-items: center; */
-    /* margin: 1rem;
-    border: 1px black dashed; */
-/* } */
-
-/* #election_foot-title {
-    margin: 1rem
-} */
-
-/* #election_foot-button { */
-    /* display: flex; */
-    /* justify-content: center; */
-    /* margin: 1rem */
-/* } */
 
 .election, .election .card {
     cursor:auto;
@@ -165,16 +64,6 @@ header {
 .election_body-candidate{
     width: 15rem;
 }
-
-#root {
-    background-color: rgb(80, 160, 235);
-    height: 100vh;
-}
-
-main {
-    background-color: rgb(80, 160, 235);
-}
-/* dodgerblue */
 
 .score-bg {
     background-color: rgb(151, 183, 230);
@@ -185,4 +74,4 @@ main {
     background-color: rgb(13, 110, 253);
     text-align: center;
     line-height: 25px;
-  }
+}

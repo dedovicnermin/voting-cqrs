@@ -15,19 +15,6 @@ export default function Election() {
 
     return (
         <>
-            {/* <Container className="mt-4 ml-2">
-                <Container>
-                    <button className="btn btn-secondary" onClick={handleBackButtonClick}>&lt; Back</button>
-                </Container>
-            </Container>
-            <Container className="e-wrapper">
-                <Container className="election">
-                    <ElectionHeader election={election}/>
-                    <ElectionBody id={election.id}/>
-                    <ElectionFoot election={election}/>
-                </Container>
-            </Container> */}
-            
             <Container>
                 <Row  className="mt-3 mb-3">
                     <Col>
@@ -43,7 +30,6 @@ export default function Election() {
                         </Card>
                     </Col>
                 </Row>
-                
             </Container>
         </>
     )
