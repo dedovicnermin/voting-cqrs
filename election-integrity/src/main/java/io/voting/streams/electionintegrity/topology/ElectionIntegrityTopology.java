@@ -4,7 +4,7 @@ import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionCreate;
-import io.voting.streams.electionintegrity.topology.mappers.CandidateMapper;
+import io.voting.streams.electionintegrity.topology.mappers.ElectionMapper;
 import io.voting.streams.electionintegrity.topology.mappers.CloudEventMapper;
 import io.voting.streams.electionintegrity.topology.predicates.IllegalContentProcessor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,6 @@ import java.util.Properties;
 public final class ElectionIntegrityTopology {
 
   private static final Predicate<String, ElectionCreate> illegalContent = new IllegalContentProcessor();
-  private static final ValueMapper<ElectionCreate, Election> candidateEnrichment = new CandidateMapper();
   private static final ValueMapper<Election, CloudEvent> cloudEventEnrichment = new CloudEventMapper();
 
   private ElectionIntegrityTopology() {}
@@ -30,12 +29,12 @@ public final class ElectionIntegrityTopology {
   public static Topology buildTopology(final StreamsBuilder builder, final Properties properties) {
     final String inputTopic = properties.getProperty("input.topic");
     final String outputTopic = properties.getProperty("output.topic");
-    log.debug("Input topic : {}", inputTopic);
-    log.debug("Output topic : {}", outputTopic);
+
+    final ValueMapper<ElectionCreate, Election> electionEnrichment = new ElectionMapper(properties.getProperty("election.ttl"));
 
     builder.stream(inputTopic, Consumed.with(Serdes.String(), StreamUtils.getJsonSerde(ElectionCreate.class)))
             .filterNot(illegalContent)
-            .mapValues(candidateEnrichment)
+            .mapValues(electionEnrichment)
             .mapValues(cloudEventEnrichment)
             .to(outputTopic, Produced.with(Serdes.String(), StreamUtils.getCESerde()));
 
