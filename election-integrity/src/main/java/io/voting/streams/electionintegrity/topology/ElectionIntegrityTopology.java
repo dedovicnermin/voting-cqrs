@@ -36,6 +36,7 @@ public final class ElectionIntegrityTopology {
             .filterNot(illegalContent)
             .mapValues(electionEnrichment)
             .mapValues(cloudEventEnrichment)
+            .selectKey((k, v) -> v.getId())
             .to(outputTopic, Produced.with(Serdes.String(), StreamUtils.getCESerde()));
 
     final Topology topology = builder.build();

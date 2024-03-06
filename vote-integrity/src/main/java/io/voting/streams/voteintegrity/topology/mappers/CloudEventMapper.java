@@ -27,7 +27,7 @@ public class CloudEventMapper implements ValueMapper<ElectionSummary, CloudEvent
     final ElectionVote vote = electionSummary.getVote();
 
     final CloudEvent event = builder
-            .withId(UUID.randomUUID().toString())
+            .withId(electionSummary.getUser())
             .withSubject(vote.getElectionId())
             .withData(StreamUtils.wrapCloudEventData(vote))
             .build();

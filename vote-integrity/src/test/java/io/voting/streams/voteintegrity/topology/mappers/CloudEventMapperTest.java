@@ -14,6 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CloudEventMapperTest {
 
+  final String userId = "100";
+  final String electionId = "000";
+  final String key = userId + ":" + electionId;
   final ValueMapper<ElectionSummary, CloudEvent> mapper = new CloudEventMapper();
   ElectionSummary summary;
 
@@ -24,13 +27,13 @@ class CloudEventMapperTest {
 
   @Test
   void test() {
-    final ElectionVote vote = ElectionVote.of("000", "Foo");
-    summary.add(vote);
+    final ElectionVote vote = ElectionVote.of(electionId, "Foo");
+    summary.add(key, vote);
 
     final CloudEvent actual = mapper.apply(summary);
 
     assertThat(actual).isNotNull();
-    assertThat(actual.getId()).isNotNull();
+    assertThat(actual.getId()).isEqualTo(userId);
     assertThat(actual.getSource().toString()).contains(VoteIntegrityTopology.class.getSimpleName());
     assertThat(actual.getType()).isEqualTo(CloudEventTypes.ELECTION_VOTE_EVENT);
     assertThat(actual.getSubject()).isEqualTo(vote.getElectionId());
