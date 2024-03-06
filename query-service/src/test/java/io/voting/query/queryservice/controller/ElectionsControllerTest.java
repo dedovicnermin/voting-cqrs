@@ -1,6 +1,7 @@
 package io.voting.query.queryservice.controller;
 
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.query.queryservice.payload.response.GenericResponse;
 import io.voting.query.queryservice.repository.ElectionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ElectionsControllerTest {
 
-  private static final Election ELECTION = new Election("id", "author", "title", "desc", "category", Map.of("Foo", 1L, "Bar", 1L));
+  private static final Election ELECTION = new Election("id", "author", "title", "desc", "category", Map.of("Foo", 1L, "Bar", 1L), 0L, 0L, ElectionStatus.OPEN);
 
   private ElectionRepository repository;
   private ElectionsController controller;

@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.kstream.ValueMapper;
 
 import java.net.URI;
-import java.util.UUID;
 
 @Slf4j
 public class CloudEventMapper implements ValueMapper<ElectionSummary, CloudEvent> {
@@ -23,7 +22,7 @@ public class CloudEventMapper implements ValueMapper<ElectionSummary, CloudEvent
 
   @Override
   public CloudEvent apply(ElectionSummary electionSummary) {
-    log.debug("Transforming legal vote into CloudEvent format : {}", electionSummary);
+    log.trace("Transforming legal vote into CloudEvent format : {}", electionSummary);
     final ElectionVote vote = electionSummary.getVote();
 
     final CloudEvent event = builder

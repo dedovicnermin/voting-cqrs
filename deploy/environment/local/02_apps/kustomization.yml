@@ -12,14 +12,16 @@ resources:
   - ../../../overlay/local/vote-integrity
   - ../../../overlay/local/event-sink
   - ../../../overlay/local/query-service
+  - ../../../overlay/local/election-ttl
 
 images:
   - name: dedovicnermin/election-integrity
-    newTag: 0.0.2
+    newTag: 0.0.3
   - name: dedovicnermin/vote-integrity
-    newTag: 0.0.6
+    newTag: 0.0.7
   - name: dedovicnermin/event-sink
-    newTag: 0.0.1
-  - name: dedovicnermin/query-service
     newTag: 0.0.2
-
+  - name: dedovicnermin/query-service
+    newTag: 0.0.3
+  - name: dedovicnermin/election-ttl
+    newTag: 0.0.1

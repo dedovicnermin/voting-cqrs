@@ -28,7 +28,7 @@ public class CloudEventMapper implements ValueMapper<Election, CloudEvent> {
             .withSubject(election.getCategory())
             .withData(StreamUtils.wrapCloudEventData(election))
             .build();
-    log.debug("CE result : {}", event);
+    log.trace("CE result : {}", event);
     return event;
   }
 }

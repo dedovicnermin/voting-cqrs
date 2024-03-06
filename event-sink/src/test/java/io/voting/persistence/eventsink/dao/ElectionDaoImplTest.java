@@ -2,6 +2,7 @@ package io.voting.persistence.eventsink.dao;
 
 import com.github.javafaker.Faker;
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.common.library.models.ElectionVote;
 import io.voting.persistence.eventsink.repository.ElectionRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,7 +45,7 @@ class ElectionDaoImplTest {
 
   @Test
   void testInsert() {
-    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L));
+    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN);
     final Election actual = dao.insertElection(election);
 
     assertThat(actual).isNotNull();
@@ -59,7 +61,7 @@ class ElectionDaoImplTest {
 
   @Test
   void testUpdate() {
-    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L));
+    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN);
     final String id = template.insert(election).getId();
 
     dao.updateElection(new ElectionVote(id, "Foo"));
@@ -81,5 +83,26 @@ class ElectionDaoImplTest {
     assertThat(template.findById(id, Election.class).getCandidates())
             .containsEntry("Foo", 2L)
             .containsEntry("Bar", 2L);
+
+    final Election e = Optional.ofNullable(template.findById(id, Election.class)).orElseThrow();
+    e.setStatus(ElectionStatus.CLOSED);
+    template.save(e);
+
+    dao.updateElection(new ElectionVote(id, "Bar"));
+    assertThat(template.findById(id, Election.class).getCandidates())
+            .containsEntry("Foo", 2L)
+            .containsEntry("Bar", 2L);
+
+  }
+
+  @Test
+  void testUpdateStatus() {
+    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN);
+    final String id = template.insert(election).getId();
+
+    dao.updateElectionStatus(id, ElectionStatus.CLOSED);
+
+    final Election actual = Optional.ofNullable(template.findById(id, Election.class)).orElseThrow();
+    assertThat(actual.getStatus()).isEqualTo(ElectionStatus.CLOSED);
   }
 }
