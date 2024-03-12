@@ -9,6 +9,7 @@ import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.utils.CloudEventTypes;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.common.library.models.ElectionVote;
 import io.voting.persistence.eventsink.dao.ElectionDao;
 import io.voting.persistence.eventsink.framework.TestReceiver;
@@ -38,7 +39,7 @@ class ElectionCreateListenerTest {
 
   @Test
   void testElectionCreateEvent() {
-    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L));
+    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN);
     final CloudEvent ce = new CloudEventBuilder()
             .withId(UUID.randomUUID().toString())
             .withSource(URI.create("http://test"))
@@ -73,7 +74,7 @@ class ElectionCreateListenerTest {
 
   @Test
   void testElectionCreateEventOnException() {
-    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L));
+    final Election election = new Election(null, fake.funnyName().name(), fake.lordOfTheRings().location(), fake.lorem().sentence(), "TEST", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN);
     final CloudEvent ce = new CloudEventBuilder()
             .withId(UUID.randomUUID().toString())
             .withSource(URI.create("http://test"))
@@ -109,5 +110,11 @@ class ElectionCreateListenerTest {
     /** Not being tested */
     @Override
     public Election updateElection(ElectionVote electionVote) {return null;}
+
+    /** Not being tested */
+    @Override
+    public Election updateElectionStatus(String electionId, ElectionStatus electionStatus) {
+      return null;
+    }
   }
 }

@@ -22,13 +22,13 @@ public class CloudEventMapper implements ValueMapper<Election, CloudEvent> {
 
   @Override
   public CloudEvent apply(Election election) {
-    log.debug("Mapping election ({}) into CloudEvent format", election);
+    log.trace("Mapping election ({}) into CloudEvent format", election);
     final CloudEvent event = ceBuilder
-            .withId(UUID.randomUUID().toString())
+            .withId(election.getId())
             .withSubject(election.getCategory())
             .withData(StreamUtils.wrapCloudEventData(election))
             .build();
-    log.debug("Format result : {}", event);
+    log.trace("CE result : {}", event);
     return event;
   }
 }

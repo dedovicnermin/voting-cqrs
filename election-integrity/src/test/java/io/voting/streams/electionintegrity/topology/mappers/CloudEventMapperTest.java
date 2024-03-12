@@ -4,12 +4,15 @@ import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.utils.CloudEventTypes;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.streams.electionintegrity.topology.ElectionIntegrityTopology;
 import org.apache.kafka.streams.kstream.ValueMapper;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +23,16 @@ class CloudEventMapperTest {
   @Test
   void test() {
     final String category = "TEST";
-    final Election election = new Election(null, "author", "title", "description", category, Map.of("Foo", 0L, "Bar", 0L));
+    final Election election = Election.builder()
+            .id(UUID.randomUUID().toString())
+            .author("author")
+            .title("title")
+            .description("description")
+            .category(category)
+            .candidates(Map.of("Foo", 0L, "Bar", 0L))
+            .status(ElectionStatus.OPEN)
+            .startTs(Instant.now().toEpochMilli())
+            .build();
     final CloudEvent actual = mapper.apply(election);
 
     assertThat(actual).isNotNull();

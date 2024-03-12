@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.voting.common.library.models.EdvUser;
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.query.queryservice.payload.request.RegisterUserRequest;
 import io.voting.query.queryservice.payload.response.JwtResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -55,7 +56,7 @@ class QueryServiceApplicationTest {
   @BeforeEach
   void setup() {
     user = mongoTemplate.insert(EdvUser.builder().username("test").password(encoder.encode("password")).build());
-    election = mongoTemplate.insert(new Election(null, "author", "title", "desc", "category", Map.of("Foo", 0L, "Bar", 0L)));
+    election = mongoTemplate.insert(new Election(null, "author", "title", "desc", "category", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN));
   }
 
   @AfterEach

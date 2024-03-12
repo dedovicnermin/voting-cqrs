@@ -23,20 +23,20 @@ class FirstVoteProcessorTest {
 
   @Test
   void testFirstVote() {
-    summary.add(VOTE);
+    summary.add(KEY, VOTE);
     assertThat(processor.test(KEY, summary)).isTrue();
   }
 
   @Test
   void testDuplicateVote() {
-    summary.add(VOTE);
-    summary.add(VOTE);
+    summary.add(KEY, VOTE);
+    summary.add(KEY, VOTE);
     assertThat(processor.test(KEY, summary)).isFalse();
   }
 
   @Test
   void testUnexpectedIllegalVote() {
-    summary.add(VOTE);
+    summary.add(KEY, VOTE);
     summary.setVoteAttempts(0L);
     assertThat(processor.test(KEY, summary)).isFalse();
   }

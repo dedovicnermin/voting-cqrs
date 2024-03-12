@@ -6,6 +6,7 @@ import io.voting.common.library.kafka.clients.sender.EventSender;
 import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.test.TestSender;
 import io.voting.common.library.kafka.utils.StreamUtils;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.streams.electionintegrity.framework.TestConsumerHelper;
 import io.voting.streams.electionintegrity.framework.TestKafkaContext;
 import io.voting.common.library.models.Election;
@@ -65,6 +66,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
     properties.put("input.topic", TestConsumerHelper.INPUT_TOPIC);
     properties.put("output.topic", TestConsumerHelper.OUTPUT_TOPIC);
     properties.put("commit.interval.ms", 1000);
+    properties.put("election.ttl", "PT5M");
     final Topology topology = ElectionIntegrityTopology.buildTopology(new StreamsBuilder(), properties);
     app = new KafkaStreams(topology, properties);
     app.start();
@@ -89,13 +91,30 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
     testSender.send(UUID.randomUUID().toString(), legalElection).get();
     testSender.send(UUID.randomUUID().toString(), illegalElection).get();
 
-    final Election expected = new Election(null, legalElection.getAuthor(), legalElection.getTitle(), legalElection.getDescription(), legalElection.getCategory(), buildCandidateMap(legalElection.getCandidates()));
+    final Election expected = Election.builder()
+            .author(legalElection.getAuthor())
+            .title(legalElection.getTitle())
+            .description(legalElection.getDescription())
+            .category(legalElection.getCategory())
+            .candidates(buildCandidateMap(legalElection.getCandidates()))
+            .status(ElectionStatus.OPEN)
+            .build();
+
     final ReceiveEvent<String, CloudEvent> actual = consumerHelper.getEvents().poll(1000, TimeUnit.MILLISECONDS);
     assertThat(consumerHelper.getEvents().poll(100, TimeUnit.MILLISECONDS)).isNull();
     assertThat(actual).isNotNull();
 
     final CloudEvent actualPayload = actual.getPOrE().getPayload();
-    assertThat(StreamUtils.unwrapCloudEventData(actualPayload.getData(), Election.class)).isEqualTo(expected);
+    assertThat(StreamUtils.unwrapCloudEventData(actualPayload.getData(), Election.class))
+            .satisfies(election -> assertThat(election.getId()).isNotNull())
+            .satisfies(election -> assertThat(election.getAuthor()).isEqualTo(expected.getAuthor()))
+            .satisfies(election -> assertThat(election.getTitle()).isEqualTo(expected.getTitle()))
+            .satisfies(election -> assertThat(election.getDescription()).isEqualTo(expected.getDescription()))
+            .satisfies(election -> assertThat(election.getCategory()).isEqualTo(expected.getCategory()))
+            .satisfies(election -> assertThat(election.getCandidates()).isEqualTo(expected.getCandidates()))
+            .satisfies(election -> assertThat(election.getStatus()).isEqualTo(expected.getStatus()))
+            .satisfies(election -> assertThat(election.getEndTs()).isNotNull())
+            .satisfies(election -> assertThat(election.getStartTs()).isNotNull());
 
   }
 

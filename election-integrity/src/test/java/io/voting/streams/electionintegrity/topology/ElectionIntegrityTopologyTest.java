@@ -5,6 +5,7 @@ import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionCreate;
+import io.voting.common.library.models.ElectionStatus;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -48,6 +49,7 @@ class ElectionIntegrityTopologyTest {
     properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "election-integrity.test");
     properties.put("input.topic", INPUT_TOPIC);
     properties.put("output.topic", OUTPUT_TOPIC);
+    properties.put("election.ttl", "P2D");
 
     final StreamsBuilder builder = new StreamsBuilder();
     topology = ElectionIntegrityTopology.buildTopology(builder, properties);
@@ -71,7 +73,15 @@ class ElectionIntegrityTopologyTest {
 
     final Map<String, Long> candidateMap = new HashMap<>();
     legalElection.getCandidates().forEach(c -> candidateMap.put(c, 0L));
-    final Election expected = new Election(null, legalElection.getAuthor(), legalElection.getTitle(), legalElection.getDescription(), legalElection.getCategory(), candidateMap);
+
+    final Election expected = Election.builder()
+            .author(legalElection.getAuthor())
+            .title(legalElection.getTitle())
+            .description(legalElection.getDescription())
+            .category(legalElection.getCategory())
+            .candidates(candidateMap)
+            .status(ElectionStatus.OPEN)
+            .build();
 
     inputTopic.pipeKeyValueList(Arrays.asList(
             new KeyValue<>(fake.idNumber().valid(), legalElection),
@@ -80,7 +90,16 @@ class ElectionIntegrityTopologyTest {
 
     assertThat(outputTopic.getQueueSize()).isOne();
     final CloudEvent actual = outputTopic.readKeyValue().value;
-    assertThat(StreamUtils.unwrapCloudEventData(actual.getData(), Election.class)).isEqualTo(expected);
+    assertThat(StreamUtils.unwrapCloudEventData(actual.getData(), Election.class))
+            .satisfies(election -> assertThat(election.getId()).isNotNull())
+            .satisfies(election -> assertThat(election.getAuthor()).isEqualTo(expected.getAuthor()))
+            .satisfies(election -> assertThat(election.getTitle()).isEqualTo(expected.getTitle()))
+            .satisfies(election -> assertThat(election.getDescription()).isEqualTo(expected.getDescription()))
+            .satisfies(election -> assertThat(election.getCategory()).isEqualTo(expected.getCategory()))
+            .satisfies(election -> assertThat(election.getCandidates()).isEqualTo(expected.getCandidates()))
+            .satisfies(election -> assertThat(election.getStatus()).isEqualTo(expected.getStatus()))
+            .satisfies(election -> assertThat(election.getEndTs()).isNotNull())
+            .satisfies(election -> assertThat(election.getStartTs()).isNotNull());
   }
 
 }

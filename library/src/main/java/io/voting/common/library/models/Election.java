@@ -1,6 +1,7 @@
 package io.voting.common.library.models;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Document
 public class Election {
 
@@ -24,5 +26,8 @@ public class Election {
   @Indexed
   private String category;
   private Map<String, Long> candidates;
+  private Long startTs;
+  private Long endTs;
+  private ElectionStatus status;
 
 }

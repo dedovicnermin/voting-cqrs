@@ -12,7 +12,7 @@ public class ElectionIdExtractor implements KeyValueMapper<String, ElectionSumma
   /** Key expected format = 'userId:electionId' */
   @Override
   public String apply(String key, ElectionSummary electionSummary) {
-    log.debug("Extracting election ID from key : {}", key);
+    log.trace("Extracting election ID from key : {}", key);
     return Optional.ofNullable(key)
             .map(k -> k.split(":"))
             .filter(array -> array.length >= 2)
