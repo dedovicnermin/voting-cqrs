@@ -1,56 +1,39 @@
-import { useEffect, useState } from 'react';
-// import ElectionTile from './ElectionTile';
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import {useContext, useState} from "react";
+import {StateContext} from "../context/context";
+// import ElectionCard from "./../component/ElectionCard"
+import ElectionCategoryDD from "./../component/dropdown/ElectionCategoryDD";
 
 const MyElections = () => {
 
     const navigate = useNavigate();
-
-    const [myElections, setMyElections] = useState([]);
-
-    const fetchData = async () => {
-        try {
-        const response = await axios.get(
-            `http://localhost:8080/api/users/1/elections`
-        );
-        setMyElections(response.data);
-    }
-    catch (error) {
-        console.log("Something went wrong");
-        console.log(error);  
-        }
-    }
-
-    useEffect(() => {
-        // if(user) {
-            fetchData();
-            const refresh = setInterval(() => {
-                fetchData();
-            }, 10000)
-            return () => clearInterval(refresh);
-        // }
-    }, [])
-
     const navigateToCreateNewElection = () => {
         navigate("/create/");
     }
+    const {state} = useContext(StateContext)
+    const {elections} = state;
+    const [category, setCategory] = useState("All")
+
+    const handleOnSelect = (eventKey) => setCategory(eventKey);
+
+    const filterSwitch = c => {
+        switch (category) {
+            case 'All':
+                return true;
+            default:
+                return c.category === category;
+        }
+    }
+    
 
     const displayElections = () => {
-        // if(!user) {
-        //     return (
-        //         <div className="text-center mt-5">
-        //             <h3 className="">Nothing to see here</h3>
-        //         </div>
-        //     );
-        // }
         // if (myElections.length > 0) {
         //     return (
         //         <div className="electionsList">
         //             <div className="d-flex flex-wrap justify-content-start">
         //                 {myElections.map(
         //                     x =>
-        //                     <ElectionTile key={x.id} id={x.id} title={x.title} category={x.category}/>
+        //                     <MyElectionCard/>
         //                 )}
         //             </div>
         //         </div>
@@ -78,18 +61,10 @@ const MyElections = () => {
             <div className="container">
                 <div className="row mt-3 mb-3">
                     <div className="col">
-                    </div>
-                    <div className="col text-end">
-                        filter will be here: 
-                        <select>
-                            <option>Category 1</option>
-                            <option>Category 2</option>
-                            <option>Category 3</option>
-                        </select>
+                        <ElectionCategoryDD category={category} onSelect={handleOnSelect}/>
                     </div>
                 </div>
                 {displayElections()}
-                
             </div>
         </div>
     );

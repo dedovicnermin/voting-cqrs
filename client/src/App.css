@@ -61,8 +61,25 @@ header {
     cursor:auto;
 }
 
-.election_body-candidate{
+.election_body-candidate {
     width: 15rem;
+}
+
+.new-election-candidate, .new-election-candidate-plus {
+    position: relative;
+    width: 15.5rem;
+}
+
+.new-election-delete-candidate {
+    position: absolute;
+    top: 2px;
+    right: 12px;
+    cursor: pointer;
+    color: rgb(233, 233, 233);
+}
+
+.new-election-delete-candidate:hover {
+    color: red;
 }
 
 .score-bg {
@@ -74,4 +91,17 @@ header {
     background-color: rgb(13, 110, 253);
     text-align: center;
     line-height: 25px;
+}
+
+#new-election-title {
+    /* padding: 1em; */
+    font-size: xx-large !important;
+    padding: 0;
+    /* line-height: 50px; */
+}
+
+#new-election-title::placeholder {
+    /* font-size: xx-large !important; */
+    /* font-weight: 600; */
+    /* color: black; */
 }
