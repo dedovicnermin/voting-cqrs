@@ -1,13 +1,36 @@
 import {Button, Container, Form} from "react-bootstrap";
+<<<<<<< HEAD
 import {useState} from "react";
+=======
+import {useContext} from "react";
+>>>>>>> 19a87bdf7c3225c94dfe04cfc8beb25e870b07e4
 import {useNavigate} from "react-router-dom";
+import {StateContext} from "../../context/context";
+import {useResource} from "react-request-hook";
 
 export default function ElectionFoot({election}) {
 
     const DEFAULT_SELECTION = "Select candidate";
     const navigate = useNavigate();
-    // const eventKey = `${user.id}:${election.id}`;
     const [selectedCandidate, setSelectedCandidate] = useState();
+    const { user } = useContext(StateContext).state
+    const eventKey = `${user.id}:${election.id}`;
+
+    const [eventResp, sendEvent] = useResource((voteEvent) => ({
+        url: process.env.REACT_APP_VOTE_ENDPOINT,
+        method: "post",
+        data: {
+            key: {
+                type: "STRING",
+                data: eventKey
+            },
+            value: {
+                type: "JSON",
+                data: voteEvent
+            }
+        },
+        headers: { Authorization: `Basic ${btoa('nermin' + ':' + 'nermin-secret')}`}
+    }));
 
     /**
      * Update selectedCandidate state when user selects a value from drop-down
@@ -23,6 +46,10 @@ export default function ElectionFoot({election}) {
      */
     const handleSubmitVote = event => {
         event.preventDefault()
+        sendEvent({
+            electionId: election.id,
+            votedFor: selectedCandidate
+        });
         alert(`Vote request for '${selectedCandidate}' successfully sent`)
         navigate("/elections");
     }
