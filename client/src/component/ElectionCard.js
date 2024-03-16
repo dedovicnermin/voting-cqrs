@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import {Card, Container} from "react-bootstrap";
+import {Card} from "react-bootstrap";
 
 export default function ElectionCard({election}) {
 
@@ -10,14 +10,11 @@ export default function ElectionCard({election}) {
     }
 
     return (
-        <Container>
-            <Card style={{ width: '25rem', height: '5rem' }} onClick={navigateToElectionDetails}>
-                <Card.Body>
-                    <Card.Title>{election.title}</Card.Title>
-                    <Card.Subtitle>{election.category}</Card.Subtitle>
-                </Card.Body>
-            </Card>
-        </Container>
+        <Card style={{ width: '25rem'}} onClick={navigateToElectionDetails}>
+            <Card.Body>
+                <Card.Title className="text-truncate">{election.title}</Card.Title>
+                <Card.Text>{election.category}</Card.Text>
+            </Card.Body>
+        </Card>
     )
-
 }
