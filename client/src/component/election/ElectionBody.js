@@ -34,7 +34,7 @@ export default function ElectionBody({id}) {
     return (
         <Container className="election_body border pt-1 pb-3 mb-1">
             <div id="election_body-title" className="text-center">
-                <h4>LIVE RESULTS</h4>
+                {election.status === 'OPEN' && <h4>LIVE RESULTS</h4> || <h4>RESULTS</h4>}
             </div>
             <div id="election_body-results" className="d-flex flex-row flex-wrap justify-content-evenly">
                 {
