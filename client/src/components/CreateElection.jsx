@@ -1,108 +1,158 @@
-import { useState } from 'react';
+import {useState, useContext} from "react";
+import {StateContext} from "./../context/context";
 import { useNavigate } from "react-router-dom";
+import {Container, Col, Row, Card, Button, Form} from "react-bootstrap";
+
+const { ELECTION_CATEGORIES } = require("./../component/dropdown/CategoryDDItems.js");
 
 const CreateElection = () => {
-    // const {user} = useAuthContext();
-    const user = "test user";
 
+    const {dispatch} = useContext(StateContext);
+    const {state} = useContext(StateContext)
+
+    const limitMin = 2;
+    const limitMax = 8;
     const navigate = useNavigate();
 
-    // const [serialNumber, setSerialNumber] = useState();
-    // const [buildNumber, setBuildNumber] = useState();
-    // const [naviVersion, setNaviVersion] = useState();
-    // const [mapVersion, setMapVersion] = useState();
-    // const [notes, setNotes] = useState();
+    const deleteCandidate = (e) => {
+        e.preventDefault();
+        e.target.parentElement.remove();
+        let currentSize = document.getElementsByClassName("new-election-candidate p-1").length;
+        if (currentSize <= limitMax - 1) {
+            const plusButton = document.getElementsByClassName("new-election-candidate-plus")[0];
+            plusButton.setAttribute("class", plusButton.getAttribute("class").replace(" visually-hidden", ""));
+        }
+        if (currentSize <= limitMin) {
+            const deleteButtons = document.getElementsByClassName("new-election-delete-candidate");
+            for (let i = 0; i < deleteButtons.length; i++) {
+                deleteButtons[i].remove();
+            }
+        }
+    }
 
-    // const savenewElection = async () => {
-    //             fetch('https://mywebsite.example/endpoint/', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Accept': 'application/json',
-    //         'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //         firstParam: 'yourValue',
-    //         secondParam: 'yourOtherValue',
-    //     })
-    //     })
-    //     const newElection = {
-    //         id: serialNumber,
-    //         title: buildNumber,
-    //         description: naviVersion,
-    //         category: mapVersion,
-    //         candidates: notes
-    //     }
+    const plusButton = document.getElementsByClassName("new-election-candidate-plus")[0];
+
+    const addCandidate = () => {
+        let currentSize = document.getElementsByClassName("new-election-candidate p-1").length;
+
+        const field = document.getElementById("new-election-all-candidates")
+
+        const newElem = document.createElement("div");
+        newElem.setAttribute("class", "new-election-candidate p-1");
+
+        const formControl = document.createElement("input");
+        formControl.setAttribute("class", "pt-3 pb-3 form-control candidate-value");
+        formControl.setAttribute("value", "");
+        formControl.setAttribute("type", "text");
+        formControl.setAttribute("placeholder", "New candidate");
+
+        const delIcon = document.createElement("div");
+        delIcon.setAttribute("class", "new-election-delete-candidate");
+        delIcon.addEventListener("click", e => deleteCandidate(e));
+        delIcon.innerHTML = "X"
         
-    //     addUnit(newDevice);
-    //     hideForm();
-    // }
+        newElem.appendChild(formControl);
+        newElem.appendChild(delIcon);
+        field.appendChild(newElem);
 
-    const submit = () => {
-        alert("[Created new election] dummy");
-        navigate("/all-elections/");
-    }
-
-    const displayForm = () => {
-        if(user) {
-            return (
-                <div className="mt-5 mb-3">
-                    <form>
-                        <div className="mb-3">
-                            <label for="title" className="form-label">Title</label>
-                            <input type="text" className="form-control" id="title" autocomplete="off"/>
-                        </div>
-                        <div className="mb-3">
-                            <label for="description">Description</label>
-                            <textarea className="form-control" placeholder="You can add more details here" id="description" autocomplete="off"></textarea>
-                        </div>
-                        <div className="mb-3">
-                            <label for="category">Category</label>
-                            <select className="form-select" id="category" aria-label="Choose a category">
-                                <option value="1">Social</option>
-                                <option value="2">Music</option>
-                                <option value="3">Sports</option>
-                                <option value="4">Politics</option>
-                                <option value="5">Gaming</option>
-                                <option value="6">Whatever...</option>
-                            </select>
-                        </div>
-                        <div className="mb-3">
-                            <fieldset>
-                                <label>Add from 2 to 10 candidates</label>
-                                <input type="text" className="form-control mb-1" id="candidate1" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate2" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate3" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate4" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate5" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate6" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate7" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate8" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate9" autocomplete="off"/>
-                                <input type="text" className="form-control mb-1" id="candidate10" autocomplete="off"/>
-                            </fieldset>
-                        </div>
-                        <div className="d-flex justify-content-center">
-                            <button type="reset" className="btn btn-warning mt-3 mb-5 w-50" onClick={submit}>Create</button>
-                        </div>
-                    </form>
-                </div>
-            )
-        }
-        else {
-            return (
-                <div className="text-center mt-5">
-                    <h3 className="">Nothing to see here</h3>
-                </div>
-            );
+        if (currentSize >= limitMax - 1) {
+            const plusButton = document.getElementsByClassName("new-election-candidate-plus")[0];
+            plusButton.setAttribute("class", plusButton.getAttribute("class") + " visually-hidden")
         }
     }
+
+    
+    const [formData, setFormData] = useState({
+        title: "",
+        author: state.user.username,
+        description: "",
+        category: "",
+        candidates: {}
+    });
+
+    const handleTitle = event => setFormData({...formData, title: event.target.value});
+    const handleDescription = event => setFormData({...formData, description: event.target.value});
+    const handleCategory = event => setFormData({...formData, category: event.target.value});
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        let candidates = document.getElementsByClassName("candidate-value");
+
+        // use .value to populate the formData candidates
+        // for (let i = 0; i < candidates.length; i++) {
+        //     console.log(candidates[i].value)
+        // }
+    }
+
 
     return (
-        <div>
-            <div className="container">
-                {displayForm()}
-            </div>
-        </div>
+        <>
+            <Container>
+                <Row className="mt-1 mb-3 p-1">
+                </Row>
+                <Row>
+                    <Col>
+                        <Card className="election mt-3 p-3 pt-1">
+                            <Form onSubmit={handleSubmit}>
+                                <Row>
+                                    <Col className="d-flex justify-content-center">
+                                        <Form.Control id="new-election-title" className="text-center w-50 h4"
+                                            placeholder="Election Title" 
+                                            value={formData.title}
+                                            onChange={handleTitle}
+                                        />
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col md={8}>
+                                        <Form.Group className="mb-3 ps-3" controlId="new-election-description">
+                                            <div><b>Description: </b></div>
+                                            <Form.Control type="text" placeholder="Add a description" 
+                                                value={formData.description}
+                                                onChange={handleDescription}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={4}>
+                                        <div>
+                                            <b>Category: </b>
+                                            <Form.Select onChange={handleCategory}>
+                                                {
+                                                    Object.values(ELECTION_CATEGORIES).map(x =>
+                                                        <option key={x} value={x}>{x}</option>
+                                                    )
+                                                }                     
+                                            </Form.Select>
+                                        </div>
+                                    </Col>
+                                </Row>
+                                <Container className="border pt-1 pb-3 mt-0 mb-3 ">
+                                    <div id="election_body-title" className="text-center">
+                                        <h4>ADD UP TO 8 CANDIDATES</h4>
+                                    </div>
+                                    <div id="new-election-all-candidates" className="d-flex flex-row flex-wrap justify-content-start ps-5 pe-5">
+                                        <div className="new-election-candidate p-1">
+                                            <Form.Control type="text" placeholder="New candidate" className="pt-3 pb-3 candidate-value"/>
+                                        </div>
+                                        <div className="new-election-candidate p-1">
+                                            <Form.Control type="text" placeholder="New candidate" className="pt-3 pb-3 candidate-value"/>
+                                        </div>
+                                        <div className="new-election-candidate-plus p-1 order-last">
+                                            <Button variant="outline-success" className="h-100 w-100 text-center  pt-3 pb-3" onClick={addCandidate}>
+                                                +1
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </Container>
+                                <div id="election_foot-button" className="text-center d-flex justify-content-center">
+                                    <Button variant="primary" disabled={false} type="submit" size="md" className="mt-1 mb-3">Submit</Button>
+                                </div>
+                            </Form>
+                        </Card>
+                    </Col>
+                </Row>
+            </Container>
+        </>
     );
 }
 

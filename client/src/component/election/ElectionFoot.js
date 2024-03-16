@@ -1,5 +1,5 @@
 import {Button, Container, Form} from "react-bootstrap";
-import {useContext, useState} from "react";
+import {useState, useContext, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {StateContext} from "../../context/context";
 import {useResource} from "react-request-hook";
@@ -61,22 +61,28 @@ export default function ElectionFoot({election}) {
 
 
     return (
-        <Container className="election_foot">
-            <div id="election_foot-title"><h4>VOTE</h4></div>
+        <Container className="election_foot border">
+            <div className="text-center">
+                <h4>VOTE</h4>
+            </div>
             <Form onSubmit={handleSubmitVote}>
                 <Form.Group controlId="formSelectCandidate">
-                    <Form.Select onChange={handleSelectChange} value={selectedCandidate}>
-                        <option key={DEFAULT_SELECTION} value={DEFAULT_SELECTION}>{DEFAULT_SELECTION}</option>
-                        {
-                            Object.keys(election.candidates).map(candidate =>
-                                <option key={candidate} value={candidate}>{candidate}</option>
-                            )
-                        }
-                    </Form.Select>
-                    <Form.Text muted>Only one vote will be counted per election</Form.Text>
+                    <div className="d-flex justify-content-center">
+                        <Form.Select className="w-50 " onChange={handleSelectChange} value={selectedCandidate}>
+                            <option key={DEFAULT_SELECTION} value={DEFAULT_SELECTION}>{DEFAULT_SELECTION}</option>
+                            {
+                                Object.keys(election.candidates).map(candidate =>
+                                    <option key={candidate} value={candidate}>{candidate}</option>
+                                )
+                            }
+                        </Form.Select> 
+                    </div>
+                    <div className="d-flex justify-content-center">
+                        <Form.Text muted>Only one vote will be counted per election</Form.Text>
+                    </div>
                 </Form.Group>
-                <div id="election_foot-button">
-                    <Button variant="primary" disabled={displayVoteButton() === false} type="submit" size="md">Submit</Button>
+                <div id="election_foot-button" className="text-center d-flex justify-content-center">
+                    <Button variant="primary" disabled={displayVoteButton() === false} type="submit" size="md" className="mt-1 mb-3">Submit</Button>
                 </div>
             </Form>
         </Container>
