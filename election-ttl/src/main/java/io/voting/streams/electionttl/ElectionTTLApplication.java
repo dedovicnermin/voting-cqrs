@@ -5,7 +5,9 @@ import io.voting.streams.electionttl.topology.TTLTopology;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.processor.WallclockTimestampExtractor;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -55,6 +57,7 @@ public class ElectionTTLApplication {
   }
 
   private static KafkaStreams buildStreams(final Properties properties) {
+    properties.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
     properties.putIfAbsent(ElectionTTLConfig.ELECTION_REQUESTS_TOPIC, "election.requests");
     properties.putIfAbsent(ElectionTTLConfig.ELECTION_VOTES_TOPIC, "election.votes");
     properties.putIfAbsent(ElectionTTLConfig.VOTE_INTEGRITY_CHANGELOG_TOPIC, "vote.integrity.001-votes.integrity.aggregate-changelog");

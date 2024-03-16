@@ -36,6 +36,11 @@ services:
       KAFKA_CONFLUENT_BALANCER_ENABLE: 'false'
       KAFKA_KAFKA_REST_ENABLE: 'true'
       CLUSTER_ID: 'GJjTu-METQy8Ud-d0EQ9ZA'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/kafka/v3/clusters"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.5.0
@@ -43,7 +48,7 @@ services:
     container_name: control-center
     depends_on:
       broker:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "9021:9021"
     environment:
@@ -61,20 +66,19 @@ services:
     ports:
       - "27017:27017"
     env_file:
-      - mongodb/.env
+      - sandbox/mongodb/.env
     environment:
       - MONGO_INITDB_DATABASE=edv
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin-secret
     volumes:
-      - ./mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./sandbox/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   cli:
     image: confluentinc/confluent-cli:3.54.0
     container_name: cli
     command: >
       sh -c "
-      sleep 30 &&
       confluent kafka topic create election.requests.raw --no-authentication --url http://broker:8090/kafka &&
       confluent kafka topic create election.requests --no-authentication --url broker:8090/kafka &&
       confluent kafka topic create election.votes.raw --no-authentication --url broker:8090/kafka &&
@@ -82,7 +86,7 @@ services:
       "
     depends_on:
       broker:
-        condition: service_started
+        condition: service_healthy
       control-center:
         condition: service_started
       mongo:
@@ -94,10 +98,10 @@ services:
     command:
       - /mnt/config/tegridy.properties
     volumes:
-      - ../election-integrity/src/main/resources/application-sandbox_internal.properties:/mnt/config/tegridy.properties:ro
+      - ./election-integrity/src/main/resources/application-sandbox_internal.properties:/mnt/config/tegridy.properties:ro
     depends_on:
       broker:
-        condition: service_started
+        condition: service_healthy
       cli:
         condition: service_completed_successfully
 
@@ -107,23 +111,24 @@ services:
     command:
       - /mnt/config/tegridy.properties
     volumes:
-      - ../vote-integrity/src/main/resources/application-sandbox_internal.properties:/mnt/config/tegridy.properties:ro
+      - ./vote-integrity/src/main/resources/application-sandbox_internal.properties:/mnt/config/tegridy.properties:ro
     depends_on:
       broker:
-        condition: service_started
+        condition: service_healthy
       cli:
         condition: service_completed_successfully
 
   ttl:
-    image: dedovicnermin/election-ttl:0.0.1
+    image: dedovicnermin/election-ttl
+    build: election-ttl
     container_name: ttl
     command:
       - /mnt/config/ttl.properties
     volumes:
-      - ../election-ttl/src/main/resources/application-sandbox_internal.properties:/mnt/config/ttl.properties:ro
+      - ./election-ttl/src/main/resources/application-sandbox_internal.properties:/mnt/config/ttl.properties:ro
     depends_on:
       broker:
-        condition: service_started
+        condition: service_healthy
       cli:
         condition: service_completed_successfully
       event-sink:
@@ -144,7 +149,7 @@ services:
       }'
     depends_on:
       broker:
-        condition: service_started
+        condition: service_healthy
       mongo:
         condition: service_started
       cli:
