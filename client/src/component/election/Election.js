@@ -3,15 +3,21 @@ import {Container, Col, Row, Card} from "react-bootstrap";
 import ElectionHeader from "./ElectionHeader";
 import ElectionBody from "./ElectionBody";
 import ElectionFoot from "./ElectionFoot";
+import {useContext} from "react";
+import {StateContext} from "../../context/context";
 
 export default function Election() {
 
     const navigate = useNavigate();
-    let election = useLocation().state;
+    let electionParam = useLocation().state;
+    const { state } = useContext(StateContext);
+    const { elections } = state;
 
     const handleBackButtonClick = () => {
         navigate("/elections")
     }
+
+    const election = elections.filter(e => e.id === electionParam.id)[0];
 
     return (
         <>
@@ -26,7 +32,7 @@ export default function Election() {
                         <Card className="election p-3">
                             <ElectionHeader election={election}/>
                             <ElectionBody id={election.id}/>
-                            <ElectionFoot election={election}/>
+                            {election.status === 'OPEN' && <ElectionFoot election={election}/>}
                         </Card>
                     </Col>
                 </Row>

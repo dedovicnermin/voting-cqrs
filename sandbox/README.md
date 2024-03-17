@@ -17,7 +17,19 @@ Create topics in UI:
 
 ```
 mvn clean install -DskipTests
+cd sandbox
+docker compose up -d
+```
 
+
+# Shutting down applications
+```
+cd sandbox
+./stop_and_clean_sandbox.sh
+```
+
+
+```
 java -jar election-integrity/target/election-integrity.jar election-integrity/src/main/resources/application-sandbox.properties
 
 java -jar vote-integrity/target/vote-integrity.jar vote-integrity/src/main/resources/application-sandbox.properties

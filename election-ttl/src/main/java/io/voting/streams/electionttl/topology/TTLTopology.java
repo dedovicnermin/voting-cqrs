@@ -47,13 +47,13 @@ public final class TTLTopology {
             .filter(targetSubsetEventTypes)
             .mapValues(convertToHeartbeat)
             .groupByKey()
-            .windowedBy(TimeWindows.ofSizeAndGrace(ttlDuration(properties), Duration.ofSeconds(1)))
+            .windowedBy(TimeWindows.ofSizeWithNoGrace(ttlDuration(properties)))
             .aggregate(
                     TTLAggregator.initializer(),
                     aggregator,
                     TTLAggregator.materialize()
             )
-            .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded().withMaxRecords(200000L)))
+            .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded().withNoBound()))
             .toStream()
             .map((windowedKey, ttlSummary) -> new KeyValue<>(windowedKey.key(), ttlSummary));
 

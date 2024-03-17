@@ -50,7 +50,8 @@ class ElectionClient:
 
     def query_election(self, election_id):
         try:
-            election = self.elections.find_one({'_id': ObjectId(election_id)})
+            # ObjectId(election_id)
+            election = self.elections.find_one({'_id': election_id})
             candidates = []
             for k in election['candidates'].keys():
                 candidates.append(k)
