@@ -9,8 +9,7 @@ import {StateContext} from "./context/context";
 import Header from './components/Header'
 import ElectionList from "./component/ElectionList";
 import Election from "./component/election/Election";
-import MyElectionList from './components/MyElectionList'
-// import MyElections from './components/MyElection'
+import MyElectionList from './component/MyElectionList'
 import CreateElection from './components/CreateElection';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -52,7 +51,6 @@ const App = () => {
                 <Route path = "/elections" element={state.user?.id ? <ElectionList/> : <Navigate to="/login"/>}/>
                 <Route path = "/elections/:id" element={state.user?.id ? <Election/> : <Navigate to="/login"/> }/>
                 <Route path = "/my-elections" element={state.user?.id ? <MyElectionList/> : <Navigate to="/login"/>}/>
-                {/* <Route path = "/my-elections/:id" element={state.user?.id ? <Election/> : <Navigate to="/login"/> }/>  */}
                 <Route path = "/create" element={state.user?.id ? <CreateElection/> : <Navigate to="/login"/>}/>
                 <Route path = "/login" element={state.user?.id ? <Navigate to="/elections"/> : <Login/> }/>
                 <Route path = "/register" element={state.user?.id ? <Navigate to="/elections"/> : <Register/> }/>

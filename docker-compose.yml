@@ -93,7 +93,8 @@ services:
         condition: service_started
 
   etegridy:
-    image: dedovicnermin/election-integrity:0.0.3
+    image: dedovicnermin/election-integrity
+    build: election-integrity
     container_name: etegridy
     command:
       - /mnt/config/tegridy.properties
@@ -106,7 +107,8 @@ services:
         condition: service_completed_successfully
 
   vtegridy:
-    image: dedovicnermin/vote-integrity:0.0.7
+    image: dedovicnermin/vote-integrity
+    build: vote-integrity
     container_name: vtegridy
     command:
       - /mnt/config/tegridy.properties
@@ -139,7 +141,8 @@ services:
         condition: service_started
 
   event-sink:
-    image: dedovicnermin/event-sink:0.0.2
+    image: dedovicnermin/event-sink
+    build: event-sink
     container_name: event-sink
     environment:
       SPRING_PROFILES_ACTIVE: sandbox
@@ -156,7 +159,8 @@ services:
         condition: service_completed_successfully
 
   query-service:
-    image: dedovicnermin/query-service:0.0.3
+    image: dedovicnermin/query-service
+    build: query-service
     container_name: query-service
     ports:
       - "8080:8080"
