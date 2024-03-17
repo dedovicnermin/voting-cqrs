@@ -8,7 +8,7 @@ import {RequestProvider} from "react-request-hook";
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:8080/api/"
+    baseURL: `${process.env.REACT_APP_QUERY_SERVICE_URL}/api/`
 })
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

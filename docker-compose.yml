@@ -172,3 +172,21 @@ services:
     depends_on:
       mongo:
         condition: service_started
+
+#  client:
+#    image: dedovicnermin/voting-cqrs-client
+#    build: client
+#    container_name: client
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      REACT_APP_QUERY_SERVICE_URL: "http://query-service:8080"
+#      REACT_APP_VOTE_ENDPOINT: "http://broker:8090/kafka/v3/clusters/GJjTu-METQy8Ud-d0EQ9ZA/topics/elections.votes.raw/records"
+#      REACT_APP_ELECTION_ENDPOINT: "http://broker:8090/kafka/v3/clusters/GJjTu-METQy8Ud-d0EQ9ZA/topics/elections.requests.raw/records"
+#    depends_on:
+#      broker:
+#        condition: service_healthy
+#      mongo:
+#        condition: service_started
+#      query-service:
+#        condition: service_started
