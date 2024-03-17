@@ -10,6 +10,7 @@ import io.voting.common.library.kafka.test.TestSender;
 import io.voting.common.library.kafka.utils.CloudEventTypes;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.common.library.models.ElectionVote;
 import io.voting.persistence.eventsink.framework.TestKafkaContext;
 import lombok.SneakyThrows;
@@ -114,7 +115,7 @@ class EventSinkApplicationTest extends TestKafkaContext {
   }
 
   static CloudEvent buildElectionCreate(final Map<String, Long> candidates) {
-    final Election election = new Election(null, fake.funnyName().name(), fake.harryPotter().spell(), fake.lorem().paragraph(), "TEST", candidates);
+    final Election election = new Election(null, fake.funnyName().name(), fake.harryPotter().spell(), fake.lorem().paragraph(), "TEST", candidates, 0L, 0L, ElectionStatus.OPEN);
     return CloudEventHelper.buildCloudEvent(CloudEventTypes.ELECTION_CREATE_EVENT, StreamUtils.wrapCloudEventData(election));
   }
 
@@ -123,7 +124,7 @@ class EventSinkApplicationTest extends TestKafkaContext {
   @MethodSource
   void testElectionUpdateEvents(Map<String, Long> candidates, List<ElectionVote> votes, Map<String, Long> expectedResults) {
     final Election election = template.insert(
-            new Election(null, fake.funnyName().name(), fake.harryPotter().spell(), fake.lorem().paragraph(), "TEST", candidates));
+            new Election(null, fake.funnyName().name(), fake.harryPotter().spell(), fake.lorem().paragraph(), "TEST", candidates, 0L, 0L, ElectionStatus.OPEN));
     assertThat(election.getId()).isNotNull();
 
     for (ElectionVote vote : votes) {

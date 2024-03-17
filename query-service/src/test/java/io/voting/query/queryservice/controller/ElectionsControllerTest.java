@@ -1,6 +1,7 @@
 package io.voting.query.queryservice.controller;
 
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.query.queryservice.payload.response.GenericResponse;
 import io.voting.query.queryservice.repository.ElectionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,13 +27,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ElectionsControllerTest {
 
-  private static final Election ELECTION = new Election("id", "author", "title", "desc", "category", Map.of("Foo", 1L, "Bar", 1L));
+  private static final Election ELECTION = new Election("id", "test", "title", "desc", "category", Map.of("Foo", 1L, "Bar", 1L), 0L, 0L, ElectionStatus.OPEN);
 
+  private Principal principal;
   private ElectionRepository repository;
   private ElectionsController controller;
 
   @BeforeEach
   void setup() {
+    principal = Mockito.mock(Principal.class);
     repository = Mockito.mock(ElectionRepository.class);
     controller = new ElectionsController(repository);
   }
@@ -70,6 +74,19 @@ class ElectionsControllerTest {
     assertThat(response).isNotNull();
     assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(500));
     assertThat(response.getBody()).isEqualTo(new GenericResponse("Error: " + "ON PURPOSE"));
+  }
+
+  @Test
+  void testGetElectionsCreatedByUser() {
+    final List<Election> electionList = Arrays.asList(ELECTION, ELECTION, ELECTION);
+    when(principal.getName()).thenReturn("test");
+    when(repository.findAllByAuthor("test")).thenReturn(electionList);
+
+    final ResponseEntity<?> response = controller.getElectionCreatedByUser(principal);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
+    assertThat(response.getBody()).isEqualTo(electionList);
   }
 
   @Test

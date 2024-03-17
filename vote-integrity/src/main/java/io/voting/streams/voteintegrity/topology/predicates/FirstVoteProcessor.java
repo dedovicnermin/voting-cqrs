@@ -16,7 +16,7 @@ public class FirstVoteProcessor implements Predicate<String, ElectionSummary> {
       log.warn("Illegal unexpected vote encountered for key ({}) : {}", key, electionSummary);
       return false;
     } else {
-      log.debug("Legal vote encountered for key ({}) : {}", key, electionSummary);
+      log.trace("Legal vote encountered for key ({}) : {}", key, electionSummary);
       return true;
     }
   }

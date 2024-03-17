@@ -602,6 +602,90 @@ ruleFiles: {}
 serverFiles:
   ## Alerts configuration
   ## Ref: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+  alerting_rules.yml:
+
+    groups:
+    - name: edv
+      rules:
+        - alert: InstanceDown
+          expr: up == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Instance {{ $labels.instance }} down'
+            description: '{{ $labels.instance }} has been down for more than 5 minutes.'
+
+    - name: producer-clients
+      rules:
+        - alert: ProducerRecordErrorRate
+          expr: kafka_producer_producer_metrics_record_error_rate{client_id!~"_confluent-controlcenter.+"} > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Producer client ({{ $labels.client_id }}) failing to send messages to brokers in {{ $labels.clusterId }}"
+            description: "Producer is dropping messages. # of retries have been exhausted, resulting in dropped message(s) - {{ .value }}"
+
+    - name: kafka
+      rules:
+        - alert: OfflineReplicaCount
+          expr: kafka_server_replicamanager_offlinereplicacount > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Kafka Offline Partitions'
+            description: 'There are {{ $value }} Offline Partitions on Cluster: {{ $labels.clusterId }}, Server {{ $labels.statefulset_kubernetes_io_pod_name }}'
+        - alert: OfflinePartitionCount
+          expr: kafka_controller_kafkacontroller_offlinepartitionscount > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Partition(s) without an active leader reported in {{ $labels.clusterId }}"
+            description: "{{ .value }} partitions cannot be read from or written to. Identify topics with offline partitions and restart any problem brokers."
+        - alert: UnderReplicatedPartitions
+          expr: kafka_server_replicamanager_underreplicatedpartitions > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Kafka Under Replicated Partitions'
+            description: 'There are {{ $value }} Under Replicated Partitions on Cluster: {{ $labels.clusterId }}, Server {{ $labels.statefulset_kubernetes_io_pod_name }}'
+        - alert: UnderMinIsrPartitionCount
+          expr: kafka_server_replicamanager_underminisrpartitioncount > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Kafka Under Min ISR partitions'
+            description: 'There are {{ $value }} partitions under the Min ISR on Cluster: {{ $labels.clusterId }}, Server {{ $labels.statefulset_kubernetes_io_pod_name }}'
+        - alert: ActiveControllerCount
+          expr: kafka_controller_kafkacontroller_activecontrollercount > 1
+          for: 30s
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Kafka Abnormal Controller State'
+            description: 'There are {{ $value }} Active Controllers in the Cluster: {{ $labels.clusterId }}'
+        - alert: NetworkProcessorPoolUsageCritical
+          expr: kafka_network_socketserver_networkprocessoravgidlepercent < 0.10
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Network processor pool is overloaded. Client requests may take longer to complete in {{ $labels.clusterId }}"
+            description: "Network processor threads are responsible for reading/writing data to and from clients on the network. If request queue size is hitting limit frequently, increase # of network threads. "
+
+        - alert: RequestHandlerPoolUsageCritical
+          expr: kafka_server_kafkarequesthandlerpool_requesthandleravgidlepercent_total < 0.10
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Broker request handlers overloaded in {{ $labels.clusterId }}"
+            description: "At greater than 90% (curr : {{ $value }}) usage, request handler is overloaded and serving requests to/from clients may take longer. Increase count of request handlers if resources are available / request queue consistently at limit. Consider increasing count of brokers."
 
   # groups:
   #   - name: Instances

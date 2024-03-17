@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  layer: integrity
+
+resources:
+  - ../../../base/election-ttl
+
+configMapGenerator:
+  - name: ttl-cfg
+    behavior: create
+    files:
+      - application.properties
+
+patches:
+  - target:
+      kind: StatefulSet
+      name: election-ttl
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 516Mi
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 1Gi
+      - op: replace
+        path: /spec/replicas
+        value: 1

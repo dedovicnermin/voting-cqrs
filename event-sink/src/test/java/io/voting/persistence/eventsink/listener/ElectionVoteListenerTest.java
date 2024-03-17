@@ -8,6 +8,7 @@ import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.utils.CloudEventTypes;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.common.library.models.ElectionVote;
 import io.voting.persistence.eventsink.dao.ElectionDao;
 import io.voting.persistence.eventsink.framework.TestReceiver;
@@ -97,7 +98,13 @@ class ElectionVoteListenerTest {
       if (throwException) throw new RuntimeException("ON PURPOSE");
       count++;
       final String mocked = "mocked";
-      return new Election(mocked, mocked, mocked, mocked, mocked, null);
+      return new Election(mocked, mocked, mocked, mocked, mocked, null, 0L, 0L, ElectionStatus.OPEN);
+    }
+
+    /** Not being tested */
+    @Override
+    public Election updateElectionStatus(String electionId, ElectionStatus electionStatus) {
+      return null;
     }
 
     /** Not being tested */

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.voting.common.library.models.EdvUser;
 import io.voting.common.library.models.Election;
+import io.voting.common.library.models.ElectionStatus;
 import io.voting.query.queryservice.payload.request.RegisterUserRequest;
 import io.voting.query.queryservice.payload.response.JwtResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +44,7 @@ class QueryServiceApplicationTest {
 
   private static EdvUser user;
   private static Election election;
+  private static Election userElection;
 
   @LocalServerPort
   private int port;
@@ -55,7 +58,8 @@ class QueryServiceApplicationTest {
   @BeforeEach
   void setup() {
     user = mongoTemplate.insert(EdvUser.builder().username("test").password(encoder.encode("password")).build());
-    election = mongoTemplate.insert(new Election(null, "author", "title", "desc", "category", Map.of("Foo", 0L, "Bar", 0L)));
+    election = mongoTemplate.insert(new Election(null, "author", "title", "desc", "category", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN));
+    userElection = mongoTemplate.insert(new Election(null, "test", "title", "desc", "category", Map.of("Foo", 0L, "Bar", 0L), 0L, 0L, ElectionStatus.OPEN));
   }
 
   @AfterEach
@@ -96,7 +100,19 @@ class QueryServiceApplicationTest {
     assertThat(response).isNotNull();
     assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
     final List<Election> body = mapper.readValue(response.getBody(), new TypeReference<>() {});
-    assertThat(body).isEqualTo(Collections.singletonList(election));
+    assertThat(body).isEqualTo(Arrays.asList(election, userElection));
+  }
+
+  @Test
+  void testGetUserElection() throws JsonProcessingException {
+    final HttpEntity<String> entity = new HttpEntity<>(null, getHeadersWithBearer());
+
+    final ResponseEntity<String> response = restTemplate.exchange(createURLWithPort("/api/my-elections"), HttpMethod.GET, entity, String.class);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
+    final List<Election> body = mapper.readValue(response.getBody(), new TypeReference<>() {});
+    assertThat(body).isEqualTo(Collections.singletonList(userElection));
   }
 
   @Test

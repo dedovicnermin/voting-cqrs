@@ -20,9 +20,9 @@ public class VoteAggregator implements Aggregator<String, ElectionVote, Election
 
   @Override
   public ElectionSummary apply(final String key, final ElectionVote electionVote, final ElectionSummary electionSummary) {
-    log.debug("Applying aggregate using key ({}), vote ({}) and current election summary ({})", key, electionVote, electionSummary);
-    electionSummary.add(electionVote);
-    log.debug("Election summary post-aggregate result : {}", electionSummary);
+    log.trace("Applying aggregate using key ({}), vote ({}) and current election summary ({})", key, electionVote, electionSummary);
+    electionSummary.add(key, electionVote);
+    log.trace("Election summary post-aggregate result : {}", electionSummary);
     return electionSummary;
   }
 

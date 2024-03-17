@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -38,6 +39,17 @@ public class ElectionsController {
               .orElse(ResponseEntity.badRequest().body(null));
     } catch (Exception e) {
       log.debug("Unexpected exception occurred : {}", e.getMessage(), e);
+      return ResponseEntity.internalServerError().body(new GenericResponse("Error: " + e.getMessage()));
+    }
+  }
+
+  @GetMapping("/api/my-elections")
+  public ResponseEntity<?> getElectionCreatedByUser(final Principal principal) {
+    try {
+      final List<Election> elections = electionRepository.findAllByAuthor(principal.getName());
+      return ResponseEntity.ok(elections);
+    } catch (Exception e) {
+      log.error("Unexpected exception occurred : {}", e.getMessage(), e);
       return ResponseEntity.internalServerError().body(new GenericResponse("Error: " + e.getMessage()));
     }
   }

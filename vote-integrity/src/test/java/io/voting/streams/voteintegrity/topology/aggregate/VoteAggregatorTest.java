@@ -28,18 +28,20 @@ class VoteAggregatorTest {
 
     assertThat(applied.getVoteAttempts()).isEqualTo(1L);
     assertThat(applied.getVote()).isEqualTo(vote);
+    assertThat(applied.getUser()).isEqualTo(USER_ID);
   }
 
   @Test
   void testDuplicateVote() {
     final ElectionSummary summary = new ElectionSummary();
     final ElectionVote vote = ElectionVote.of(ELECTION_ID, "Bar");
-    summary.add(vote);
+    summary.add(KEY, vote);
 
     final ElectionSummary applied = aggregator.apply(KEY, vote, summary);
 
     assertThat(applied.getVoteAttempts()).isEqualTo(2L);
     assertThat(applied.getVote()).isEqualTo(vote);
+    assertThat(applied.getUser()).isEqualTo(USER_ID);
   }
 
   @Test

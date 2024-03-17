@@ -1,0 +1,13 @@
+.idea
+README.md
+Dockerfile
+.gitignore
+
+target/archive-tmp
+target/query-service.jar.original
+target/generated-sources
+target/maven-archiver
+target/maven-status
+target/test-classes
+src
+pom.xml

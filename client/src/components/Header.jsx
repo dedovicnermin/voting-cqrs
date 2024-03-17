@@ -1,30 +1,26 @@
-import { useAuthContext } from '../services/useAuthContext';
-import React, { Component, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useLogout } from '../services/useLogout';
+import React, { useContext} from 'react';
+import {StateContext} from "../context/context";
+import { Link, useNavigate } from 'react-router-dom';
+import {USER_EVENTS} from "./../context/reducer";
 
 const Header = () => {
 
-  // const {logout} = useLogout();
-  // const {user} = useAuthContext();
-  // const user = {
-  //   usernname: "me",
-  //   id: 11
-  // };
-  const user = true
-  // const user = false
+  const {dispatch} = useContext(StateContext);
+  const {state} = useContext(StateContext)
   const navigate = useNavigate();
 
   const doLogout = () => {
-      // logout();
-      console.log('LOGOUT')
+    dispatch({
+      type: USER_EVENTS.LOGOUT,
+      payload: {}
+  });
   }
 
   const goToLogin = () => {
       navigate("/login");
   }
 
-  if (user) {
+  if (state.user?.id) {
     return (
       <header className='bg-secondary bg-gradient'>
         <div className='container'>
@@ -32,7 +28,7 @@ const Header = () => {
             <div>
               <ul className="nav">
                 <li>
-                  <Link className="nav-link" to="/all-elections">Open Elections</Link>
+                  <Link className="nav-link" to="/elections">Elections</Link>
                 </li>
                 <li>
                   <Link className="nav-link" to="/my-elections">My Elections</Link>
@@ -44,9 +40,9 @@ const Header = () => {
             </div>
             <div className="ml-auto">
               <div className="d-flex justify-content-end">
-                <ul className="nav">
+                <ul className="nav red">
                   <li>
-                    <button className="nav-link" onClick={doLogout}></button>
+                    <button className="nav-link" onClick={doLogout}>Logout</button>
                   </li>
                 </ul>
               </div>

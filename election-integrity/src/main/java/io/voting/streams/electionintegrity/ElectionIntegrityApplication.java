@@ -55,6 +55,8 @@ public class ElectionIntegrityApplication {
       throw new RuntimeException("Missing input/output topic configuration");
     }
 
+    properties.putIfAbsent("election.ttl", "P1D"); // default 1D TTL
+
     final Topology topology = ElectionIntegrityTopology.buildTopology(new StreamsBuilder(), properties);
     return new KafkaStreams(topology, properties);
   }

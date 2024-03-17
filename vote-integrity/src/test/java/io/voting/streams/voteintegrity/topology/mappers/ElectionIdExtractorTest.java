@@ -24,25 +24,25 @@ class ElectionIdExtractorTest {
 
   @Test
   void testExtractionOnValidKey() {
-    summary.add(ElectionVote.of("thisWillNotBeReturned_KeyIsValidFormat", "Foo"));
+    summary.add(KEY, ElectionVote.of("thisWillNotBeReturned_KeyIsValidFormat", "Foo"));
     assertThat(extractor.apply(KEY, summary)).isEqualTo(ELECTION_ID);
   }
 
   @Test
   void testExtractionOnInvalidKey() {
-    summary.add(ElectionVote.of(ELECTION_ID, "Foo"));
+    summary.add(KEY, ElectionVote.of(ELECTION_ID, "Foo"));
     assertThat(extractor.apply(USER_ID, summary)).isEqualTo(ELECTION_ID);
   }
 
   @Test
   void testExtractionOnEmptyKey() {
-    summary.add(ElectionVote.of(ELECTION_ID, "Foo"));
+    summary.add(KEY, ElectionVote.of(ELECTION_ID, "Foo"));
     assertThat(extractor.apply("", summary)).isEqualTo(ELECTION_ID);
   }
 
   @Test
   void testExtractionOnNullKey() {
-    summary.add(ElectionVote.of(ELECTION_ID, "Foo"));
+    summary.add(KEY, ElectionVote.of(ELECTION_ID, "Foo"));
     assertThat(extractor.apply(null, summary)).isEqualTo(ELECTION_ID);
   }
 }

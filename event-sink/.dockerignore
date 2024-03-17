@@ -1,0 +1,13 @@
+.idea
+README.md
+Dockerfile
+.gitignore
+
+target/archive-tmp
+target/event-sink.jar.original
+target/generated-sources
+target/maven-archiver
+target/maven-status
+target/test-classes
+src
+pom.xml

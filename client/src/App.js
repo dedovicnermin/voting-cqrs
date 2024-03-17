@@ -1,26 +1,18 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Routes, Route, Navigate } from "react-router-dom";
-import Header from './components/Header'
-import AllElections from './components/AllElections'
-import MyElections from './components/MyElections'
-import CreateElection from './components/CreateElection';
-import ElectionView from './components/ElectionView';
-
-
-
 import {useEffect, useReducer} from "react";
 import AppReducer, {ELECTION_EVENTS} from "./context/reducer";
 import {useResource} from "react-request-hook";
 import {StateContext} from "./context/context";
+
+import Header from './components/Header'
 import ElectionList from "./component/ElectionList";
 import Election from "./component/election/Election";
-
-
+import MyElectionList from './component/MyElectionList'
+import CreateElection from './components/CreateElection';
 import Login from './components/Login';
 import Register from './components/Register';
-
-
 
 const App = () => {
 
@@ -38,7 +30,7 @@ const App = () => {
   useEffect(() => {
     if (state.user.token && state.user.username && state.user.id) {
       getElections()
-      const refresh = setInterval(() => {getElections()}, 5000)
+      const refresh = setInterval(() => {getElections()}, 2000)
       return () => clearInterval(refresh)
     }
   }, [state?.user?.token, state?.user?.id, state?.user?.username]);
@@ -49,32 +41,19 @@ const App = () => {
     }
   }, [electionsResp]);
 
-
-  const user = true;
-
   return(
       <div className="App">
         <StateContext.Provider value={{state, dispatch}}>
           <Header/>
             <main>
               <Routes>
-                {/*<Route path = "/" element={user ? <AllElections/> : <Navigate to="/login"/>}/>*/}
                 <Route path = "/" element={state.user?.id ? <Navigate to="/elections"/> : <Navigate to="/login"/>}/>
-                <Route path = "/all-elections" element = {user ? <AllElections/> : <Navigate to = "/login"/>}/>
-                <Route path = "/my-elections" element = {user ? <MyElections/> : <Navigate to = "/login"/>}/>
-                <Route path = "/create" element = {user ? <CreateElection/> : <Navigate to = "/login"/>}/>
-                {/*<Route path = "/login" element={!user ? <LoginPage/> : <Navigate to={"/"}/>}/>*/}
-                <Route path = "/all-elections/:id" element = {user ? <ElectionView/> : <Navigate to = "/login"/>}/>
-
                 <Route path = "/elections" element={state.user?.id ? <ElectionList/> : <Navigate to="/login"/>}/>
-                <Route path = "/elections/:id" element={state.user?.id ? <Election /> : <Navigate to="/login"/> }/>
-
-                <Route path = "/elections" element={state.user?.id ? <ElectionList/> : <Navigate to="/login"/>}/>
-                <Route path = "/elections/:id" element={state.user?.id ? <Election /> : <Navigate to="/login"/> }/>
-
-                <Route path = "/login" element={user?.id ? <Navigate to="/elections"/> : <Login/> }/>
-                <Route path = "/register" element={user?.id ? <Navigate to="/elections"/> : <Register/> }/>
-
+                <Route path = "/elections/:id" element={state.user?.id ? <Election/> : <Navigate to="/login"/> }/>
+                <Route path = "/my-elections" element={state.user?.id ? <MyElectionList/> : <Navigate to="/login"/>}/>
+                <Route path = "/create" element={state.user?.id ? <CreateElection/> : <Navigate to="/login"/>}/>
+                <Route path = "/login" element={state.user?.id ? <Navigate to="/elections"/> : <Login/> }/>
+                <Route path = "/register" element={state.user?.id ? <Navigate to="/elections"/> : <Register/> }/>
               </Routes>
             </main>
         </StateContext.Provider>

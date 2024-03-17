@@ -11,6 +11,12 @@
       "password": "$2a$10$/C1apIr0LTRtvM2hg3Xe..Swd59zprSBP6NA0a64PLPH4Hv.rLuuq",
       "id": "1001",
       "username": "nermin"
+    },
+    {
+      "email": "test@email.com2",
+      "password": "$2a$10$ydtG3yMwg466exPBRjqq0.YZZovhdXesIuuMKEHpNX6oOHn7ybwje",
+      "username": "test@email.com2",
+      "id": "svgRiep"
     }
   ],
   "elections": [
@@ -20,6 +26,7 @@
       "title": "Is a hotdog a sandwich?",
       "description": "Really. Is it?",
       "category": "Social",
+      "expires": 1710545273041,
       "candidates": {
         "Yes, of course": 0,
         "Absolutely not": 0
@@ -31,6 +38,7 @@
       "author": "Author 2",
       "description": "Your personal music taste, not the objective data like a number if copies sold, etc.",
       "category": "Music",
+      "expires": 1710545273041,
       "candidates": {
         "Avril Lavigne": 0,
         "The Offspring": 0,
@@ -45,6 +53,7 @@
       "author": "Author 2",
       "description": "",
       "category": "Social",
+      "expires": 1710545273041,
       "candidates": {
         "To be": 1,
         "Not to be": 12
@@ -56,6 +65,7 @@
       "author": "Author 2",
       "description": "School distric 299",
       "category": "Social",
+      "expires": 1710545273041,
       "candidates": {
         "Candidate 1": 0,
         "Candidate 2": 12,
@@ -80,8 +90,9 @@
       "id": "5",
       "title": "NBA MVP (2024)",
       "author": "the_basketball_man",
-      "description": "Who do you think will win MVP this season?",
+      "description": "Who do you think will win MVP this season?Who do you think will win MVP this season?Who do you think will win MVP this season?Who do you think will win MVP this season?Who do you think will win MVP this season?",
       "category": "Sports",
+      "expires": 1710545273041,
       "candidates": {
         "LeBron James": 1,
         "Kevin Durant": 3,
@@ -99,6 +110,7 @@
       "author": "the_basketball_man",
       "description": "Which one do you prefer",
       "category": "Random",
+      "expires": 1710545273041,
       "candidates": {
         "Berkins": 5,
         "Crocs": 4

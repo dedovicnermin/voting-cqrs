@@ -12,14 +12,17 @@ resources:
   - ../../../overlay/gke/vote-integrity
   - ../../../overlay/gke/event-sink
   - ../../../overlay/gke/query-service
+  - ../../../overlay/gke/election-ttl
 
 images:
   - name: dedovicnermin/election-integrity
-    newTag: 0.0.2
+    newTag: 0.0.4
   - name: dedovicnermin/vote-integrity
-    newTag: 0.0.6
+    newTag: 0.0.8
   - name: dedovicnermin/event-sink
-    newTag: 0.0.1
+    newTag: 0.0.3
   - name: dedovicnermin/query-service
+    newTag: 0.0.4
+  - name: dedovicnermin/election-ttl
     newTag: 0.0.2
 
