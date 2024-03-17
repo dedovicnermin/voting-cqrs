@@ -602,7 +602,9 @@ ruleFiles: {}
 serverFiles:
   ## Alerts configuration
   ## Ref: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-  groups:
+  alerting_rules.yml:
+
+    groups:
     - name: edv
       rules:
         - alert: InstanceDown
