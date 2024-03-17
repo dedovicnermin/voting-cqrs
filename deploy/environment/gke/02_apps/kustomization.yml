@@ -16,13 +16,13 @@ resources:
 
 images:
   - name: dedovicnermin/election-integrity
-    newTag: 0.0.3
+    newTag: 0.0.4
   - name: dedovicnermin/vote-integrity
-    newTag: 0.0.7
+    newTag: 0.0.8
   - name: dedovicnermin/event-sink
-    newTag: 0.0.2
-  - name: dedovicnermin/query-service
     newTag: 0.0.3
+  - name: dedovicnermin/query-service
+    newTag: 0.0.4
   - name: dedovicnermin/election-ttl
-    newTag: 0.0.1
+    newTag: 0.0.2
 

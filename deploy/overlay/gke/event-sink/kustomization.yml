@@ -20,4 +20,4 @@ patches:
         value: 264Mi
       - op: replace
         path: /spec/replicas
-        value: 3
+        value: 1
