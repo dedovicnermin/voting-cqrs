@@ -24,6 +24,7 @@
         <module>vote-integrity</module>
         <module>query-service</module>
         <module>election-ttl</module>
+        <module>cmd-bridge</module>
     </modules>
 
     <properties>
