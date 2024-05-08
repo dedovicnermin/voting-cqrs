@@ -1,4 +1,4 @@
-package io.voting.command.cmdbridge;
+package io.voting.command.cmdbridge.config;
 
 import org.springframework.boot.rsocket.messaging.RSocketStrategiesCustomizer;
 import org.springframework.context.annotation.Bean;

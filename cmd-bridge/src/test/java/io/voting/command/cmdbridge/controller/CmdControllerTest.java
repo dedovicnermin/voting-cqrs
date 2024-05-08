@@ -1,6 +1,6 @@
 package io.voting.command.cmdbridge.controller;
 
-import io.voting.command.cmdbridge.AppConfig;
+import io.voting.command.cmdbridge.config.AppConfig;
 import io.voting.common.library.models.ElectionCreate;
 import io.voting.common.library.models.ElectionVote;
 import org.junit.jupiter.api.BeforeAll;

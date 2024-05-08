@@ -1,7 +1,6 @@
 package io.voting.command.cmdbridge.controller;
 
-import io.cloudevents.CloudEvent;
-import io.voting.common.library.kafka.clients.sender.EventSender;
+import io.voting.command.cmdbridge.service.CmdService;
 import io.voting.common.library.models.ElectionCreate;
 import io.voting.common.library.models.ElectionVote;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +14,10 @@ import reactor.core.publisher.Mono;
 @Controller
 public class CmdController {
 
-  private final EventSender<String, CloudEvent> voteSender;
-  private final EventSender<String, CloudEvent> electionSender;
+  private final CmdService service;
 
-  public CmdController(EventSender<String, CloudEvent> voteSender, EventSender<String, CloudEvent> electionSender) {
-    this.voteSender = voteSender;
-    this.electionSender = electionSender;
+  public CmdController(final CmdService service) {
+    this.service = service;
   }
 
   /**
@@ -32,6 +29,7 @@ public class CmdController {
   @MessageMapping({"new-vote"})
   public Mono<Void> voteCommandTest(@Header String key, @Payload final ElectionVote vote) {
     log.info("Voter with ID ({}) requested vote: {}", key, vote);
+    service.handle(key, vote);
     return Mono.empty();
   }
 
@@ -44,6 +42,7 @@ public class CmdController {
   @MessageMapping("new-election")
   public Mono<Void> electionCommand(@Header String key, @Payload final ElectionCreate election) {
     log.info("Received election requested by ({}): {}", key, election);
+    service.handle(key, election);
     return Mono.empty();
   }
 
