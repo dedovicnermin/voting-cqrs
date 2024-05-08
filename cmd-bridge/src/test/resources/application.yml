@@ -7,18 +7,10 @@ spring:
 
 kafka:
   properties:
-    config.providers: file
-    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
-    bootstrap.servers: bootstrap.local.nermdev.io:443
-    security.protocol: SASL_SSL
-    sasl.mechanism: PLAIN
-    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{file:/Users/ndedovic/nermdev-secrets.txt:username}" password="{file:/Users/ndedovic/nermdev-secrets.txt:password}";
-    ssl.truststore.location: /Users/ndedovic/PycharmProjects/homelab/workspace/kafka/auth/nermin/truststore.jks
-    ssl.truststore.password: {file:/Users/ndedovic/nermdev-secrets.txt:trust_password}
+    bootstrap.servers: bootstrap.replace.in.itest:443
   producer:
-    linger.ms: 15
+    linger.ms: 1
     acks: all
-    enable.idempotence: true
   topics:
     NEW_VOTE: test.election.votes.raw
     NEW_ELECTION: test.election.requests.raw
