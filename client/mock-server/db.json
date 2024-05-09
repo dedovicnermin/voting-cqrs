@@ -40,6 +40,7 @@
       "description": "Your personal music taste, not the objective data like a number if copies sold, etc.",
       "category": "Music",
       "expires": 1710545273041,
+      "status": "OPEN",
       "candidates": {
         "Avril Lavigne": 0,
         "The Offspring": 0,
@@ -55,6 +56,7 @@
       "description": "",
       "category": "Social",
       "expires": 1710545273041,
+      "status": "OPEN",
       "candidates": {
         "To be": 1,
         "Not to be": 12
@@ -79,6 +81,7 @@
       "author": "Author 1",
       "description": "copy paste from wiki",
       "category": "Sports",
+      "status": "OPEN",
       "candidates": {
         "Edmonton Oilers": 0,
         "Los Angeles Kings": 12,

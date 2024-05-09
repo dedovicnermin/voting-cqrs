@@ -14,6 +14,7 @@ import MyElectionList from './component/MyElectionList'
 import CreateElection from './components/CreateElection';
 import Login from './components/Login';
 import Register from './components/Register';
+import {RSocketProvider} from "./component/rsocket/RSocketProvider";
 window.Buffer = Buffer;
 
 const App = () => {
@@ -46,6 +47,7 @@ const App = () => {
   return(
       <div className="App">
         <StateContext.Provider value={{state, dispatch}}>
+          <RSocketProvider>
           <Header/>
             <main>
               <Routes>
@@ -58,6 +60,7 @@ const App = () => {
                 <Route path = "/register" element={state.user?.id ? <Navigate to="/elections"/> : <Register/> }/>
               </Routes>
             </main>
+          </RSocketProvider>
         </StateContext.Provider>
       </div>
   );

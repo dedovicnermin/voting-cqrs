@@ -2,17 +2,7 @@ import {Button, Container, Form} from "react-bootstrap";
 import {useState, useContext, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {StateContext} from "../../context/context";
-import {useResource} from "react-request-hook";
-import client, {connectRSocket} from "../rsocket/CommandClient";
-import {
-    encodeRoute,
-    encodeAndAddCustomMetadata,
-    encodeCompositeMetadata,
-    WellKnownMimeType,
-    BufferEncoder
-} from "rsocket-core";
-import {encodeCustomMetadataHeader} from "rsocket-core/build/CompositeMetadata";
-import {fireElectionVote} from "../rsocket/rsHelper";
+import { useRSocket } from "../rsocket/RSocketProvider";
 
 export default function ElectionFoot({election}) {
 
@@ -21,23 +11,7 @@ export default function ElectionFoot({election}) {
     const [selectedCandidate, setSelectedCandidate] = useState();
     const { user } = useContext(StateContext).state
     const eventKey = `${user.id}:${election.id}`;
-
-
-    // const [eventResp, sendEvent] = useResource((voteEvent) => ({
-    //     url: process.env.REACT_APP_VOTE_ENDPOINT,
-    //     method: "post",
-    //     data: {
-    //         key: {
-    //             type: "STRING",
-    //             data: eventKey
-    //         },
-    //         value: {
-    //             type: "JSON",
-    //             data: voteEvent
-    //         }
-    //     },
-    //     headers: { Authorization: `Basic ${btoa('nermin' + ':' + 'nermin-secret')}`}
-    // }));
+    const {sendFireAndForget} = useRSocket();
 
     /**
      * Update selectedCandidate state when user selects a value from drop-down
@@ -53,10 +27,7 @@ export default function ElectionFoot({election}) {
      */
     const handleSubmitVote = async event => {
         event.preventDefault();
-        await fireElectionVote(
-            eventKey, {electionId: election.id, votedFor: selectedCandidate}
-        ).then(r => console.log("ElectionFoot -> .then() I AM HERE"));
-
+        sendFireAndForget('new-vote', eventKey, {electionId: election.id, votedFor: selectedCandidate});
         alert(`Vote request for '${selectedCandidate}' successfully sent`)
         navigate("/elections");
     }
