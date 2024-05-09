@@ -2,7 +2,7 @@ import {useState, useContext} from "react";
 import {StateContext} from "../context/context";
 import { useNavigate } from "react-router-dom";
 import {Container, Col, Row, Card, Button, Form} from "react-bootstrap";
-import {useResource} from "react-request-hook";
+import { useRSocket } from "../component/rsocket/RSocketProvider";
 
 const { ELECTION_CATEGORIES } = require("./../component/dropdown/CategoryDDItems.js");
 
@@ -11,26 +11,11 @@ const CreateElection = () => {
     const DEFAULT_SELECTION = "Select category";
 
     const {state} = useContext(StateContext)
+    const {sendFireAndForget} = useRSocket();
 
     const limitMin = 2;
     const limitMax = 8;
     const navigate = useNavigate();
-
-    const [eventResp, sendEvent] = useResource((eventValue) => ({
-        url: process.env.REACT_APP_ELECTION_ENDPOINT,
-        method: "post",
-        data: {
-            key: {
-                type: "STRING",
-                data: state.user.id
-            },
-            value: {
-                type: "JSON",
-                data: eventValue
-            }
-        },
-        headers: { Authorization: `Basic ${btoa('nermin' + ':' + 'nermin-secret')}`}
-    }));
 
     const deleteCandidate = (e) => {
         e.preventDefault();
@@ -99,13 +84,17 @@ const CreateElection = () => {
         for (let i = 0; i < candidates.length; i++) {
             candidateArray.push(candidates[i].value)
         }
-        sendEvent({
-            title: formData.title,
-            author: formData.author,
-            description: formData.description,
-            category: formData.category,
-            candidates: candidateArray
-        });
+        sendFireAndForget(
+            'new-election',
+            state.user.id,
+            {
+                title: formData.title,
+                author: formData.author,
+                description: formData.description,
+                category: formData.category,
+                candidates: candidateArray
+            }
+        );
         alert(`Create election request has been sent.`);
         navigate("/elections");
     }

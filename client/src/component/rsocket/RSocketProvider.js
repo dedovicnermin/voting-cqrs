@@ -24,8 +24,8 @@ export const RSocketProvider = ({ children }) => {
             },
             transport: new RSocketWebSocketClient({
                 debug: true,
-                // url: `${process.env.REACT_APP_CMD_ENDPOINT}`  // WebSocket URL of the RSocket server
-                url: 'ws://localhost:7000/cmd', // WebSocket URL of the RSocket server
+                url: `${process.env.REACT_APP_CMD_ENDPOINT}`,  // WebSocket URL of the RSocket server
+                // url: 'ws://localhost:7000/cmd', // WebSocket URL of the RSocket server
                 wsCreator: url => new WebSocket(url)
             }, BufferEncoders),
         });
