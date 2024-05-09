@@ -48,7 +48,8 @@ class ElectionIntegrityTopologyTest {
     properties = new Properties();
     properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "election-integrity.test");
     properties.put("input.topic", INPUT_TOPIC);
-    properties.put("output.topic", OUTPUT_TOPIC);
+    properties.put("output.topic.elections", OUTPUT_TOPIC);
+    properties.put("output.topic.votes", "election.votes");
     properties.put("election.ttl", "P2D");
 
     final StreamsBuilder builder = new StreamsBuilder();

@@ -1,4 +1,4 @@
-package io.voting.streams.electionintegrity.topology.mappers;
+package io.voting.streams.electionintegrity.topology.mappers.ce;
 
 import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.utils.CloudEventTypes;
@@ -16,9 +16,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CloudEventMapperTest {
+class CEElectionMapperTest {
 
-  private final ValueMapper<Election, CloudEvent> mapper = new CloudEventMapper();
+  private final ValueMapper<Election, CloudEvent> mapper = new CEElectionMapper();
 
   @Test
   void test() {

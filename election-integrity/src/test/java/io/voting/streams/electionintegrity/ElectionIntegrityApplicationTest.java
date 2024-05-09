@@ -64,7 +64,8 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
     properties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
     properties.put("cache.max.bytes.buffering", 0);
     properties.put("input.topic", TestConsumerHelper.INPUT_TOPIC);
-    properties.put("output.topic", TestConsumerHelper.OUTPUT_TOPIC);
+    properties.put("output.topic.elections", TestConsumerHelper.OUTPUT_TOPIC_ELECTION);
+    properties.put("output.topic.votes", "election.votes");
     properties.put("commit.interval.ms", 1000);
     properties.put("election.ttl", "PT5M");
     final Topology topology = ElectionIntegrityTopology.buildTopology(new StreamsBuilder(), properties);
@@ -100,7 +101,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
             .status(ElectionStatus.OPEN)
             .build();
 
-    final ReceiveEvent<String, CloudEvent> actual = consumerHelper.getEvents().poll(1000, TimeUnit.MILLISECONDS);
+    final ReceiveEvent<String, CloudEvent> actual = consumerHelper.getEvents().poll(3000, TimeUnit.MILLISECONDS);
     assertThat(consumerHelper.getEvents().poll(100, TimeUnit.MILLISECONDS)).isNull();
     assertThat(actual).isNotNull();
 

@@ -26,10 +26,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class TestConsumerHelper {
 
   public static final String INPUT_TOPIC = "election.requests.raw";
-  public static final String OUTPUT_TOPIC = "election.requests";
+  public static final String OUTPUT_TOPIC_ELECTION = "election.requests";
+  public static final String OUTPUT_TOPIC_VOTES = "election.votes";
 
   static final NewTopic IN = new NewTopic(INPUT_TOPIC, 1, (short) 1);
-  static final NewTopic OUT = new NewTopic(OUTPUT_TOPIC, 1, (short) 1);
+  static final NewTopic OUT = new NewTopic(OUTPUT_TOPIC_ELECTION, 1, (short) 1);
+  static final NewTopic OUT_VOTES = new NewTopic(OUTPUT_TOPIC_VOTES, 1, (short) 1);
+
 
   @Getter
   private final BlockingQueue<ReceiveEvent<String, CloudEvent>> events = new LinkedBlockingQueue<>();
@@ -73,9 +76,9 @@ public class TestConsumerHelper {
 
   private static void createTargetTopics(KafkaContainer kafkaContainer) {
     final KafkaAdmin kafkaAdmin = new KafkaAdmin(Map.of("bootstrap.servers", kafkaContainer.getBootstrapServers()));
-    kafkaAdmin.createOrModifyTopics(IN, OUT);
+    kafkaAdmin.createOrModifyTopics(IN, OUT, OUT_VOTES);
     final Collection<TopicDescription> values = kafkaAdmin.describeTopics(
-            IN.name(), OUT.name()
+            IN.name(), OUT.name(), OUT_VOTES.name()
     ).values();
     values.forEach(td -> System.out.println("TOPIC : " + td));
     kafkaAdmin.setCloseTimeout(1000);
