@@ -27,6 +27,7 @@
       "description": "Really. Is it?",
       "category": "Social",
       "expires": 1710545273041,
+      "status": "OPEN",
       "candidates": {
         "Yes, of course": 0,
         "Absolutely not": 0

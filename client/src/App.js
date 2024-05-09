@@ -1,5 +1,6 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { Buffer} from "buffer";
 import { Routes, Route, Navigate } from "react-router-dom";
 import {useEffect, useReducer} from "react";
 import AppReducer, {ELECTION_EVENTS} from "./context/reducer";
@@ -13,6 +14,7 @@ import MyElectionList from './component/MyElectionList'
 import CreateElection from './components/CreateElection';
 import Login from './components/Login';
 import Register from './components/Register';
+window.Buffer = Buffer;
 
 const App = () => {
 

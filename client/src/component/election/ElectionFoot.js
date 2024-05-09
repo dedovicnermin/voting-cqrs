@@ -3,6 +3,16 @@ import {useState, useContext, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {StateContext} from "../../context/context";
 import {useResource} from "react-request-hook";
+import client, {connectRSocket} from "../rsocket/CommandClient";
+import {
+    encodeRoute,
+    encodeAndAddCustomMetadata,
+    encodeCompositeMetadata,
+    WellKnownMimeType,
+    BufferEncoder
+} from "rsocket-core";
+import {encodeCustomMetadataHeader} from "rsocket-core/build/CompositeMetadata";
+import {fireElectionVote} from "../rsocket/rsHelper";
 
 export default function ElectionFoot({election}) {
 
@@ -12,21 +22,22 @@ export default function ElectionFoot({election}) {
     const { user } = useContext(StateContext).state
     const eventKey = `${user.id}:${election.id}`;
 
-    const [eventResp, sendEvent] = useResource((voteEvent) => ({
-        url: process.env.REACT_APP_VOTE_ENDPOINT,
-        method: "post",
-        data: {
-            key: {
-                type: "STRING",
-                data: eventKey
-            },
-            value: {
-                type: "JSON",
-                data: voteEvent
-            }
-        },
-        headers: { Authorization: `Basic ${btoa('nermin' + ':' + 'nermin-secret')}`}
-    }));
+
+    // const [eventResp, sendEvent] = useResource((voteEvent) => ({
+    //     url: process.env.REACT_APP_VOTE_ENDPOINT,
+    //     method: "post",
+    //     data: {
+    //         key: {
+    //             type: "STRING",
+    //             data: eventKey
+    //         },
+    //         value: {
+    //             type: "JSON",
+    //             data: voteEvent
+    //         }
+    //     },
+    //     headers: { Authorization: `Basic ${btoa('nermin' + ':' + 'nermin-secret')}`}
+    // }));
 
     /**
      * Update selectedCandidate state when user selects a value from drop-down
@@ -41,11 +52,83 @@ export default function ElectionFoot({election}) {
      * @param event formEvent
      */
     const handleSubmitVote = event => {
-        event.preventDefault()
-        sendEvent({
-            electionId: election.id,
-            votedFor: selectedCandidate
-        });
+        event.preventDefault();
+        fireElectionVote(
+            eventKey,
+            {
+                electionId: election.id,
+                votedFor: selectedCandidate
+            }
+        ).then(r => console.log("ElectionFoot -> .then() I AM HERE"));
+        // let socket;
+        // const connectAndSend = async () => {
+        //     try {
+        //         socket = await client.connect()
+        //         console.log('Connected to CMD RSocket server');
+        //         const customMimeType = 'messaging/key';
+        //         console.log('NERM: ' + eventKey);
+        //         const customMetadataEntry = {
+        //             mimeType: customMimeType,
+        //             data: Buffer.from(eventKey)
+        //         };
+        //
+        //         // const customMetadata = encodeAndAddCustomMetadata('message/key', new TextEncoder().encode(eventKey));
+        //         const metadata = encodeCompositeMetadata([
+        //             [WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute('new-vote')],
+        //             // ['message/key', customMetadata]
+        //             [customMimeType, BufferEncoder.encode(customMetadataEntry.data)]
+        //         ]);
+        //
+        //         socket.fireAndForget({
+        //             data: {
+        //                 electionId: election.id,
+        //                 votedFor: selectedCandidate
+        //             },
+        //             metadata: metadata
+        //         });
+        //
+        //         socket.close();
+        //     } catch (error) {
+        //         console.error('Connection failed or message sending error: ', error)
+        //     }
+        // };
+        //
+        // connectAndSend()
+        // if (socket) {
+        //     socket.close();
+        // }
+
+        // client.connect().subscribe({
+        //     onComplete: socket => {
+        //         console.log('Connected to CMD RSocket server');
+        //         const customMimeType = 'messaging/key';
+        //         const customMetadataEntry = {
+        //             mimeType: customMimeType,
+        //             data: Buffer.from(eventKey)
+        //         };
+
+                // const customMetadata = encodeAndAddCustomMetadata('message/key', new TextEncoder().encode(eventKey));
+                // const metadata = encodeCompositeMetadata([
+                //     [WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute('new-vote')],
+                //     ['message/key', customMetadata]
+                    // [customMimeType, BufferEncoder.encode(customMetadataEntry.data)]
+                // ]);
+
+                // socket.fireAndForget({
+                //     data: {
+                //         electionId: election.id,
+                //         votedFor: selectedCandidate
+                //     },
+                //     metadata: metadata
+                // });
+            // },
+            // onError: error => console.error("Connection has failed", error),
+            // onClose: socket => socket.close()
+        // });
+        // sendEvent({
+        //     electionId: election.id,
+        //     votedFor: selectedCandidate
+        // });
         alert(`Vote request for '${selectedCandidate}' successfully sent`)
         navigate("/elections");
     }
