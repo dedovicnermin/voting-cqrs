@@ -1,6 +1,7 @@
 package io.voting.streams.electionintegrity.topology;
 
 import io.cloudevents.CloudEvent;
+import io.voting.common.library.kafka.utils.CloudEventTypes;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionCreate;
@@ -12,6 +13,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Predicate;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.ValueMapper;
@@ -32,7 +34,11 @@ public final class ElectionIntegrityTopology {
 
     final ValueMapper<ElectionCreate, Election> electionEnrichment = new ElectionMapper(properties.getProperty("election.ttl"));
 
-    builder.stream(inputTopic, Consumed.with(Serdes.String(), StreamUtils.getJsonSerde(ElectionCreate.class)))
+    final KStream<String, CloudEvent> commandStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), StreamUtils.getCESerde()));
+    final KStream<String, CloudEvent> electionCommands = commandStream.filter((k, ce) -> CloudEventTypes.ELECTION_CREATE_CMD.equals(ce.getType()));
+
+    electionCommands
+            .mapValues(ce -> StreamUtils.unwrapCloudEventData(ce.getData(), ElectionCreate.class))
             .filterNot(illegalContent)
             .mapValues(electionEnrichment)
             .mapValues(cloudEventEnrichment)
