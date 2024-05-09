@@ -51,84 +51,12 @@ export default function ElectionFoot({election}) {
      * Invoked when form button has been clicked
      * @param event formEvent
      */
-    const handleSubmitVote = event => {
+    const handleSubmitVote = async event => {
         event.preventDefault();
-        fireElectionVote(
-            eventKey,
-            {
-                electionId: election.id,
-                votedFor: selectedCandidate
-            }
+        await fireElectionVote(
+            eventKey, {electionId: election.id, votedFor: selectedCandidate}
         ).then(r => console.log("ElectionFoot -> .then() I AM HERE"));
-        // let socket;
-        // const connectAndSend = async () => {
-        //     try {
-        //         socket = await client.connect()
-        //         console.log('Connected to CMD RSocket server');
-        //         const customMimeType = 'messaging/key';
-        //         console.log('NERM: ' + eventKey);
-        //         const customMetadataEntry = {
-        //             mimeType: customMimeType,
-        //             data: Buffer.from(eventKey)
-        //         };
-        //
-        //         // const customMetadata = encodeAndAddCustomMetadata('message/key', new TextEncoder().encode(eventKey));
-        //         const metadata = encodeCompositeMetadata([
-        //             [WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute('new-vote')],
-        //             // ['message/key', customMetadata]
-        //             [customMimeType, BufferEncoder.encode(customMetadataEntry.data)]
-        //         ]);
-        //
-        //         socket.fireAndForget({
-        //             data: {
-        //                 electionId: election.id,
-        //                 votedFor: selectedCandidate
-        //             },
-        //             metadata: metadata
-        //         });
-        //
-        //         socket.close();
-        //     } catch (error) {
-        //         console.error('Connection failed or message sending error: ', error)
-        //     }
-        // };
-        //
-        // connectAndSend()
-        // if (socket) {
-        //     socket.close();
-        // }
 
-        // client.connect().subscribe({
-        //     onComplete: socket => {
-        //         console.log('Connected to CMD RSocket server');
-        //         const customMimeType = 'messaging/key';
-        //         const customMetadataEntry = {
-        //             mimeType: customMimeType,
-        //             data: Buffer.from(eventKey)
-        //         };
-
-                // const customMetadata = encodeAndAddCustomMetadata('message/key', new TextEncoder().encode(eventKey));
-                // const metadata = encodeCompositeMetadata([
-                //     [WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute('new-vote')],
-                //     ['message/key', customMetadata]
-                    // [customMimeType, BufferEncoder.encode(customMetadataEntry.data)]
-                // ]);
-
-                // socket.fireAndForget({
-                //     data: {
-                //         electionId: election.id,
-                //         votedFor: selectedCandidate
-                //     },
-                //     metadata: metadata
-                // });
-            // },
-            // onError: error => console.error("Connection has failed", error),
-            // onClose: socket => socket.close()
-        // });
-        // sendEvent({
-        //     electionId: election.id,
-        //     votedFor: selectedCandidate
-        // });
         alert(`Vote request for '${selectedCandidate}' successfully sent`)
         navigate("/elections");
     }
