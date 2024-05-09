@@ -3,10 +3,12 @@ package io.voting.streams.electionintegrity;
 import com.github.javafaker.Faker;
 import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.clients.sender.EventSender;
+import io.voting.common.library.kafka.models.PayloadOrError;
 import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.test.TestSender;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionStatus;
+import io.voting.common.library.models.ElectionVote;
 import io.voting.streams.electionintegrity.framework.TestCmdBuilder;
 import io.voting.streams.electionintegrity.framework.TestConsumerHelper;
 import io.voting.streams.electionintegrity.framework.TestKafkaContext;
@@ -24,20 +26,24 @@ import org.apache.kafka.streams.Topology;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +58,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
 
   @BeforeAll
   static void init() {
-    consumerHelper = new TestConsumerHelper(kafkaContainer);
+    consumerHelper = new TestConsumerHelper(kafkaContainer, TestConsumerHelper.OUTPUT_TOPIC_ELECTION);
     final KafkaProducer<String, CloudEvent> producer = new KafkaProducer<>(
             KafkaTestUtils.producerProps(kafkaContainer.getBootstrapServers()),
             new StringSerializer(), StreamUtils.getCESerde().serializer()
@@ -88,7 +94,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
 
   @ParameterizedTest
   @MethodSource
-  void test(ElectionCreate legalElection, ElectionCreate illegalElection) throws ExecutionException, InterruptedException {
+  void testElection(ElectionCreate legalElection, ElectionCreate illegalElection) throws ExecutionException, InterruptedException {
     testSender.send(UUID.randomUUID().toString(), TestCmdBuilder.buildCE(legalElection)).get();
     testSender.send(UUID.randomUUID().toString(), TestCmdBuilder.buildCE(illegalElection)).get();
 
@@ -119,7 +125,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
 
   }
 
-  static Stream<Arguments> test() {
+  static Stream<Arguments> testElection() {
     return Stream.of(
             Arguments.of(electionCreate("suck"), electionCreate("fuck")),
             Arguments.of(electionCreate(null), electionCreate("shit")),
@@ -147,6 +153,10 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
     final Map<String, Long> cMap = new HashMap<>();
     candidates.forEach(c -> cMap.put(c, 0L));
     return cMap;
+  }
+
+  private String eventKey(final String userId, final String electionId) {
+    return userId + ":" + electionId;
   }
 
 }

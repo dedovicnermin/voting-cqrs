@@ -19,7 +19,7 @@ public class TestCmdBuilder {
     return ceBuilder.withId("test").withType(CloudEventTypes.ELECTION_CREATE_CMD).withSubject("test").withData(StreamUtils.wrapCloudEventData(electionCreate)).build();
   }
 
-  private CloudEvent buildCE(final ElectionVote electionVote) {
+  public static CloudEvent buildCE(final ElectionVote electionVote) {
     return ceBuilder.withId("test").withType(CloudEventTypes.ELECTION_VOTE_CMD).withSubject("test").withData(StreamUtils.wrapCloudEventData(electionVote)).build();
   }
 }

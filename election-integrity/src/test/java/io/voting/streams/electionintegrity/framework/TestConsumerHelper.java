@@ -37,7 +37,7 @@ public class TestConsumerHelper {
   @Getter
   private final BlockingQueue<ReceiveEvent<String, CloudEvent>> events = new LinkedBlockingQueue<>();
 
-  public TestConsumerHelper(final KafkaContainer kafkaContainer) {
+  public TestConsumerHelper(final KafkaContainer kafkaContainer, final String consumeTopic) {
     final Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
             kafkaContainer.getBootstrapServers(),
             "eiTest",
@@ -45,7 +45,7 @@ public class TestConsumerHelper {
     );
     createTargetTopics(kafkaContainer);
 
-    final KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> listenerContainer = getListenerContainer(consumerProps);
+    final KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> listenerContainer = getListenerContainer(consumerProps, consumeTopic);
     listenerContainer.setupMessageListener(getMessageListener());
     listenerContainer.start();
     ContainerTestUtils.waitForAssignment(listenerContainer, 1);
@@ -57,9 +57,9 @@ public class TestConsumerHelper {
   }
 
   @NotNull
-  private static KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> getListenerContainer(Map<String, Object> consumerProps) {
+  private static KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> getListenerContainer(Map<String, Object> consumerProps, String consumeTopic) {
     final DefaultKafkaConsumerFactory<String, PayloadOrError<CloudEvent>> cf = new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), new CEPayloadDeserializer());
-    final ContainerProperties containerProperties = new ContainerProperties(OUT.name());
+    final ContainerProperties containerProperties = new ContainerProperties(consumeTopic);
     return new KafkaMessageListenerContainer<>(cf, containerProperties);
   }
 
