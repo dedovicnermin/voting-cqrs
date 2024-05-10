@@ -20,8 +20,8 @@ kafka:
     acks: all
     enable.idempotence: true
   topics:
-    NEW_VOTE: test.election.votes.raw
-    NEW_ELECTION: test.election.requests.raw
+    NEW_VOTE: test.election.commands
+    NEW_ELECTION: test.election.commands
 
 
 

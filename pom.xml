@@ -21,7 +21,6 @@
         <module>library</module>
         <module>election-integrity</module>
         <module>event-sink</module>
-        <module>vote-integrity</module>
         <module>query-service</module>
         <module>election-ttl</module>
         <module>cmd-bridge</module>

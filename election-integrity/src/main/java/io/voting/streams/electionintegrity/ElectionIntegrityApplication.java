@@ -51,7 +51,7 @@ public class ElectionIntegrityApplication {
   }
 
   private static KafkaStreams buildStreams(final Properties properties) {
-    if (Objects.isNull(properties.getProperty("input.topic")) || Objects.isNull(properties.getProperty("output.topic"))) {
+    if (Objects.isNull(properties.getProperty("input.topic")) || Objects.isNull(properties.getProperty("output.topic.elections")) || Objects.isNull(properties.getProperty("output.topic.votes"))) {
       throw new RuntimeException("Missing input/output topic configuration");
     }
 
