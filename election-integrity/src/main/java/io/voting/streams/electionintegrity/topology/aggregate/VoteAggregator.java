@@ -27,7 +27,7 @@ public class VoteAggregator implements Aggregator<String, ElectionVote, Election
   }
 
   public static Materialized<String, ElectionSummary, KeyValueStore<Bytes, byte[]>> materialize() {
-    return Materialized.<String, ElectionSummary, KeyValueStore<Bytes, byte[]>>as("votes.integrity.aggregate")
+    return Materialized.<String, ElectionSummary, KeyValueStore<Bytes, byte[]>>as("election.vote.aggregate")
             .withKeySerde(Serdes.String())
             .withValueSerde(StreamUtils.getJsonSerde(ElectionSummary.class));
   }

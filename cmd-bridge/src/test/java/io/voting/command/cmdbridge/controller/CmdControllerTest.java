@@ -101,7 +101,7 @@ class CmdControllerTest extends TestKafkaContext {
     final Mono<Void> result = requester
             .route("new-view")
             .metadata("778", AppConfig.CMD_MIMETYPE)
-            .data(ElectionView.OPEN)
+            .data(ElectionView.OPEN.toString())
             .retrieveMono(Void.class);
 
     StepVerifier

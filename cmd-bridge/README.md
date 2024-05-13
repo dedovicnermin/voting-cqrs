@@ -4,8 +4,8 @@
 ```
 rsc --debug --fnf \
   --route new-vote \
-  --metadataMimeType=messaging/key --metadata "111:5cfbfca4-aea2-4b60-baae-492a5ffb102f" \
-  --data '{"electionId": "5cfbfca4-aea2-4b60-baae-492a5ffb102f", "votedFor": "nerm"}' \
+  --metadataMimeType=messaging/key --metadata "111:774ef51d-ae19-40bd-85f0-381c99c53d0c" \
+  --data '{"electionId": "774ef51d-ae19-40bd-85f0-381c99c53d0c", "votedFor": "Brunson"}' \
   --stacktrace ws://localhost:7000/cmd
 ```
 
@@ -29,7 +29,7 @@ rsc --debug --fnf \
 ```
 rsc --debug --fnf \
   --route new-view \
-  --metadataMimeType=messaging/key --metadata "5cfbfca4-aea2-4b60-baae-492a5ffb102f" \
+  --metadataMimeType=messaging/key --metadata "774ef51d-ae19-40bd-85f0-381c99c53d0c" \
   --data "OPEN" \
   --stacktrace ws://localhost:7000/cmd
 ```

@@ -12,7 +12,7 @@ import java.net.URI;
 
 public class TestCEBuilder {
 
-  private static final CloudEventBuilder ceBuilder = new CloudEventBuilder()
+  public static final CloudEventBuilder ceBuilder = new CloudEventBuilder()
           .newBuilder()
           .withSource(URI.create("https://" + "TEST"));
 

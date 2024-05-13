@@ -3,7 +3,7 @@ package io.voting.streams.electionintegrity.topology.joiner;
 import io.cloudevents.CloudEvent;
 import io.voting.common.library.models.ElectionView;
 import io.voting.streams.electionintegrity.model.ElectionHeartbeat;
-import org.apache.kafka.streams.kstream.ValueJoinerWithKey;
+import org.apache.kafka.streams.kstream.ValueJoiner;
 
 import java.util.Optional;
 
@@ -13,10 +13,10 @@ import java.util.Optional;
  * Legal elections are keyed by electionId
  * Election views are keyed by electionId
  */
-public class ElectionViewJoiner implements ValueJoinerWithKey<String, CloudEvent, ElectionView, ElectionHeartbeat> {
+public class ElectionViewJoiner implements ValueJoiner<CloudEvent, ElectionView, ElectionHeartbeat> {
   @Override
-  public ElectionHeartbeat apply(String electionId, CloudEvent cloudEvent, ElectionView view) {
+  public ElectionHeartbeat apply(CloudEvent cloudEvent, ElectionView view) {
     final ElectionView electionView = Optional.ofNullable(view).orElse(ElectionView.OPEN);
-    return new ElectionHeartbeat(electionId, cloudEvent.getType(), electionView);
+    return new ElectionHeartbeat(cloudEvent.getId(), cloudEvent.getType(), electionView);
   }
 }

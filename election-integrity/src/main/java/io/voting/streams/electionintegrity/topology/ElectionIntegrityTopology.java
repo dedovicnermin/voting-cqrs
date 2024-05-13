@@ -39,7 +39,7 @@ import org.apache.kafka.streams.kstream.Predicate;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.ValueJoinerWithKey;
+import org.apache.kafka.streams.kstream.ValueJoiner;
 import org.apache.kafka.streams.kstream.ValueMapper;
 import org.apache.kafka.streams.state.KeyValueStore;
 
@@ -63,7 +63,7 @@ public final class ElectionIntegrityTopology {
   private static final ValueMapper<TTLSummary, CloudEvent> TTL_CE_MAPPER = new CETTLMapper();
   private static final Aggregator<String, ElectionHeartbeat, TTLSummary> TTL_AGGREGATOR = new TTLAggregator();
   // if there is no record w/ the same key on the right side of the join, then the right value is set to null
-  private static final ValueJoinerWithKey<String, CloudEvent, ElectionView, ElectionHeartbeat> ELECTION_VIEW_JOINER = new ElectionViewJoiner();
+  private static final ValueJoiner<CloudEvent, ElectionView, ElectionHeartbeat> ELECTION_VIEW_JOINER = new ElectionViewJoiner();
 
   private ElectionIntegrityTopology() {}
 
@@ -92,7 +92,7 @@ public final class ElectionIntegrityTopology {
   private static KTable<String, ElectionView> defineElectionViewState(KStream<String, CloudEvent> viewCommands) {
     return viewCommands
             .mapValues(ce -> StreamUtils.unwrapCloudEventData(ce.getData(), ElectionView.class))
-            .toTable(Named.as("election.views"), Materialized.<String, ElectionView, KeyValueStore<Bytes, byte[]>>as("election.views").withKeySerde(stringSerde).withValueSerde(StreamUtils.getJsonSerde(ElectionView.class)));
+            .toTable(Named.as("election.view.table"), Materialized.<String, ElectionView, KeyValueStore<Bytes, byte[]>>as("election.views").withKeySerde(stringSerde).withValueSerde(StreamUtils.getJsonSerde(ElectionView.class)));
   }
 
   private static KStream<String, CloudEvent> defineEIntegrity(final Properties properties, final KStream<String, CloudEvent> electionCommands) {
@@ -135,19 +135,20 @@ public final class ElectionIntegrityTopology {
                                        final KTable<String, ElectionView> electionViewState) {
     final String electionTTLDuration = properties.getProperty("election.ttl");
     final String electionOutputTopic = properties.getProperty("output.topic.elections");
+    final Duration windowDuration = Duration.parse(electionTTLDuration);
     legalElectionStream
             .merge(viewCommands)
-            .merge(legalVoteStream)
+            .merge(legalVoteStream, Named.as("election.ttl.merge"))
             .leftJoin(electionViewState, ELECTION_VIEW_JOINER, Joined.with(stringSerde, ceSerde, electionViewSerde))
             .filter((eId, hb) -> hb.view() != ElectionView.CLOSED)
             .groupByKey()
-            .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.parse(electionTTLDuration)))
+            .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMillis(windowDuration.toMillis())))
             .aggregate(
                     TTLAggregator.initializer(),
                     TTL_AGGREGATOR,
                     TTLAggregator.materialize()
             )
-            .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded().withNoBound()))
+            .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded().shutDownWhenFull()).withName("election.ttl.suppress"))
             .toStream()
             .map((windowedKey, ttlSummary) -> new KeyValue<>(windowedKey.key(), TTL_CE_MAPPER.apply(ttlSummary)))
             .to(electionOutputTopic, Produced.with(stringSerde, ceSerde));
