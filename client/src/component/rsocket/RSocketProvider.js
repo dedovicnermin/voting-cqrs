@@ -45,10 +45,11 @@ export const RSocketProvider = ({ children }) => {
         };
     }, []);
 
-    const sendFireAndForget = (route, key, value) => {
+    const sendFireAndForget = (route, key, value, isJson=true) => {
         if (client) {
+            const payload = isJson ? Buffer.from(JSON.stringify(value)) : Buffer.from(value);
             client.fireAndForget({
-                data: Buffer.from(JSON.stringify(value)),
+                data: payload,
                 metadata: encodeCompositeMetadata([
                     [MESSAGE_RSOCKET_ROUTING, encodeRoute(route)],
                     ['messaging/key', Buffer.from(key)]

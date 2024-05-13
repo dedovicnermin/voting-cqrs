@@ -1,6 +1,25 @@
 import {Container, Row, Col} from "react-bootstrap";
+import {useRSocket} from "../rsocket/RSocketProvider";
+import {useEffect} from "react";
 
 export default function ElectionHeader({election}) {
+
+    const {sendFireAndForget} = useRSocket();
+    /**
+     * This should only run on mount
+     */
+    useEffect(() => {
+        console.log(`Logging election view : ${election.id} : ${election.status}`)
+        const nowTs = new Date().getTime();
+        let status = election.status;
+        console.log(election.endTs)
+        console.log(nowTs)
+        console.log(nowTs >= election.endTs)
+        if (nowTs >= election.endTs && status !== 'CLOSED') {
+            status = 'PENDING'
+        }
+        sendFireAndForget('new-view', election.id, status, false);
+    }, []);
 
     const print_date = (ts) => {
         const date = new Date(ts);

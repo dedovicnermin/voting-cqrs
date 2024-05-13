@@ -33,7 +33,7 @@ const App = () => {
   useEffect(() => {
     if (state.user.token && state.user.username && state.user.id) {
       getElections()
-      const refresh = setInterval(() => {getElections()}, 2000)
+      const refresh = setInterval(() => {getElections()}, 5000)
       return () => clearInterval(refresh)
     }
   }, [state?.user?.token, state?.user?.id, state?.user?.username]);
