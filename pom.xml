@@ -19,11 +19,10 @@
 
     <modules>
         <module>library</module>
+        <module>cmd-bridge</module>
         <module>election-integrity</module>
         <module>event-sink</module>
         <module>query-service</module>
-        <module>election-ttl</module>
-        <module>cmd-bridge</module>
     </modules>
 
     <properties>
