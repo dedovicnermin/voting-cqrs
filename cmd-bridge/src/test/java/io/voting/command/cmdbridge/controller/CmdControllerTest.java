@@ -6,7 +6,9 @@ import io.voting.command.cmdbridge.controller.framework.TestConsumerHelper;
 import io.voting.command.cmdbridge.controller.framework.TestKafkaContext;
 import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.utils.CloudEventTypes;
+import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionCreate;
+import io.voting.common.library.models.ElectionView;
 import io.voting.common.library.models.ElectionVote;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
@@ -26,6 +28,8 @@ import reactor.test.StepVerifier;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 class CmdControllerTest extends TestKafkaContext {
@@ -69,8 +73,8 @@ class CmdControllerTest extends TestKafkaContext {
             .create(result)
             .verifyComplete();
     final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
-    Assertions.assertThat(element.getKey()).isEqualTo("777:888");
-    Assertions.assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CloudEventTypes.ELECTION_VOTE_CMD);
+    assertThat(element.getKey()).isEqualTo("777:888");
+    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CloudEventTypes.ELECTION_VOTE_CMD);
   }
 
   @SneakyThrows
@@ -87,7 +91,29 @@ class CmdControllerTest extends TestKafkaContext {
             .verifyComplete();
 
     final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
-    Assertions.assertThat(element.getKey()).isEqualTo("777");
-    Assertions.assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CloudEventTypes.ELECTION_CREATE_CMD);
+    assertThat(element.getKey()).isEqualTo("777");
+    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CloudEventTypes.ELECTION_CREATE_CMD);
+  }
+
+  @SneakyThrows
+  @Test
+  void testElectionViewCmd() {
+    final Mono<Void> result = requester
+            .route("new-view")
+            .metadata("778", AppConfig.CMD_MIMETYPE)
+            .data(ElectionView.OPEN)
+            .retrieveMono(Void.class);
+
+    StepVerifier
+            .create(result)
+            .verifyComplete();
+
+    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
+    assertThat(element.getKey()).isEqualTo("778");
+    final CloudEvent payload = element.getPOrE().getPayload();
+    assertThat(payload.getType()).isEqualTo(CloudEventTypes.ELECTION_VIEW_CMD);
+    assertThat(payload.getSubject()).isEqualTo("778");
+    assertThat(StreamUtils.unwrapCloudEventData(payload.getData(), ElectionView.class)).isEqualTo(ElectionView.OPEN);
+
   }
 }

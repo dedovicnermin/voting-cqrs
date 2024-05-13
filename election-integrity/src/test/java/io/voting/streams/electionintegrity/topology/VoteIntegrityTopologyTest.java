@@ -3,7 +3,7 @@ package io.voting.streams.electionintegrity.topology;
 import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionVote;
-import io.voting.streams.electionintegrity.framework.TestCmdBuilder;
+import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +35,7 @@ class VoteIntegrityTopologyTest {
   @BeforeAll
   static void buildTopology() {
     properties = new Properties();
-    properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "voting.test");
+    properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "voting.test-"+ UUID.randomUUID());
     properties.put("input.topic", "input");
     properties.put("output.topic.elections", "output_elections");
     properties.put("output.topic.votes", "output_votes");
@@ -71,12 +72,12 @@ class VoteIntegrityTopologyTest {
     final String EVENT_KEY = USER + ":" + ELECTION;
     inputTopic.pipeKeyValueList(
             Arrays.asList(
-                    new KeyValue<>(EVENT_KEY, TestCmdBuilder.buildCE(v1)),
-                    new KeyValue<>(EVENT_KEY, TestCmdBuilder.buildCE(v1)),
-                    new KeyValue<>(EVENT_KEY, TestCmdBuilder.buildCE(v1)),
-                    new KeyValue<>(EVENT_KEY, TestCmdBuilder.buildCE(v2)),
-                    new KeyValue<>(EVENT_KEY, TestCmdBuilder.buildCE(v3)),
-                    new KeyValue<>(EVENT_KEY, TestCmdBuilder.buildCE(v4))
+                    new KeyValue<>(EVENT_KEY, TestCEBuilder.buildCE(v1)),
+                    new KeyValue<>(EVENT_KEY, TestCEBuilder.buildCE(v1)),
+                    new KeyValue<>(EVENT_KEY, TestCEBuilder.buildCE(v1)),
+                    new KeyValue<>(EVENT_KEY, TestCEBuilder.buildCE(v2)),
+                    new KeyValue<>(EVENT_KEY, TestCEBuilder.buildCE(v3)),
+                    new KeyValue<>(EVENT_KEY, TestCEBuilder.buildCE(v4))
             )
     );
     assertThat(outputTopic.getQueueSize()).isOne();

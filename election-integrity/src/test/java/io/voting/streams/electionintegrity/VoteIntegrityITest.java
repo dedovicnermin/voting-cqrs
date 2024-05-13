@@ -8,13 +8,14 @@ import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.test.TestSender;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionVote;
-import io.voting.streams.electionintegrity.framework.TestCmdBuilder;
+import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import io.voting.streams.electionintegrity.framework.TestConsumerHelper;
 import io.voting.streams.electionintegrity.framework.TestKafkaContext;
 import io.voting.streams.electionintegrity.topology.ElectionIntegrityTopology;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -91,10 +92,10 @@ class VoteIntegrityITest extends TestKafkaContext {
      */
     String eId = "111";
     for (int i = 0; i < 25; i++) {
-      testSender.send(eventKey(userId_1, eId), TestCmdBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
-      testSender.send(eventKey(userId_2, eId), TestCmdBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
-      testSender.send(eventKey(userId_3, eId), TestCmdBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
-      testSender.send(eventKey(userId_4, eId), TestCmdBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
+      testSender.send(eventKey(userId_1, eId), TestCEBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
+      testSender.send(eventKey(userId_2, eId), TestCEBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
+      testSender.send(eventKey(userId_3, eId), TestCEBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
+      testSender.send(eventKey(userId_4, eId), TestCEBuilder.buildCE(ElectionVote.of(eId, eCandidate))).get();
       Thread.sleep(100);
     }
 

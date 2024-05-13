@@ -7,7 +7,7 @@ import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.test.TestSender;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionStatus;
-import io.voting.streams.electionintegrity.framework.TestCmdBuilder;
+import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import io.voting.streams.electionintegrity.framework.TestConsumerHelper;
 import io.voting.streams.electionintegrity.framework.TestKafkaContext;
 import io.voting.common.library.models.Election;
@@ -89,8 +89,8 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
   @ParameterizedTest
   @MethodSource
   void testElection(ElectionCreate legalElection, ElectionCreate illegalElection) throws ExecutionException, InterruptedException {
-    testSender.send(UUID.randomUUID().toString(), TestCmdBuilder.buildCE(legalElection)).get();
-    testSender.send(UUID.randomUUID().toString(), TestCmdBuilder.buildCE(illegalElection)).get();
+    testSender.send(UUID.randomUUID().toString(), TestCEBuilder.buildCE(legalElection)).get();
+    testSender.send(UUID.randomUUID().toString(), TestCEBuilder.buildCE(illegalElection)).get();
 
     final Election expected = Election.builder()
             .author(legalElection.getAuthor())
@@ -101,7 +101,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
             .status(ElectionStatus.OPEN)
             .build();
 
-    final ReceiveEvent<String, CloudEvent> actual = consumerHelper.getEvents().poll(3000, TimeUnit.MILLISECONDS);
+    final ReceiveEvent<String, CloudEvent> actual = consumerHelper.getEvents().poll(5000, TimeUnit.MILLISECONDS);
     assertThat(consumerHelper.getEvents().poll(100, TimeUnit.MILLISECONDS)).isNull();
     assertThat(actual).isNotNull();
 

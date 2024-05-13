@@ -7,7 +7,7 @@ import io.voting.common.library.models.ElectionCreate;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ElectionCmdMapper implements CloudEventMapper<String, ElectionCreate> {
+public class ElectionCreateCmdMapper implements CloudEventMapper<String, ElectionCreate> {
 
   @Override
   public CloudEvent apply(String key, ElectionCreate electionCreate) {

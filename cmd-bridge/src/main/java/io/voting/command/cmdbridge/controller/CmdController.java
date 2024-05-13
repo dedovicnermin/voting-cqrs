@@ -2,6 +2,7 @@ package io.voting.command.cmdbridge.controller;
 
 import io.voting.command.cmdbridge.service.CmdService;
 import io.voting.common.library.models.ElectionCreate;
+import io.voting.common.library.models.ElectionView;
 import io.voting.common.library.models.ElectionVote;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Header;
@@ -46,6 +47,13 @@ public class CmdController {
   public Mono<Void> electionCommand(@Header String key, @Payload final ElectionCreate election, @Headers Map<String, Object> headers) {
     log.info("Received election requested by ({}): {}", key, election);
     service.handle(key, election);
+    return Mono.empty();
+  }
+
+  @MessageMapping({"new-view"})
+  public Mono<Void> electionViewedCommand(@Header String key, @Payload String electionStatus) {
+    log.info("Election ({}) was just viewed with election status {}", key, electionStatus);
+    service.handle(key, ElectionView.valueOf(electionStatus));
     return Mono.empty();
   }
 

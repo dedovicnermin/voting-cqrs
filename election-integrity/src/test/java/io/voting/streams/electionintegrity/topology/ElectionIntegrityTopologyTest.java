@@ -6,7 +6,7 @@ import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionCreate;
 import io.voting.common.library.models.ElectionStatus;
-import io.voting.streams.electionintegrity.framework.TestCmdBuilder;
+import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -85,8 +85,8 @@ class ElectionIntegrityTopologyTest {
 
 
     inputTopic.pipeKeyValueList(Arrays.asList(
-            new KeyValue<>(fake.idNumber().valid(), TestCmdBuilder.buildCE(legalElection)),
-            new KeyValue<>(fake.idNumber().valid(), TestCmdBuilder.buildCE(illegalElection))
+            new KeyValue<>(fake.idNumber().valid(), TestCEBuilder.buildCE(legalElection)),
+            new KeyValue<>(fake.idNumber().valid(), TestCEBuilder.buildCE(illegalElection))
     ));
 
     assertThat(outputTopic.getQueueSize()).isOne();
