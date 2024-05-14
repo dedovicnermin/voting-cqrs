@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: edv-ws
+  annotations:
+    nginx.ingress.kubernetes.io/websocket-services: "cmd-bridge"
+    nginx.org/websocket-services: cmd-bridge
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cmd-bridge.test.nermdev.io
+      http:
+        paths:
+          - path: /cmd
+            pathType: Prefix
+            backend:
+              service:
+                name: cmd-bridge
+                port:
+                  number: 7000

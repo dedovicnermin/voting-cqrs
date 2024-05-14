@@ -1,4 +1,9 @@
+# cmd-bridge (command bridge)
 
+This component uses RSocket over websocket to accept FNF requests made by users interacting with UI (`client`):
+  - Emit an event when user submits new election request
+  - Emit an event when user clicks/views a respective election 
+  - Emit an event when user registers a vote for a respective election
 
 ## Vote CMD 
 ```

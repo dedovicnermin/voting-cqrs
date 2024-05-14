@@ -1,0 +1,22 @@
+kafka:
+  properties:
+    config.providers: file
+    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
+    bootstrap.servers: kafka.cfk.svc.cluster.local:9093
+    security.protocol: SASL_PLAINTEXT
+    sasl.mechanism: PLAIN
+    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{file:/mnt/kafka-secrets/secrets.txt:username}" password="{file:/mnt/kafka-secrets/secrets.txt:password}";
+  consumer:
+    group.id: test.event.sink
+    auto.offset.reset: earliest
+    enable.auto.commit: false
+    poll.duration: 500
+  consumer-topics:
+    - test.election.requests
+    - test.election.votes
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}
+      database: edv

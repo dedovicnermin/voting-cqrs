@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: election-integrity
+  annotations:
+    prometheus.io/port: "7778"
+    prometheus.io/scrape: "true"
+  labels:
+    app: election-integrity
+spec:
+  selector:
+    matchLabels:
+      app: election-integrity
+  serviceName: election-integrity
+  replicas: 1
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "7778"
+        prometheus.io/scrape: "true"
+      labels:
+        app: election-integrity
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - amd64
+                - key: node-role.kubernetes.io/master
+                  operator: DoesNotExist
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - election-integrity
+              topologyKey: "kubernetes.io/hostname"
+      securityContext:
+        fsGroup: 54321
+        runAsUser: 1000
+      containers:
+        - name: election-integrity
+          image: registry.nermdev.io/apps/election-integrity
+          imagePullPolicy: Always
+          args:
+            - /mnt/application/application.properties
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: eintegrity-state
+              mountPath: /mnt/data/
+              subPath: eintegrity
+            - name: app-config
+              mountPath: /mnt/application
+            - name: kafka-secrets
+              mountPath: /mnt/kafka-secrets
+          resources:
+            requests:
+              cpu: 1.0
+              memory: 512Mi
+            limits:
+              cpu: 1.0
+              memory: 1Gi
+      volumes:
+        - name: app-config
+          configMap:
+            name: ei-cfg
+        - name: kafka-secrets
+          secret:
+            secretName: kafka-secrets
+  volumeClaimTemplates:
+    - metadata:
+        name: eintegrity-state
+      spec:
+        storageClassName: delete-wfc
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 16Gi

@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base/query-service
+  - ing.yml
+
+configMapGenerator:
+  - name: qs-cfg
+    behavior: create
+    files:
+      - overrides.json
+patches:
+  - target:
+      kind: Deployment
+      name: query-service
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: SPRING_PROFILES_ACTIVE
+            value: test
+          - name: SPRING_APPLICATION_JSON
+            valueFrom: 
+              configMapKeyRef:
+                name: qs-cfg
+                key: overrides.json
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP                
+      - op: replace
+        path: /spec/replicas
+        value: 1

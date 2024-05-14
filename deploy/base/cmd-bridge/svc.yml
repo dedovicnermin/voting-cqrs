@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cmd-bridge
+  labels:
+    app: cmd-bridge
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: 7000
+    - port: 7000
+      name: ws
+      targetPort: 7000
+  selector:
+    app: cmd-bridge
