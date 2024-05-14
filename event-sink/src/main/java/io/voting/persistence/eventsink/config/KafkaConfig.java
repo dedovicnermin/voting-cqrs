@@ -21,10 +21,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 @Configuration
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaConfig {
+
+  /**
+   * application config (.yml / .properties) does not prefix expression with '$' on purpose
+   * If not, spring will replace '${file:/path/to/file.txt:key}' into '/path/to/file.txt:key'
+   */
+  final BiFunction<String, Object, Object> configProviderReMap = (k, v) -> ((String) v).replace("{", "${");
 
   @Setter
   private Map<String, String> properties;
@@ -44,6 +51,10 @@ public class KafkaConfig {
     config.putAll(consumer);
     config.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
     config.putIfAbsent("poll.duration", "1000");
+    if (config.containsKey("config.providers")) {
+      config.computeIfPresent("sasl.jaas.config", configProviderReMap);
+      config.computeIfPresent("ssl.truststore.password", configProviderReMap);
+    }
     return config;
   }
 

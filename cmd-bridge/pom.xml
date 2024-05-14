@@ -29,6 +29,7 @@
                         <ports>
                             <port>7203</port>
                             <port>7778</port>
+                            <port>7000</port>
                         </ports>
                         <jvmFlags>
                             <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false</jvmFlag>
@@ -36,7 +37,7 @@
                             <jvmFlag>-Dcom.sun.management.jmxremote.port=7203</jvmFlag>
                             <jvmFlag>-Dcom.sun.management.jmxremote.rmi.port=7203</jvmFlag>
                             <jvmFlag>-Dcom.sun.management.jmxremote.host=0.0.0.0</jvmFlag>
-                            <jvmFlag>-Djava.rmi.server.hostname=$NODE_NAME</jvmFlag>
+                            <jvmFlag>-Djava.rmi.server.hostname=$POD_NAME</jvmFlag>
                             <jvmFlag>-javaagent:/exporter/jmx_prometheus_javaagent-0.19.0.jar=7778:/exporter/kafka_client.yml</jvmFlag>
                         </jvmFlags>
                     </container>

@@ -50,11 +50,14 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
             .csrf(AbstractHttpConfigurer::disable)
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .authorizeHttpRequests(auth ->
-                    auth.requestMatchers("/api/auth/**").permitAll()
+                    auth
+                            .requestMatchers("/api/auth/**").permitAll()
                             .requestMatchers("/error").permitAll()
-                            .anyRequest().authenticated())
+                            .requestMatchers("/api/elections", "/api/elections/**", "/api/my-elections").authenticated()
+                            .anyRequest().permitAll()
+            )
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .httpBasic(Customizer.withDefaults())
