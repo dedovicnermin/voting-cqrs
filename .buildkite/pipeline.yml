@@ -4,12 +4,6 @@ steps:
       - label: "Compile / Build / Test / Package :maven::java:"
         commands:
           - mvn clean install
-        artifact_paths:
-          - election-integrity/target/election-integrity.jar
-          - vote-integrity/target/vote-integrity.jar
-          - election-ttl/target/election-ttl.jar
-          - event-sink/target/event-sink.jar
-          - query-service/target/query-service.jar
         plugins:
           - docker#v5.8.0:
               image: dedovicnermin/buildkite-j17:0.0.2
