@@ -4,9 +4,9 @@
 ```
 rsc --debug --fnf \
   --route new-vote \
-  --metadataMimeType=messaging/key --metadata "111:774ef51d-ae19-40bd-85f0-381c99c53d0c" \
-  --data '{"electionId": "774ef51d-ae19-40bd-85f0-381c99c53d0c", "votedFor": "Brunson"}' \
-  --stacktrace ws://localhost:7000/cmd
+  --metadataMimeType=messaging/key --metadata "111:3c8eea22-7dda-4406-bb32-235d146d61c4" \
+  --data '{"electionId": "3c8eea22-7dda-4406-bb32-235d146d61c4", "votedFor": "Brunson"}' \
+  --stacktrace ws://cmd-bridge.test.nermdev.io/cmd
 ```
 
 
@@ -22,16 +22,16 @@ rsc --debug --fnf \
     "category": "SPORTS",
     "candidates": ["Luka Doncic", "Nikola Jokic", "Anthony Edwards", "Brunson"]
     }' \
-  --stacktrace ws://localhost:7000/cmd
+  --stacktrace ws://cmd-bridge.test.nermdev.io/cmd
 ```
 
 ## Election view CMD
 ```
 rsc --debug --fnf \
   --route new-view \
-  --metadataMimeType=messaging/key --metadata "774ef51d-ae19-40bd-85f0-381c99c53d0c" \
+  --metadataMimeType=messaging/key --metadata "3c8eea22-7dda-4406-bb32-235d146d61c4" \
   --data "OPEN" \
-  --stacktrace ws://localhost:7000/cmd
+  --stacktrace ws://cmd-bridge.test.nermdev.io/cmd
 ```
 
 
