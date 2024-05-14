@@ -1,8 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - election.requests.raw.yml
-  - election.votes.raw.yml
-  - election.requests.yml
-  - election.votes.yml
