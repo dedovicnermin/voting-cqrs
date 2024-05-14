@@ -1,43 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: event-sink
+  name: cmd-bridge
   annotations:
     prometheus.io/port: "7778"
     prometheus.io/scrape: "true"
   labels:
-    app: event-sink
+    app: cmd-bridge
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: event-sink
+      app: cmd-bridge
   template:
     metadata:
       annotations:
         prometheus.io/port: "7778"
         prometheus.io/scrape: "true"
       labels:
-        app: event-sink
+        app: cmd-bridge
     spec:
-      containers:
-        - name: event-sink
-          image: registry.nermdev.io/apps/event-sink
-          imagePullPolicy: Always
-          volumeMounts:
-            - name: kafka-secrets
-              mountPath: /mnt/kafka-secrets
-          resources:
-            requests:
-              cpu: 500m
-              memory: 256Mi
-            limits:
-              cpu: 1.0
-              memory: 516Mi
-      volumes:
-        - name: kafka-secrets
-          secret:
-            secretName: kafka-secrets
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -56,5 +38,26 @@ spec:
                   - key: app
                     operator: In
                     values:
-                      - event-sink
+                      - cmd-bridge
               topologyKey: "kubernetes.io/hostname"
+      securityContext:
+        fsGroup: 54321
+        runAsUser: 1000
+      containers:
+        - name: cmd-bridge
+          image: registry.nermdev.io/apps/cmd-bridge
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: kafka-secrets
+              mountPath: /mnt/kafka-secrets
+          resources:
+            requests:
+              cpu: 1.0
+              memory: 256Mi
+            limits:
+              cpu: 1.0
+              memory: 256Mi
+      volumes:
+        - name: kafka-secrets
+          secret:
+            secretName: kafka-secrets
