@@ -26,7 +26,9 @@
       "title": "Is a hotdog a sandwich?",
       "description": "Really. Is it?",
       "category": "Social",
-      "expires": 1710545273041,
+      "startTs": 1715629916141,
+      "endTs": 1715630516141,
+      "status": "OPEN",
       "candidates": {
         "Yes, of course": 0,
         "Absolutely not": 0
@@ -38,7 +40,9 @@
       "author": "Author 2",
       "description": "Your personal music taste, not the objective data like a number if copies sold, etc.",
       "category": "Music",
-      "expires": 1710545273041,
+      "startTs": 1715629916141,
+      "endTs": 1715630516141,
+      "status": "OPEN",
       "candidates": {
         "Avril Lavigne": 0,
         "The Offspring": 0,
@@ -53,7 +57,9 @@
       "author": "Author 2",
       "description": "",
       "category": "Social",
-      "expires": 1710545273041,
+      "startTs": 1715629916141,
+      "endTs": 1715630516141,
+      "status": "OPEN",
       "candidates": {
         "To be": 1,
         "Not to be": 12
@@ -65,7 +71,8 @@
       "author": "Author 2",
       "description": "School distric 299",
       "category": "Social",
-      "expires": 1710545273041,
+      "startTs": 1715629916141,
+      "endTs": 1715630516141,
       "candidates": {
         "Candidate 1": 0,
         "Candidate 2": 12,
@@ -78,6 +85,9 @@
       "author": "Author 1",
       "description": "copy paste from wiki",
       "category": "Sports",
+      "status": "OPEN",
+      "startTs": 1715629916141,
+      "endTs": 1715630516141,
       "candidates": {
         "Edmonton Oilers": 0,
         "Los Angeles Kings": 12,

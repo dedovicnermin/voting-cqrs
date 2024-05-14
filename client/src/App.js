@@ -1,5 +1,6 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { Buffer} from "buffer";
 import { Routes, Route, Navigate } from "react-router-dom";
 import {useEffect, useReducer} from "react";
 import AppReducer, {ELECTION_EVENTS} from "./context/reducer";
@@ -13,6 +14,8 @@ import MyElectionList from './component/MyElectionList'
 import CreateElection from './components/CreateElection';
 import Login from './components/Login';
 import Register from './components/Register';
+import {RSocketProvider} from "./component/rsocket/RSocketProvider";
+window.Buffer = Buffer;
 
 const App = () => {
 
@@ -30,7 +33,7 @@ const App = () => {
   useEffect(() => {
     if (state.user.token && state.user.username && state.user.id) {
       getElections()
-      const refresh = setInterval(() => {getElections()}, 2000)
+      const refresh = setInterval(() => {getElections()}, 5000)
       return () => clearInterval(refresh)
     }
   }, [state?.user?.token, state?.user?.id, state?.user?.username]);
@@ -44,6 +47,7 @@ const App = () => {
   return(
       <div className="App">
         <StateContext.Provider value={{state, dispatch}}>
+          <RSocketProvider>
           <Header/>
             <main>
               <Routes>
@@ -56,6 +60,7 @@ const App = () => {
                 <Route path = "/register" element={state.user?.id ? <Navigate to="/elections"/> : <Register/> }/>
               </Routes>
             </main>
+          </RSocketProvider>
         </StateContext.Provider>
       </div>
   );

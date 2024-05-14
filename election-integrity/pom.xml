@@ -68,6 +68,16 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -110,6 +120,41 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <configuration>
+                    <container>
+                        <ports>
+                            <port>7203</port>
+                            <port>7778</port>
+                        </ports>
+                        <jvmFlags>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.port=7203</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.rmi.port=7203</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.host=0.0.0.0</jvmFlag>
+                            <jvmFlag>-Djava.rmi.server.hostname=$NODE_NAME</jvmFlag>
+                            <jvmFlag>-javaagent:/exporter/jmx_prometheus_javaagent-0.19.0.jar=7778:/exporter/kafka_streams.yml</jvmFlag>
+                        </jvmFlags>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>exporter</from>
+                                <into>/exporter</into>
+                            </path>
+                        </paths>
+                        <permissions>
+                            <permission>
+                                <file>/exporter/*</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -1,0 +1,19 @@
+spring:
+  rsocket:
+    server:
+      transport: websocket
+      mapping-path: /cmd
+      port: 0
+
+kafka:
+  properties:
+    bootstrap.servers: bootstrap.replace.in.itest:443
+  producer:
+    linger.ms: 1
+    acks: all
+  topics:
+    NEW_VOTE: test.election.votes.raw
+    NEW_ELECTION: test.election.requests.raw
+
+
+

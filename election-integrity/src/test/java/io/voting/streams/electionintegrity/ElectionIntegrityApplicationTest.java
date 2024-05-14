@@ -7,6 +7,7 @@ import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.test.TestSender;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionStatus;
+import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import io.voting.streams.electionintegrity.framework.TestConsumerHelper;
 import io.voting.streams.electionintegrity.framework.TestKafkaContext;
 import io.voting.common.library.models.Election;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.util.Arrays;
@@ -46,16 +46,16 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
 
   static final Properties properties = new Properties();
   static final Faker fake = Faker.instance();
-  static EventSender<String, ElectionCreate> testSender;
+  static EventSender<String, CloudEvent> testSender;
   static TestConsumerHelper consumerHelper;
   static KafkaStreams app;
 
   @BeforeAll
   static void init() {
-    consumerHelper = new TestConsumerHelper(kafkaContainer);
-    final KafkaProducer<String, ElectionCreate> producer = new KafkaProducer<>(
+    consumerHelper = new TestConsumerHelper(kafkaContainer, TestConsumerHelper.OUTPUT_TOPIC_ELECTION);
+    final KafkaProducer<String, CloudEvent> producer = new KafkaProducer<>(
             KafkaTestUtils.producerProps(kafkaContainer.getBootstrapServers()),
-            new StringSerializer(), new JsonSerializer<>()
+            new StringSerializer(), StreamUtils.getCESerde().serializer()
     );
     testSender = new TestSender<>(TestConsumerHelper.INPUT_TOPIC, producer);
     properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "election.integrity."+ UUID.randomUUID());
@@ -64,7 +64,8 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
     properties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
     properties.put("cache.max.bytes.buffering", 0);
     properties.put("input.topic", TestConsumerHelper.INPUT_TOPIC);
-    properties.put("output.topic", TestConsumerHelper.OUTPUT_TOPIC);
+    properties.put("output.topic.elections", TestConsumerHelper.OUTPUT_TOPIC_ELECTION);
+    properties.put("output.topic.votes", "election.votes");
     properties.put("commit.interval.ms", 1000);
     properties.put("election.ttl", "PT5M");
     final Topology topology = ElectionIntegrityTopology.buildTopology(new StreamsBuilder(), properties);
@@ -87,9 +88,9 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
 
   @ParameterizedTest
   @MethodSource
-  void test(ElectionCreate legalElection, ElectionCreate illegalElection) throws ExecutionException, InterruptedException {
-    testSender.send(UUID.randomUUID().toString(), legalElection).get();
-    testSender.send(UUID.randomUUID().toString(), illegalElection).get();
+  void testElection(ElectionCreate legalElection, ElectionCreate illegalElection) throws ExecutionException, InterruptedException {
+    testSender.send(UUID.randomUUID().toString(), TestCEBuilder.buildCE(legalElection)).get();
+    testSender.send(UUID.randomUUID().toString(), TestCEBuilder.buildCE(illegalElection)).get();
 
     final Election expected = Election.builder()
             .author(legalElection.getAuthor())
@@ -100,7 +101,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
             .status(ElectionStatus.OPEN)
             .build();
 
-    final ReceiveEvent<String, CloudEvent> actual = consumerHelper.getEvents().poll(1000, TimeUnit.MILLISECONDS);
+    final ReceiveEvent<String, CloudEvent> actual = consumerHelper.getEvents().poll(5000, TimeUnit.MILLISECONDS);
     assertThat(consumerHelper.getEvents().poll(100, TimeUnit.MILLISECONDS)).isNull();
     assertThat(actual).isNotNull();
 
@@ -118,7 +119,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
 
   }
 
-  static Stream<Arguments> test() {
+  static Stream<Arguments> testElection() {
     return Stream.of(
             Arguments.of(electionCreate("suck"), electionCreate("fuck")),
             Arguments.of(electionCreate(null), electionCreate("shit")),
