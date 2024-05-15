@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: test
+
+commonLabels:
+  project: edv
+
+resources:
+  - ../../overlay/test/client
+  - ../../overlay/test/cmd-bridge
+  - ../../overlay/test/election-integrity
+  - ../../overlay/test/event-sink
+  - ../../overlay/test/query-service
+
+images:
+  - name: registry.nermdev.io/apps/edv-client
+    newTag: 0.0.1
+  - name: registry.nermdev.io/apps/cmd-bridge
+    newTag: 0.0.1-SNAPSHOT
+  - name: registry.nermdev.io/apps/election-integrity
+    newTag: 0.0.1-SNAPSHOT
+  - name: registry.nermdev.io/apps/event-sink
+    newTag: 0.0.1-SNAPSHOT
+  - name: registry.nermdev.io/apps/query-service
+    newTag: 0.0.1-SNAPSHOT
+

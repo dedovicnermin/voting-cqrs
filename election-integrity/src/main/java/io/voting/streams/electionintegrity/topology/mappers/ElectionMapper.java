@@ -5,6 +5,7 @@ import io.voting.common.library.models.ElectionCreate;
 import io.voting.common.library.models.ElectionStatus;
 import io.voting.streams.electionintegrity.topology.util.TTLPairs;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.ValueMapper;
 import org.javatuples.Pair;
 
@@ -57,5 +58,9 @@ public class ElectionMapper implements ValueMapper<ElectionCreate, Election> {
               return election;
             })
             .orElseThrow();
+  }
+
+  public static Named name() {
+    return Named.as("ei.legal.election.mapper");
   }
 }

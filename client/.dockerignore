@@ -4,5 +4,6 @@ package-lock.json
 Dockerfile
 .dockerignore
 .idea
+.env
 REACT_README.md
 README.md

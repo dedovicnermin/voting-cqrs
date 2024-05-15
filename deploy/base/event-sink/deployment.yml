@@ -22,33 +22,39 @@ spec:
     spec:
       containers:
         - name: event-sink
-          image: dedovicnermin/event-sink
-          env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
-            - name: SPRING_PROFILES_ACTIVE
-              value: k8s
+          image: registry.nermdev.io/apps/event-sink
+          imagePullPolicy: Always
           volumeMounts:
-            - name: tls
-              mountPath: /mnt/ssl
+            - name: kafka-secrets
+              mountPath: /mnt/kafka-secrets
           resources:
             requests:
-              cpu: 100m
-              memory: 132Mi
+              cpu: 500m
+              memory: 256Mi
             limits:
-              cpu: 100m
-              memory: 132Mi
+              cpu: 1.0
+              memory: 516Mi
       volumes:
-        - name: tls
+        - name: kafka-secrets
           secret:
-            secretName: tls-nermin
+            secretName: kafka-secrets
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                  - key: node-role.kubernetes.io/master
+                    operator: DoesNotExist
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - event-sink
+              topologyKey: "kubernetes.io/hostname"

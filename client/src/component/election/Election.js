@@ -32,7 +32,7 @@ export default function Election() {
                         <Card className="election p-3">
                             <ElectionHeader election={election}/>
                             <ElectionBody id={election.id}/>
-                            {election.status === 'OPEN' && <ElectionFoot election={election}/>}
+                            {election.status !== 'CLOSED' && <ElectionFoot election={election}/>}
                         </Card>
                     </Col>
                 </Row>

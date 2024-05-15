@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cmd-bridge
+  annotations:
+    prometheus.io/port: "7778"
+    prometheus.io/scrape: "true"
+  labels:
+    app: cmd-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cmd-bridge
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "7778"
+        prometheus.io/scrape: "true"
+      labels:
+        app: cmd-bridge
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                  - key: node-role.kubernetes.io/master
+                    operator: DoesNotExist
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - cmd-bridge
+              topologyKey: "kubernetes.io/hostname"
+      securityContext:
+        fsGroup: 54321
+        runAsUser: 1000
+      containers:
+        - name: cmd-bridge
+          image: registry.nermdev.io/apps/cmd-bridge
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: kafka-secrets
+              mountPath: /mnt/kafka-secrets
+          resources:
+            requests:
+              cpu: 1.0
+              memory: 256Mi
+            limits:
+              cpu: 1.0
+              memory: 256Mi
+      volumes:
+        - name: kafka-secrets
+          secret:
+            secretName: kafka-secrets

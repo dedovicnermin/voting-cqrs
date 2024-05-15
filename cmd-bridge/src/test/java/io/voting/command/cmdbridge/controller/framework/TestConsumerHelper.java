@@ -1,0 +1,83 @@
+package io.voting.command.cmdbridge.controller.framework;
+
+import io.cloudevents.CloudEvent;
+import io.voting.common.library.kafka.clients.serialization.ce.CEPayloadDeserializer;
+import io.voting.common.library.kafka.models.PayloadOrError;
+import io.voting.common.library.kafka.models.ReceiveEvent;
+import lombok.Getter;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListener;
+import org.springframework.kafka.test.utils.ContainerTestUtils;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.testcontainers.containers.KafkaContainer;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+public class TestConsumerHelper {
+
+  public static final String ELECTION_TOPIC = "test.election.requests.raw";
+  public static final String VOTE_TOPIC = "test.election.votes.raw";
+
+  static final NewTopic ELEC_TOPIC = new NewTopic(ELECTION_TOPIC, 1, (short) 1);
+  static final NewTopic V_TOPIC = new NewTopic(VOTE_TOPIC, 1, (short) 1);
+
+  @Getter
+  private final BlockingQueue<ReceiveEvent<String, CloudEvent>> events = new LinkedBlockingQueue<>();
+
+  public TestConsumerHelper(final KafkaContainer kafkaContainer) {
+    final Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
+            kafkaContainer.getBootstrapServers(),
+            "eiTest",
+            "true"
+    );
+    createTargetTopics(kafkaContainer);
+
+    final KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> listenerContainer = getListenerContainer(consumerProps);
+    listenerContainer.setupMessageListener(getMessageListener());
+    listenerContainer.start();
+    ContainerTestUtils.waitForAssignment(listenerContainer, 2);
+    Runtime.getRuntime().addShutdownHook(new Thread(listenerContainer::stop));
+  }
+
+  public void clearQueues() {
+    events.clear();
+  }
+
+  @NotNull
+  private static KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> getListenerContainer(Map<String, Object> consumerProps) {
+    final DefaultKafkaConsumerFactory<String, PayloadOrError<CloudEvent>> cf = new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), new CEPayloadDeserializer());
+    final ContainerProperties containerProperties = new ContainerProperties(ELEC_TOPIC.name(), V_TOPIC.name());
+    return new KafkaMessageListenerContainer<>(cf, containerProperties);
+  }
+
+  @NotNull
+  private MessageListener<String, PayloadOrError<CloudEvent>> getMessageListener() {
+    return data -> {
+      final ReceiveEvent<String, CloudEvent> re = new ReceiveEvent<>(
+              data.topic(), data.partition(), data.offset(), data.timestamp(), data.key(), data.value());
+      System.out.println("TestConsumer received : " + re);
+      events.add(re);
+    };
+  }
+
+
+  private static void createTargetTopics(KafkaContainer kafkaContainer) {
+    final KafkaAdmin kafkaAdmin = new KafkaAdmin(Map.of("bootstrap.servers", kafkaContainer.getBootstrapServers()));
+    kafkaAdmin.createOrModifyTopics(ELEC_TOPIC, V_TOPIC);
+    final Collection<TopicDescription> values = kafkaAdmin.describeTopics(
+            ELEC_TOPIC.name(), V_TOPIC.name()
+    ).values();
+    values.forEach(td -> System.out.println("TOPIC : " + td));
+    kafkaAdmin.setCloseTimeout(1000);
+  }
+}

@@ -6,6 +6,7 @@ import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionCreate;
 import io.voting.common.library.models.ElectionStatus;
+import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -33,13 +34,12 @@ class ElectionIntegrityTopologyTest {
   static final String OUTPUT_TOPIC = "election.requests";
 
   static final Serde<String> STRING_SERDE = Serdes.String();
-  static final Serde<ElectionCreate> ELECTION_CREATE_SERDE = StreamUtils.getJsonSerde(ElectionCreate.class);
   static final Serde<CloudEvent> CLOUD_EVENT_SERDE = StreamUtils.getCESerde();
 
   static Topology topology;
   static Properties properties;
   TopologyTestDriver testDriver;
-  TestInputTopic<String, ElectionCreate> inputTopic;
+  TestInputTopic<String, CloudEvent> inputTopic;
   TestOutputTopic<String, CloudEvent> outputTopic;
 
 
@@ -48,7 +48,8 @@ class ElectionIntegrityTopologyTest {
     properties = new Properties();
     properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "election-integrity.test");
     properties.put("input.topic", INPUT_TOPIC);
-    properties.put("output.topic", OUTPUT_TOPIC);
+    properties.put("output.topic.elections", OUTPUT_TOPIC);
+    properties.put("output.topic.votes", "election.votes");
     properties.put("election.ttl", "P2D");
 
     final StreamsBuilder builder = new StreamsBuilder();
@@ -58,7 +59,7 @@ class ElectionIntegrityTopologyTest {
   @BeforeEach
   void setup() {
     testDriver = new TopologyTestDriver(topology, properties);
-    inputTopic = testDriver.createInputTopic(INPUT_TOPIC, STRING_SERDE.serializer(), ELECTION_CREATE_SERDE.serializer());
+    inputTopic = testDriver.createInputTopic(INPUT_TOPIC, STRING_SERDE.serializer(), CLOUD_EVENT_SERDE.serializer());
     outputTopic = testDriver.createOutputTopic(OUTPUT_TOPIC, STRING_SERDE.deserializer(), CLOUD_EVENT_SERDE.deserializer());
   }
 
@@ -70,7 +71,6 @@ class ElectionIntegrityTopologyTest {
     final Faker fake = Faker.instance();
     final ElectionCreate legalElection = new ElectionCreate(fake.funnyName().name(), "Good Election", fake.lorem().paragraph(), "GOOD", Arrays.asList(fake.funnyName().name(), fake.funnyName().name()));
     final ElectionCreate illegalElection = new ElectionCreate(fake.funnyName().name(), "Bad Election", fake.lorem().paragraph() + "ass", "TEST", Arrays.asList(fake.funnyName().name(), fake.funnyName().name(), "FUCK Cillary Hlinton"));
-
     final Map<String, Long> candidateMap = new HashMap<>();
     legalElection.getCandidates().forEach(c -> candidateMap.put(c, 0L));
 
@@ -83,9 +83,10 @@ class ElectionIntegrityTopologyTest {
             .status(ElectionStatus.OPEN)
             .build();
 
+
     inputTopic.pipeKeyValueList(Arrays.asList(
-            new KeyValue<>(fake.idNumber().valid(), legalElection),
-            new KeyValue<>(fake.idNumber().valid(), illegalElection)
+            new KeyValue<>(fake.idNumber().valid(), TestCEBuilder.buildCE(legalElection)),
+            new KeyValue<>(fake.idNumber().valid(), TestCEBuilder.buildCE(illegalElection))
     ));
 
     assertThat(outputTopic.getQueueSize()).isOne();
@@ -101,5 +102,7 @@ class ElectionIntegrityTopologyTest {
             .satisfies(election -> assertThat(election.getEndTs()).isNotNull())
             .satisfies(election -> assertThat(election.getStartTs()).isNotNull());
   }
+
+
 
 }

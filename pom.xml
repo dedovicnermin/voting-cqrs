@@ -19,11 +19,10 @@
 
     <modules>
         <module>library</module>
+        <module>cmd-bridge</module>
         <module>election-integrity</module>
         <module>event-sink</module>
-        <module>vote-integrity</module>
         <module>query-service</module>
-        <module>election-ttl</module>
     </modules>
 
     <properties>
@@ -38,6 +37,7 @@
         <lombok.version>1.18.30</lombok.version>
         <slf4j.version>2.0.11</slf4j.version>
         <cloudevent.version>2.3.0</cloudevent.version>
+        <image>registry.nermdev.io/apps/${project.artifactId}:${project.version}</image>
     </properties>
 
     <dependencies>
@@ -61,6 +61,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.reload4j</groupId>
+                    <artifactId>reload4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -155,6 +161,19 @@
     </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>3.4.2</version>
+                    <configuration>
+                        <allowInsecureRegistries>true</allowInsecureRegistries>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

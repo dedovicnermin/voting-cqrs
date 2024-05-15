@@ -39,7 +39,6 @@ const Login = () => {
                 setLoginFailed(true);
             } else {
                 setLoginFailed(false);
-                console.log(JSON.stringify(loginResp.data));
                 dispatch({
                     type: USER_EVENTS.LOGIN,
                     payload: {

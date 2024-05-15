@@ -1,8 +1,8 @@
 import {Button, Container, Form} from "react-bootstrap";
-import {useState, useContext, useEffect} from "react";
+import {useState, useContext} from "react";
 import {useNavigate} from "react-router-dom";
 import {StateContext} from "../../context/context";
-import {useResource} from "react-request-hook";
+import { useRSocket } from "../rsocket/RSocketProvider";
 
 export default function ElectionFoot({election}) {
 
@@ -11,22 +11,7 @@ export default function ElectionFoot({election}) {
     const [selectedCandidate, setSelectedCandidate] = useState();
     const { user } = useContext(StateContext).state
     const eventKey = `${user.id}:${election.id}`;
-
-    const [eventResp, sendEvent] = useResource((voteEvent) => ({
-        url: process.env.REACT_APP_VOTE_ENDPOINT,
-        method: "post",
-        data: {
-            key: {
-                type: "STRING",
-                data: eventKey
-            },
-            value: {
-                type: "JSON",
-                data: voteEvent
-            }
-        },
-        headers: { Authorization: `Basic ${btoa('nermin' + ':' + 'nermin-secret')}`}
-    }));
+    const {sendFireAndForget} = useRSocket();
 
     /**
      * Update selectedCandidate state when user selects a value from drop-down
@@ -40,12 +25,9 @@ export default function ElectionFoot({election}) {
      * Invoked when form button has been clicked
      * @param event formEvent
      */
-    const handleSubmitVote = event => {
-        event.preventDefault()
-        sendEvent({
-            electionId: election.id,
-            votedFor: selectedCandidate
-        });
+    const handleSubmitVote = async event => {
+        event.preventDefault();
+        sendFireAndForget('new-vote', eventKey, {electionId: election.id, votedFor: selectedCandidate});
         alert(`Vote request for '${selectedCandidate}' successfully sent`)
         navigate("/elections");
     }
