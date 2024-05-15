@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -74,23 +73,24 @@ class TTLTopologyTest {
     final KeyValue<String, CloudEvent> legalElection = outputTopic.readKeyValue();
     assertThat(legalElection).isNotNull();
 
-    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(ElectionView.OPEN));
+    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ElectionView.OPEN));
     final CloudEvent voteEvent = TestCEBuilder.buildCE(new ElectionVote(legalElection.key, "Foo"));
     inputTopic.pipeInput("userId0:" + legalElection.key, voteEvent);
     inputTopic.pipeInput("userId1:" + legalElection.key, voteEvent);
     inputTopic.pipeInput("userId2:" + legalElection.key, voteEvent);
-
-    assertThat(outputTopic.getQueueSize()).isZero();
-    inputTopic.advanceTime(Duration.ofMinutes(15L));
     assertThat(outputTopic.getQueueSize()).isZero();
 
-
-    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(ElectionView.PENDING));
+    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ElectionView.PENDING));
     assertThat(outputTopic.getQueueSize()).isOne();
     final KeyValue<String, CloudEvent> actualTTLEvent = outputTopic.readKeyValue();
     assertThat(actualTTLEvent.key).isEqualTo(legalElection.key);
     assertThat(new String(actualTTLEvent.value.getData().toBytes())).isEqualTo(legalElection.key);
     assertThat(actualTTLEvent.value.getType()).isEqualTo(CloudEventTypes.ELECTION_EXPIRATION_EVENT);
+
+    // only PENDING
+    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ElectionView.CLOSED));
+    assertThat(outputTopic.getQueueSize()).isZero();
+
   }
 
 }

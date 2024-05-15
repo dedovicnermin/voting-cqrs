@@ -24,7 +24,7 @@ public class TestCEBuilder {
     return ceBuilder.withId("test").withType(CloudEventTypes.ELECTION_VOTE_CMD).withSubject("test").withData(StreamUtils.wrapCloudEventData(electionVote)).build();
   }
 
-  public static CloudEvent buildCE(final ElectionView electionView) {
-    return ceBuilder.withId("test").withType(CloudEventTypes.ELECTION_VIEW_CMD).withSubject("test").withData(StreamUtils.wrapCloudEventData(electionView)).build();
+  public static CloudEvent buildCE(final String key, final ElectionView electionView) {
+    return ceBuilder.withId(key).withType(CloudEventTypes.ELECTION_VIEW_CMD).withSubject(key).withData(StreamUtils.wrapCloudEventData(electionView)).build();
   }
 }
