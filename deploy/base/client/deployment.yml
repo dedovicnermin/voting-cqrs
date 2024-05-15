@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edv-client
+  labels:
+    app: edv-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edv-client
+  template:
+    metadata:
+      labels:
+        app: edv-client
+    spec:
+      containers:
+        - name: edv-client
+          image: registry.nermdev.io/apps/edv-client
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 1.0
+              memory: 512Mi
+            limits:
+              cpu: 2.0
+              memory: 1Gi
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                  - key: node-role.kubernetes.io/master
+                    operator: DoesNotExist
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - edv-client
+              topologyKey: "kubernetes.io/hostname"

@@ -34,6 +34,11 @@ Interact with `query-service` component for creating an account
 
 ## Events
 
+### ElectionView
+- each time user clicks a particular election, an event is emitted containing
+  - election ID
+  - Election view (sends PENDING on OPEN elections if `.now()` > election.endTs)
+
 ### ElectionVote
 
 ```
@@ -58,9 +63,10 @@ value : {
 }
 ```
 
-
-## Encountering CORS issue:
-
 ```
-open -n -a /Applications/Google\ Chrome.app --args --user-data-dir="/tmp/disableSecChrome" --disable-web-security
+docker run -d --name edv-client \
+  -p 3000:3000 \
+  -e REACT_APP_QUERY_SERVICE_URL=http://query-service.test.nermdev.io \
+  -e REACT_APP_CMD_ENDPOINT=ws://cmd-bridge.test.nermdev.io/cmd \
+  registry.nermdev.io/apps/edv-client:$VERSION
 ```

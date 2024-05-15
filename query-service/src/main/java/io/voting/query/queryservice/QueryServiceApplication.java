@@ -19,7 +19,7 @@ public class QueryServiceApplication {
       @Override
       public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOriginPatterns("http://*:3000");
+                .allowedOriginPatterns("http://*");
       }
     };
   }
