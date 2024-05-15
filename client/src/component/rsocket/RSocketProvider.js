@@ -33,7 +33,7 @@ export const RSocketProvider = ({ children }) => {
         // Connect to RSocket server
         rsocketClient.connect().subscribe({
             onComplete: socket => {
-                console.log('Connection established');
+                console.log('Connection with cmd server established');
                 setClient(socket);
             },
             onError: error => console.error('Connection has failed', error),

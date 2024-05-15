@@ -15,24 +15,12 @@ steps:
 
   - group: ":k8s: Component deployment validation :hammer:"
     steps:
-      - label: ":gandalf: Deploy-validation : election-integrity :gandalf:"
+      - label: ":gandalf: Overlays :gandalf:"
         commands:
+          - kustomize build deploy/overlay/test/client > /dev/null
+          - kustomize build deploy/overlay/test/cmd-bridge > /dev/null
           - kustomize build deploy/overlay/test/election-integrity > /dev/null
-        plugins:
-          - docker#v5.8.0:
-              image: dedovicnermin/buildkite-j17:0.0.2
-              propagate-uid-gid: true
-
-      - label: ":gandalf: Deploy-validation : event-sink :gandalf:"
-        commands:
           - kustomize build deploy/overlay/test/event-sink > /dev/null
-        plugins:
-          - docker#v5.8.0:
-              image: dedovicnermin/buildkite-j17:0.0.2
-              propagate-uid-gid: true
-
-      - label: ":gandalf: Deploy-validation : query-service :gandalf:"
-        commands:
           - kustomize build deploy/overlay/test/query-service > /dev/null
         plugins:
           - docker#v5.8.0:

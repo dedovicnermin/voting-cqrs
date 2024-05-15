@@ -7,12 +7,15 @@ commonLabels:
   project: edv
 
 resources:
+  - ../../overlay/test/client
   - ../../overlay/test/cmd-bridge
   - ../../overlay/test/election-integrity
   - ../../overlay/test/event-sink
   - ../../overlay/test/query-service
 
 images:
+  - name: registry.nermdev.io/apps/edv-client
+    newTag: 0.0.1
   - name: registry.nermdev.io/apps/cmd-bridge
     newTag: 0.0.1-SNAPSHOT
   - name: registry.nermdev.io/apps/election-integrity

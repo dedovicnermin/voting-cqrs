@@ -9,13 +9,9 @@ export default function ElectionHeader({election}) {
      * This should only run on mount
      */
     useEffect(() => {
-        console.log(`Logging election view : ${election.id} : ${election.status}`)
         const nowTs = new Date().getTime();
         let status = election.status;
-        console.log(election.endTs)
-        console.log(nowTs)
-        console.log(nowTs >= election.endTs)
-        if (nowTs >= election.endTs && status !== 'CLOSED') {
+        if (status !== 'CLOSED' && nowTs >= election.endTs) {
             status = 'PENDING'
         }
         sendFireAndForget('new-view', election.id, status, false);
