@@ -5,6 +5,7 @@ import io.voting.common.library.kafka.utils.CloudEventTypes;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.streams.kstream.Named;
 
 @Slf4j
 public class CEElectionMapper implements CEMapper<Election> {
@@ -20,5 +21,9 @@ public class CEElectionMapper implements CEMapper<Election> {
             .build();
     log.trace("CE result : {}", event);
     return event;
+  }
+
+  public static Named name() {
+    return Named.as("ei.ce.mapper");
   }
 }

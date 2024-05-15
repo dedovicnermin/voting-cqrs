@@ -9,6 +9,7 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.Aggregator;
 import org.apache.kafka.streams.kstream.Initializer;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.state.KeyValueStore;
 
 @Slf4j
@@ -30,5 +31,9 @@ public class VoteAggregator implements Aggregator<String, ElectionVote, Election
     return Materialized.<String, ElectionSummary, KeyValueStore<Bytes, byte[]>>as("election.vote.aggregate")
             .withKeySerde(Serdes.String())
             .withValueSerde(StreamUtils.getJsonSerde(ElectionSummary.class));
+  }
+
+  public static Named name() {
+    return Named.as("vi.integrity.aggregator");
   }
 }

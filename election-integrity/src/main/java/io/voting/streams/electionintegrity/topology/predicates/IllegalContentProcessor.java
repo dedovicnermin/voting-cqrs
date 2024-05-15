@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.voting.common.library.models.ElectionCreate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Predicate;
 
 import java.io.BufferedReader;
@@ -43,5 +44,9 @@ public class IllegalContentProcessor implements Predicate<String, ElectionCreate
       log.error("Error converting event into POJO : {}", electionCreate, e);
       return true;
     }
+  }
+
+  public static Named name() {
+    return Named.as("ei.integrity.filter");
   }
 }

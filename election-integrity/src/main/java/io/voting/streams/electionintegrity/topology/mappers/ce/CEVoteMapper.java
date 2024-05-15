@@ -6,6 +6,7 @@ import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionVote;
 import io.voting.streams.electionintegrity.model.ElectionSummary;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.streams.kstream.Named;
 
 @Slf4j
 public class CEVoteMapper implements CEMapper<ElectionSummary> {
@@ -23,5 +24,9 @@ public class CEVoteMapper implements CEMapper<ElectionSummary> {
 
     log.debug("Legal vote transformation result : {}", event);
     return event;
+  }
+
+  public static Named name() {
+    return Named.as("vi.ce.mapper");
   }
 }
