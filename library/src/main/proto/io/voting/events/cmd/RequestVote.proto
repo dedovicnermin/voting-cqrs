@@ -1,0 +1,9 @@
+syntax = "proto3";
+package io.voting.events.cmd;
+option java_outer_classname = "RequestVoteProto";
+
+message RequestVote {
+  string eId = 1;
+  string uId = 2;
+  string votedFor = 3;
+}

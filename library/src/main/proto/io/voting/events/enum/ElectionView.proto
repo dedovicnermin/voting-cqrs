@@ -1,0 +1,9 @@
+syntax = "proto3";
+package io.voting.events.enum;
+option java_outer_classname = "ElectionViewProto";
+
+enum ElectionView {
+  OPEN = 0;
+  PENDING = 1;
+  CLOSED = 2;
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+package io.voting.events.enum;
+option java_outer_classname = "EventTypes";
+
+enum EventType {
+  REQUEST_ELECTION_CREATE = 0;
+  REQUEST_ELECTION_VIEW = 1;
+  REQUEST_ELECTION_VOTE = 2;
+
+  PERSIST_ELECTION_CREATE = 10;
+  PERSIST_ELECTION_CLOSE = 11;
+  PERSIST_ELECTION_VOTE = 12;
+
+}

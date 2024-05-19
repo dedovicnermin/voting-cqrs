@@ -32,13 +32,22 @@
         <java.version>17</java.version>
         <spring.version>3.2.2</spring.version>
         <kafka.version>3.6.1</kafka.version>
+        <confluent.version>7.6.0</confluent.version>
         <spring-kafka.version>3.1.1</spring-kafka.version>
         <jackson.version>2.16.1</jackson.version>
         <lombok.version>1.18.30</lombok.version>
         <slf4j.version>2.0.11</slf4j.version>
         <cloudevent.version>2.3.0</cloudevent.version>
+        <protobuf.version>3.21.2</protobuf.version>
         <image>registry.nermdev.io/apps/${project.artifactId}:${project.version}</image>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -114,6 +123,11 @@
                 <version>${kafka.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-protobuf-serializer</artifactId>
+                <version>${confluent.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.cloudevents</groupId>
                 <artifactId>cloudevents-core</artifactId>
                 <version>${cloudevent.version}</version>
@@ -142,6 +156,16 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${protobuf.version}</version>
             </dependency>
 
             <!--     TEST DEPs       -->

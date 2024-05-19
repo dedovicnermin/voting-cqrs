@@ -1,0 +1,13 @@
+syntax = "proto3";
+package io.voting.events.enum;
+option java_outer_classname = "ElectionCategoryProto";
+
+enum ElectionCategory {
+  Unknown = 0;
+  Social = 1;
+  Music = 2;
+  Sports = 3;
+  Politics = 4;
+  Gaming = 5;
+  Random = 25;
+}

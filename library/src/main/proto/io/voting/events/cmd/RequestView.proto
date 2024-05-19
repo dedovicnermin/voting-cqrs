@@ -1,0 +1,14 @@
+syntax = "proto3";
+package io.voting.events.cmd;
+option java_outer_classname = "RequestViewProto";
+
+import "io/voting/events/enum/ElectionView.proto";
+import "io/voting/events/enum/ElectionCategory.proto";
+import "google/protobuf/wrappers.proto";
+
+message RequestView {
+  string eId = 1;
+  io.voting.events.enum.ElectionView eView = 2;
+  io.voting.events.enum.ElectionCategory eCategory = 3;
+  string uId = 4;
+}

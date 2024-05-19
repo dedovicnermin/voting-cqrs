@@ -1,0 +1,21 @@
+syntax = "proto3";
+package io.voting.events.cmd;
+option java_outer_classname = "CmdEventProto";
+
+import "io/voting/events/cmd/RequestCreate.proto";
+import "io/voting/events/cmd/RequestView.proto";
+import "io/voting/events/cmd/RequestVote.proto";
+import "google/protobuf/timestamp.proto";
+
+message CmdEvent {
+  string id = 1;
+  string source = 2;
+  string type = 3;
+  string subject = 4;
+  google.protobuf.Timestamp ts = 5;
+  oneof data {
+    RequestCreate electionCreate = 6;
+    RequestView electionView = 7;
+    RequestVote electionVote = 8;
+  }
+}

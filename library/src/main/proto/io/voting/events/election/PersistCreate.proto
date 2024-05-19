@@ -1,0 +1,18 @@
+syntax = "proto3";
+package io.voting.events.election;
+option java_outer_classname = "PersistCreateProto";
+
+import "io/voting/events/enum/ElectionCategory.proto";
+import "google/protobuf/timestamp.proto";
+
+message PersistCreate {
+  string id = 1;
+  string author = 2;
+  string title = 3;
+  string description = 4;
+  io.voting.events.enum.ElectionCategory category = 5;
+  map<string, int64> candidates = 6;
+  google.protobuf.Timestamp startTs = 7;
+  google.protobuf.Timestamp endTs = 8;
+  string status = 9;
+}
