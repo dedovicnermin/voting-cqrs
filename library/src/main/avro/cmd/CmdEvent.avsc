@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "CmdEvent",
+  "namespace": "io.voting.events.cmd",
+  "doc": "Events emitted from the cmd-bridge component",
+  "fields": [
+    {
+      "name": "cmd",
+      "type": [
+        "io.voting.events.cmd.CreateElection",
+        "io.voting.events.cmd.ViewElection",
+        "io.voting.events.cmd.RegisterVote"
+      ]
+    }
+  ]
+}

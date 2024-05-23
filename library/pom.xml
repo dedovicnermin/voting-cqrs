@@ -17,7 +17,15 @@
 
     <properties>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <schema.registry.url>http://localhost:8081</schema.registry.url>
     </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -44,10 +52,107 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
+                            <imports>
+                                <import>${project.basedir}/src/main/avro/enum/ElectionCategory.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/CmdEvent.avsc</import>
+                            </imports>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-schema-registry-maven-plugin</artifactId>
+                <version>${confluent.version}</version>
+                <configuration>
+                    <schemaRegistryUrls>${schema.registry.url}</schemaRegistryUrls>
+                    <subjects>
+                        <election-category>${project.basedir}/src/main/avro/enum/ElectionCategory.avsc</election-category>
+                        <create-election-cmd>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</create-election-cmd>
+                        <view-election-cmd>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</view-election-cmd>
+                        <register-vote-cmd>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</register-vote-cmd>
+                        <election.commands-value>${project.basedir}/src/main/avro/cmd/CmdEvent.avsc</election.commands-value>
+                    </subjects>
+                    <schemaTypes>
+                        <election-category>AVRO</election-category>
+                        <create-election-cmd>AVRO</create-election-cmd>
+                        <view-election-cmd>AVRO</view-election-cmd>
+                        <register-vote-cmd>AVRO</register-vote-cmd>
+                        <election.commands-value>AVRO</election.commands-value>
+                    </schemaTypes>
+                    <references>
+                        <create-election-cmd>
+                            <reference>
+                                <name>io.voting.events.enums.ElectionCategory</name>
+                                <subject>election-category</subject>
+                            </reference>
+                        </create-election-cmd>
+                        <election.commands-value>
+                            <reference>
+                                <name>io.voting.events.cmd.ElectionCreateData</name>
+                                <subject>create-election-cmd</subject>
+                            </reference>
+                            <reference>
+                                <name>io.voting.events.cmd.ElectionViewData</name>
+                                <subject>view-election-cmd</subject>
+                            </reference>
+                            <reference>
+                                <name>io.voting.events.cmd.ElectionVoteData</name>
+                                <subject>register-vote-cmd</subject>
+                            </reference>
+                        </election.commands-value>
+                    </references>
+
+                    <compatibilityLevels/>
+                    <messagePath/>
+                    <outputDirectory/>
+                    <outputPath/>
+                    <previousSchemaPaths/>
+                    <schemas/>
+<!--                    <userInfoConfig>${schema.registry.basic.auth.user.info}</userInfoConfig>-->
+                    <configs>
+<!--                        <schema.registry.ssl.truststore.location>/Users/ndedovic/PycharmProjects/homelab/workspace/kafka/auth/nermin/truststore.jks</schema.registry.ssl.truststore.location>-->
+<!--                        <schema.registry.ssl.truststore.password>mystorepassword</schema.registry.ssl.truststore.password>-->
+                    </configs>
+                </configuration>
+            </plugin>
+
+
+
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>

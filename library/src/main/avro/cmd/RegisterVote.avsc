@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "RegisterVote",
+  "namespace": "io.voting.events.cmd",
+  "doc": "Data sent by frontend when user submits election vote",
+  "fields": [
+    {
+      "name": "eId",
+      "type": "string",
+      "doc": "Election ID"
+    },
+    {
+      "name": "votedFor",
+      "type": "string",
+      "doc": "Candidate selected from election"
+    }
+  ]
+}

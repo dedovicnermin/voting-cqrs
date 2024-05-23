@@ -1,0 +1,35 @@
+{
+  "type": "record",
+  "name": "CreateElection",
+  "doc": "Data entered by user when creating a new election",
+  "namespace": "io.voting.events.cmd",
+  "fields": [
+    {
+      "name": "author",
+      "type": "string",
+      "doc": "The username of the client requesting new election be created"
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "doc": "The name of the election"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "doc": "A explanation of what the election is targeting from audience, applicable when title is not sufficient"
+    },
+    {
+      "name": "category",
+      "type": "io.voting.events.enum.ElectionCategory",
+      "doc": "The high-level subject/scope of the election"
+    },
+    {
+      "name": "candidates",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    }
+  ]
+}
