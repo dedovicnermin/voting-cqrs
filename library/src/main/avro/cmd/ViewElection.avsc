@@ -6,7 +6,10 @@
   "fields": [
     {
       "name": "eId",
-      "type": "string"
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      }
     },
     {
       "name": "view",

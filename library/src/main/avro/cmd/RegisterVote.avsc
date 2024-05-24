@@ -6,12 +6,18 @@
   "fields": [
     {
       "name": "eId",
-      "type": "string",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
       "doc": "Election ID"
     },
     {
       "name": "votedFor",
-      "type": "string",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
       "doc": "Candidate selected from election"
     }
   ]

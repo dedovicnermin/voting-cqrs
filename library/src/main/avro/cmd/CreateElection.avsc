@@ -6,17 +6,26 @@
   "fields": [
     {
       "name": "author",
-      "type": "string",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
       "doc": "The username of the client requesting new election be created"
     },
     {
       "name": "title",
-      "type": "string",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
       "doc": "The name of the election"
     },
     {
       "name": "description",
-      "type": "string",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
       "doc": "A explanation of what the election is targeting from audience, applicable when title is not sufficient"
     },
     {
@@ -28,7 +37,10 @@
       "name": "candidates",
       "type": {
         "type": "array",
-        "items": "string"
+        "items": {
+          "type": "string",
+          "avro.java.string": "String"
+        }
       }
     }
   ]

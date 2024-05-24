@@ -81,7 +81,6 @@
                             <goal>schema</goal>
                         </goals>
                         <configuration>
-                            <stringType>String</stringType>
                             <sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
                             <imports>
                                 <import>${project.basedir}/src/main/avro/enums/ElectionCategory.avsc</import>

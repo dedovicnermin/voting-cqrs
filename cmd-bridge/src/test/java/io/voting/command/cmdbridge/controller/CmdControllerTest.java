@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -72,7 +73,7 @@ class CmdControllerTest extends TestKafkaContext {
 
     final Schema electionCategorySchema = ElectionCategory.getClassSchema();
 //    final Schema createElectionSchema = CreateElection.getClassSchema();
-    final String createElectionSchema = "{\"type\":\"record\",\"name\":\"CreateElection\",\"doc\":\"Data entered by user when creating a new election\",\"namespace\":\"io.voting.events.cmd\",\"fields\":[{\"name\":\"author\",\"type\":\"string\",\"doc\":\"The username of the client requesting new election be created\"},{\"name\":\"title\",\"type\":\"string\",\"doc\":\"The name of the election\"},{\"name\":\"description\",\"type\":\"string\",\"doc\":\"A explanation of what the election is targeting from audience, applicable when title is not sufficient\"},{\"name\":\"category\",\"type\":\"io.voting.events.enums.ElectionCategory\",\"doc\":\"The high-level subject/scope of the election\"},{\"name\":\"candidates\",\"type\":{\"type\":\"array\",\"items\":\"string\"}}]}";
+    final String createElectionSchema = "{\"type\":\"record\",\"name\":\"CreateElection\",\"doc\":\"Data entered by user when creating a new election\",\"namespace\":\"io.voting.events.cmd\",\"fields\":[{\"name\":\"author\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The username of the client requesting new election be created\"},{\"name\":\"title\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The name of the election\"},{\"name\":\"description\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"A explanation of what the election is targeting from audience, applicable when title is not sufficient\"},{\"name\":\"category\",\"type\":\"io.voting.events.enums.ElectionCategory\",\"doc\":\"The high-level subject/scope of the election\"},{\"name\":\"candidates\",\"type\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}}]}";
     final Schema viewElectionSchema = ViewElection.getClassSchema();
     final Schema registerVoteSchema = RegisterVote.getClassSchema();
 //    final Schema cmdEventSchema = CmdEvent.getClassSchema();
@@ -87,12 +88,17 @@ class CmdControllerTest extends TestKafkaContext {
       int electionCategoryId = client.register("election-category", new AvroSchema(electionCategorySchema));
       System.out.println("Registered election category: " + electionCategoryId);
 
+      Thread.sleep(2000);
+
       int viewElectionId = client.register("view-election-cmd", new AvroSchema(viewElectionSchema));
       System.out.println("Registered view election: " + viewElectionId);
+
+      Thread.sleep(2000);
 
       int registerVoteId = client.register("register-vote-cmd", new AvroSchema(registerVoteSchema));
       System.out.println("Registered register vote: " + registerVoteId);
 
+      Thread.sleep(2000);
 
       String schema = client.getByVersion("election-category", -1, true).getSchema();
       SchemaReference electionCategoryRef = new SchemaReference(ElectionCategory.class.getName(), "election-category", electionCategoryId);
@@ -109,20 +115,26 @@ class CmdControllerTest extends TestKafkaContext {
 
       Thread.sleep(10000);
 
+      Map<String, String> name = Map.of(
+              ElectionCategory.class.getName(), schema,
+              CreateElection.class.getName(), createElectionSchema,
+              ViewElection.class.getName(), client.getByVersion("view-election-cmd", -1, true).getSchema(),
+              RegisterVote.class.getName(), client.getByVersion("register-vote-cmd", -1, true).getSchema()
+      );
+      Thread.sleep(1000);
+      Integer vecmdVersion = client.getByVersion("view-election-cmd", -1, true).getVersion();
+      Integer rvcmdVersion = client.getByVersion("register-vote-cmd", -1, true).getVersion();
+      Integer cecmdVersion = client.getByVersion("create-election-cmd", -1, true).getVersion();
+      Thread.sleep(1000);
+      List<SchemaReference> references = Arrays.asList(
+              new SchemaReference(ViewElection.class.getName(), "view-election-cmd", vecmdVersion),
+              new SchemaReference(RegisterVote.class.getName(), "register-vote-cmd", rvcmdVersion),
+              new SchemaReference(CreateElection.class.getName(), "create-election-cmd", cecmdVersion)
+      );
       int cmdEventId = client.register("test.election.commands-value", new AvroSchema(
               cmdEventSchema,
-              Arrays.asList(
-//                      new SchemaReference(electionCategoryRef.getName(), "election-category", client.getByVersion("election-category", -1, true).getVersion()),
-                      new SchemaReference(ViewElection.class.getName(), "view-election-cmd", client.getByVersion("view-election-cmd", -1, true).getVersion()),
-                      new SchemaReference(RegisterVote.class.getName(), "register-vote-cmd", client.getByVersion("register-vote-cmd", -1, true).getVersion()),
-                      new SchemaReference(CreateElection.class.getName(), "create-election-cmd", client.getByVersion("create-election-cmd", -1, true).getVersion())
-              ),
-              Map.of(
-                      ElectionCategory.class.getName(), schema,
-                      CreateElection.class.getName(), createElectionSchema,
-                      ViewElection.class.getName(), client.getByVersion("view-election-cmd", -1, true).getSchema(),
-                      RegisterVote.class.getName(), client.getByVersion("register-vote-cmd", -1, true).getSchema()
-              ),
+              references,
+              name,
               null
       ));
       System.out.println("Registered cmd-event: " + cmdEventId);
