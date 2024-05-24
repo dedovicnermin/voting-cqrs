@@ -8,7 +8,9 @@ spring:
 kafka:
   properties:
     bootstrap.servers: bootstrap.replace.in.itest:443
-    auto.register.schemas: true
+#    auto.register.schemas: true
+    use.latest.version: true
+    latest.compatibility.strict: false
     schema.registry.url: http://willbereplaced:8081
   producer:
     linger.ms: 1

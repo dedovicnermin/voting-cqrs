@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -108,6 +107,8 @@ class CmdControllerTest extends TestKafkaContext {
       );
       System.out.println("registered create-election-cmd: " + electionCreateId);
 
+      Thread.sleep(10000);
+
       int cmdEventId = client.register("test.election.commands-value", new AvroSchema(
               cmdEventSchema,
               Arrays.asList(
@@ -129,6 +130,8 @@ class CmdControllerTest extends TestKafkaContext {
     } catch (RestClientException e) {
         throw new RuntimeException(e);
     } catch (IOException e) {
+        throw new RuntimeException(e);
+    } catch (InterruptedException e) {
         throw new RuntimeException(e);
     }
 
