@@ -2,8 +2,6 @@ package io.voting.command.cmdbridge.mappers;
 
 import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.clients.serialization.avro.AvroCloudEventData;
-import io.voting.common.library.kafka.utils.CloudEventTypes;
-import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionView;
 import io.voting.events.cmd.CmdEvent;
 import io.voting.events.cmd.ViewElection;
@@ -30,8 +28,14 @@ public class ElectionViewCmdMapper implements CloudEventMapper<String, ElectionV
 
   @Override
   public CmdEvent format(String electionId, ElectionView view) {
-    return new CmdEvent(
-            new ViewElection(electionId, io.voting.events.enums.ElectionView.valueOf(view.name()))
-    );
+    try {
+      io.voting.events.enums.ElectionView eView = io.voting.events.enums.ElectionView.valueOf(view.name());
+      return new CmdEvent(new ViewElection(electionId, eView));
+    } catch (IllegalArgumentException e) {
+      log.error("Unsupported election view: {}", view.name());
+      return new CmdEvent(
+              new ViewElection(electionId, io.voting.events.enums.ElectionView.UNKNOWN)
+      );
+    }
   }
 }

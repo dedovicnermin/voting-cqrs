@@ -14,6 +14,7 @@ import io.voting.common.library.models.ElectionVote;
 import io.voting.events.cmd.CmdEvent;
 import io.voting.events.cmd.CreateElection;
 import io.voting.events.cmd.RegisterVote;
+import io.voting.events.cmd.ViewElection;
 import io.voting.events.enum$.ElectionCategory;
 import lombok.SneakyThrows;
 import org.apache.avro.generic.IndexedRecord;
@@ -34,7 +35,9 @@ import reactor.test.StepVerifier;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -80,17 +83,18 @@ class CmdControllerTest extends TestKafkaContext {
     StepVerifier
             .create(result)
             .verifyComplete();
+
     final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(10, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("777:888");
     assertThat(element.getPOrE().getError()).isNull();
-    final CloudEvent payload = element.getPOrE().getPayload();
-    assertThat(payload.getType()).isEqualTo(RegisterVote.class.getName());
+    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(RegisterVote.class.getName());
 
-    final CmdEvent payloadData = AvroCloudEventData.dataOf(payload.getData());
+    final CmdEvent payloadData = AvroCloudEventData.dataOf(element.getPOrE().getPayload().getData());
+    assertThat(payloadData.getCmd()).isNotNull().isInstanceOf(RegisterVote.class);
 
-    assertThat(payloadData.getCmd()).isNotNull();
-    assertThat(((RegisterVote)payloadData.getCmd()).getEId().toString()).isEqualTo("888");
-    assertThat(((RegisterVote)payloadData.getCmd()).getVotedFor().toString()).isEqualTo("Doug");
+    final RegisterVote actualCmd = (RegisterVote) payloadData.getCmd();
+    assertThat(actualCmd.getEId()).hasToString("888");
+    assertThat(actualCmd.getVotedFor()).hasToString("Doug");
 
   }
 
@@ -115,11 +119,11 @@ class CmdControllerTest extends TestKafkaContext {
 
     assertThat(payloadData.getCmd()).isNotNull().isInstanceOf(CreateElection.class);
     final CreateElection actualPayloadData = (CreateElection) payloadData.getCmd();
-    assertThat(actualPayloadData.getAuthor().toString()).isEqualTo(expectedCmdData.getAuthor());
-    assertThat(actualPayloadData.getTitle().toString()).isEqualTo(expectedCmdData.getTitle());
-    assertThat(actualPayloadData.getDescription().toString()).isEqualTo(expectedCmdData.getDescription());
-    assertThat(actualPayloadData.getCandidates()).isEqualTo(new ArrayList<>(expectedCmdData.getCandidates()));
+    assertThat(actualPayloadData.getAuthor()).hasToString(expectedCmdData.getAuthor());
+    assertThat(actualPayloadData.getTitle()).hasToString(expectedCmdData.getTitle());
+    assertThat(actualPayloadData.getDescription()).hasToString(expectedCmdData.getDescription());
     assertThat(actualPayloadData.getCategory()).isEqualTo(ElectionCategory.Gaming);
+    assertThat(actualPayloadData.getCandidates().stream().map(CharSequence::toString).toList()).isEqualTo(expectedCmdData.getCandidates());
   }
 
   @SneakyThrows
@@ -137,10 +141,16 @@ class CmdControllerTest extends TestKafkaContext {
 
     final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("778");
-    final CloudEvent payload = element.getPOrE().getPayload();
-    assertThat(payload.getType()).isEqualTo(CloudEventTypes.ELECTION_VIEW_CMD);
-    assertThat(payload.getSubject()).isEqualTo("778");
-    assertThat(StreamUtils.unwrapCloudEventData(payload.getData(), ElectionView.class)).isEqualTo(ElectionView.OPEN);
+    assertThat(element.getPOrE().getError()).isNull();
+    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(ViewElection.class.getName());
+    assertThat(element.getPOrE().getPayload().getSubject()).isEqualTo("778");
+
+    final CmdEvent cmdEvent = AvroCloudEventData.dataOf(element.getPOrE().getPayload().getData());
+    assertThat(cmdEvent.getCmd()).isNotNull().isInstanceOf(ViewElection.class);
+
+    final ViewElection actualData = (ViewElection) cmdEvent.getCmd();
+    assertThat(actualData.getEId()).hasToString("778");
+    assertThat(actualData.getView()).isEqualTo(io.voting.events.enums.ElectionView.OPEN);
 
   }
 }

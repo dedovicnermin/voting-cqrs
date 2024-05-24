@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Optional;
 
 @Slf4j
 public class ElectionCreateCmdMapper implements CloudEventMapper<String, ElectionCreate> {
@@ -31,15 +30,25 @@ public class ElectionCreateCmdMapper implements CloudEventMapper<String, Electio
 
   @Override
   public CmdEvent format(String key, ElectionCreate electionCreate) {
-    return new CmdEvent(
-            new CreateElection(
-                    electionCreate.getAuthor(),
-                    electionCreate.getTitle(),
-                    electionCreate.getDescription(),
-                    Optional.of(ElectionCategory.valueOf(electionCreate.getCategory())).orElse(ElectionCategory.Unknown),
-                    new ArrayList<>(electionCreate.getCandidates())
-            )
-    );
+    try {
+      ElectionCategory category = ElectionCategory.valueOf(electionCreate.getCategory());
+      return new CmdEvent(new CreateElection(
+              electionCreate.getAuthor(),
+              electionCreate.getTitle(),
+              electionCreate.getDescription(),
+              category,
+              new ArrayList<>(electionCreate.getCandidates())
+      ));
+    } catch (IllegalArgumentException e) {
+      log.error("Unsupported ElectionCategory: {}", electionCreate.getCategory());
+      return new CmdEvent(new CreateElection(
+              electionCreate.getAuthor(),
+              electionCreate.getTitle(),
+              electionCreate.getDescription(),
+              ElectionCategory.Random,
+              new ArrayList<>(electionCreate.getCandidates())
+      ));
+    }
   }
 
 }
