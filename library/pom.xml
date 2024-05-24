@@ -81,9 +81,10 @@
                             <goal>schema</goal>
                         </goals>
                         <configuration>
+                            <stringType>String</stringType>
                             <sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
                             <imports>
-                                <import>${project.basedir}/src/main/avro/enum/ElectionCategory.avsc</import>
+                                <import>${project.basedir}/src/main/avro/enums/ElectionCategory.avsc</import>
                                 <import>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</import>
                                 <import>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</import>
                                 <import>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</import>
@@ -101,7 +102,7 @@
                 <configuration>
                     <schemaRegistryUrls>${schema.registry.url}</schemaRegistryUrls>
                     <subjects>
-                        <election-category>${project.basedir}/src/main/avro/enum/ElectionCategory.avsc</election-category>
+                        <election-category>${project.basedir}/src/main/avro/enums/ElectionCategory.avsc</election-category>
                         <create-election-cmd>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</create-election-cmd>
                         <view-election-cmd>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</view-election-cmd>
                         <register-vote-cmd>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</register-vote-cmd>
@@ -123,15 +124,15 @@
                         </create-election-cmd>
                         <election.commands-value>
                             <reference>
-                                <name>io.voting.events.cmd.ElectionCreateData</name>
+                                <name>io.voting.events.cmd.ElectionCreate</name>
                                 <subject>create-election-cmd</subject>
                             </reference>
                             <reference>
-                                <name>io.voting.events.cmd.ElectionViewData</name>
+                                <name>io.voting.events.cmd.ViewElection</name>
                                 <subject>view-election-cmd</subject>
                             </reference>
                             <reference>
-                                <name>io.voting.events.cmd.ElectionVoteData</name>
+                                <name>io.voting.events.cmd.RegisterVote</name>
                                 <subject>register-vote-cmd</subject>
                             </reference>
                         </election.commands-value>

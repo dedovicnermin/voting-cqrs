@@ -5,7 +5,7 @@ import io.voting.common.library.kafka.clients.serialization.avro.AvroCloudEventD
 import io.voting.common.library.models.ElectionCreate;
 import io.voting.events.cmd.CmdEvent;
 import io.voting.events.cmd.CreateElection;
-import io.voting.events.enum$.ElectionCategory;
+import io.voting.events.enums.ElectionCategory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;

@@ -1,7 +1,7 @@
 {
   "type": "enum",
   "name": "ElectionCategory",
-  "namespace": "io.voting.events.enum",
+  "namespace": "io.voting.events.enums",
   "doc": "A high-level scope of what the election is about",
   "symbols": [
     "Social", "Music", "Sports", "Politics", "Gaming", "Random", "Unknown"

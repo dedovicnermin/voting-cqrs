@@ -1,7 +1,7 @@
 {
   "type": "enum",
   "name": "ElectionStatus",
-  "namespace": "io.voting.events.enum",
+  "namespace": "io.voting.events.enums",
   "doc": "Represents the state of an Election",
   "symbols": [
     "OPEN", "CLOSED"

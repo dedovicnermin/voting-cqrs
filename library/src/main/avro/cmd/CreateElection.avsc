@@ -21,7 +21,7 @@
     },
     {
       "name": "category",
-      "type": "io.voting.events.enum.ElectionCategory",
+      "type": "io.voting.events.enums.ElectionCategory",
       "doc": "The high-level subject/scope of the election"
     },
     {
