@@ -14,7 +14,7 @@ public class VoteCmdMapper implements CloudEventMapper<String, ElectionVote> {
 
   @Override
   public CloudEvent apply(String key, ElectionVote electionVote) {
-    log.trace("Applying transformation (K,V): {}, {}", key, electionVote);
+    log.trace("Applying CE transformation (K,V): {}, {}", key, electionVote);
     final CloudEvent event = ceBuilder
             .withId(key)
             .withType(RegisterVote.class.getName())
@@ -22,14 +22,17 @@ public class VoteCmdMapper implements CloudEventMapper<String, ElectionVote> {
             .withData(AvroCloudEventData.MIME_TYPE, avroData(key, electionVote))
             .withTime(OffsetDateTime.now())
             .build();
-    log.trace("Applied transformation: {}", event);
+    log.trace("Applied CE transformation: {}", event);
     return event;
   }
 
   @Override
   public CmdEvent format(String key, ElectionVote value) {
     return new CmdEvent(
-            new RegisterVote(value.getElectionId(), value.getVotedFor())
+            RegisterVote.newBuilder()
+                    .setEId(value.getElectionId())
+                    .setVotedFor(value.getVotedFor())
+                    .build()
     );
   }
 

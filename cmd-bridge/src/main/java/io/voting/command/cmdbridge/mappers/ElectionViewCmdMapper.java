@@ -14,7 +14,7 @@ public class ElectionViewCmdMapper implements CloudEventMapper<String, ElectionV
 
   @Override
   public CloudEvent apply(String key, ElectionView electionView) {
-    log.trace("Applying transformation (K,V): {}, {}", key, electionView);
+    log.trace("Applying CE transformation (K,V): {}, {}", key, electionView);
     final CloudEvent event = ceBuilder
             .withId(key)
             .withType(ViewElection.class.getName())
@@ -22,7 +22,7 @@ public class ElectionViewCmdMapper implements CloudEventMapper<String, ElectionV
             .withData(AvroCloudEventData.MIME_TYPE, avroData(key, electionView))
             .withTime(OffsetDateTime.now())
             .build();
-    log.trace("Applied transformation: {}", event);
+    log.trace("Applied CE transformation: {}", event);
     return event;
   }
 
@@ -30,12 +30,17 @@ public class ElectionViewCmdMapper implements CloudEventMapper<String, ElectionV
   public CmdEvent format(String electionId, ElectionView view) {
     try {
       io.voting.events.enums.ElectionView eView = io.voting.events.enums.ElectionView.valueOf(view.name());
-      return new CmdEvent(new ViewElection(electionId, eView));
+      return new CmdEvent(buildViewElection(electionId, eView));
     } catch (IllegalArgumentException e) {
-      log.error("Unsupported election view: {}", view.name());
-      return new CmdEvent(
-              new ViewElection(electionId, io.voting.events.enums.ElectionView.UNKNOWN)
-      );
+      log.error("Unsupported election view ({}) present in election view payload", view.name());
+      return new CmdEvent(buildViewElection(electionId, io.voting.events.enums.ElectionView.UNKNOWN));
     }
+  }
+
+  private ViewElection buildViewElection(final String electionId, final io.voting.events.enums.ElectionView view) {
+    return ViewElection.newBuilder()
+            .setEId(electionId)
+            .setView(view)
+            .build();
   }
 }

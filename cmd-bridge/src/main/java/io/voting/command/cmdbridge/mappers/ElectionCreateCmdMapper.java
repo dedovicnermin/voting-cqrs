@@ -16,7 +16,7 @@ public class ElectionCreateCmdMapper implements CloudEventMapper<String, Electio
 
   @Override
   public CloudEvent apply(String key, ElectionCreate electionCreate) {
-    log.trace("Applying transformation (K,V): {}, {}", key, electionCreate);
+    log.trace("Applying CE transformation (K,V): {}, {}", key, electionCreate);
     final CloudEvent event = ceBuilder
             .withId(key)
             .withType(CreateElection.class.getName())
@@ -24,7 +24,7 @@ public class ElectionCreateCmdMapper implements CloudEventMapper<String, Electio
             .withData(AvroCloudEventData.MIME_TYPE, avroData(key, electionCreate))
             .withTime(OffsetDateTime.now())
             .build();
-    log.trace("Applied transformation: {}", event);
+    log.trace("Applied CE transformation: {}", event);
     return event;
   }
 
@@ -32,23 +32,21 @@ public class ElectionCreateCmdMapper implements CloudEventMapper<String, Electio
   public CmdEvent format(String key, ElectionCreate electionCreate) {
     try {
       ElectionCategory category = ElectionCategory.valueOf(electionCreate.getCategory());
-      return new CmdEvent(new CreateElection(
-              electionCreate.getAuthor(),
-              electionCreate.getTitle(),
-              electionCreate.getDescription(),
-              category,
-              new ArrayList<>(electionCreate.getCandidates())
-      ));
+      return new CmdEvent(buildCreateElection(electionCreate, category));
     } catch (IllegalArgumentException e) {
-      log.error("Unsupported ElectionCategory: {}", electionCreate.getCategory());
-      return new CmdEvent(new CreateElection(
-              electionCreate.getAuthor(),
-              electionCreate.getTitle(),
-              electionCreate.getDescription(),
-              ElectionCategory.Random,
-              new ArrayList<>(electionCreate.getCandidates())
-      ));
+      log.error("Unsupported ElectionCategory ({}) present in payload : {}", electionCreate.getCategory(), electionCreate);
+      return new CmdEvent(buildCreateElection(electionCreate, ElectionCategory.Unknown));
     }
+  }
+
+  private CreateElection buildCreateElection(final ElectionCreate electionCreate, final ElectionCategory category) {
+    return CreateElection.newBuilder()
+            .setAuthor(electionCreate.getAuthor())
+            .setTitle(electionCreate.getTitle())
+            .setDescription(electionCreate.getDescription())
+            .setCategory(category)
+            .setCandidates(new ArrayList<>(electionCreate.getCandidates()))
+            .build();
   }
 
 }
