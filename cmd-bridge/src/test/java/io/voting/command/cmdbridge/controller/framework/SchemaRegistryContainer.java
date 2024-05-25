@@ -2,7 +2,6 @@ package io.voting.command.cmdbridge.controller.framework;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 public class SchemaRegistryContainer extends GenericContainer<SchemaRegistryContainer> {
@@ -22,7 +21,6 @@ public class SchemaRegistryContainer extends GenericContainer<SchemaRegistryCont
   }
 
   public SchemaRegistryContainer withKafka(KafkaContainer kafka) {
-//    return withKafka(kafka.getNetwork(), kafka.getBootstrapServers());
     return withKafkaC(kafka);
   }
 

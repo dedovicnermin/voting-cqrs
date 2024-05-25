@@ -1,10 +1,6 @@
 package io.voting.command.cmdbridge.controller;
 
 import io.cloudevents.CloudEvent;
-import io.confluent.kafka.schemaregistry.avro.AvroSchema;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.voting.command.cmdbridge.config.AppConfig;
 import io.voting.command.cmdbridge.controller.framework.TestConsumerHelper;
 import io.voting.command.cmdbridge.controller.framework.TestKafkaContext;
@@ -19,8 +15,6 @@ import io.voting.events.cmd.RegisterVote;
 import io.voting.events.cmd.ViewElection;
 import io.voting.events.enums.ElectionCategory;
 import lombok.SneakyThrows;
-import org.apache.avro.Schema;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,7 +30,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +41,6 @@ class CmdControllerTest extends TestKafkaContext {
 
   private static TestConsumerHelper consumerHelper;
   private static RSocketRequester requester;
-
 
   @DynamicPropertySource
   static void registerKafkaProperties(final DynamicPropertyRegistry dynamicPropertyRegistry) {
@@ -65,84 +57,8 @@ class CmdControllerTest extends TestKafkaContext {
             .rsocketStrategies(strategies)
             .connectWebSocket(URI.create("ws://localhost:" + port + "/cmd"))
             .block();
-
-
-    final Schema electionCategorySchema = ElectionCategory.getClassSchema();
-    final String createElectionSchema = "{\"type\":\"record\",\"name\":\"CreateElection\",\"doc\":\"Data entered by user when creating a new election\",\"namespace\":\"io.voting.events.cmd\",\"fields\":[{\"name\":\"author\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The username of the client requesting new election be created\"},{\"name\":\"title\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The name of the election\"},{\"name\":\"description\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"A explanation of what the election is targeting from audience, applicable when title is not sufficient\"},{\"name\":\"category\",\"type\":\"io.voting.events.enums.ElectionCategory\",\"doc\":\"The high-level subject/scope of the election\"},{\"name\":\"candidates\",\"type\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}}]}";
-    final Schema viewElectionSchema = ViewElection.getClassSchema();
-    final Schema registerVoteSchema = RegisterVote.getClassSchema();
-    final String cmdEventSchema = "{\"type\":\"record\",\"name\":\"CmdEvent\",\"namespace\":\"io.voting.events.cmd\",\"doc\":\"Events emitted from the cmd-bridge component\",\"fields\":[{\"name\":\"cmd\",\"type\":[\"io.voting.events.cmd.CreateElection\",\"io.voting.events.cmd.ViewElection\",\"io.voting.events.cmd.RegisterVote\"]}]}";
-
-    try (final CachedSchemaRegistryClient client = new CachedSchemaRegistryClient(TestKafkaContext.schemaRegistryUrl(), 15)) {
-
-//      int electionCategoryId = client.register("election-category", new AvroSchema(electionCategorySchema));
-//      System.out.println("Registered election category: " + electionCategoryId);
-
-      int viewElectionId = client.register("view-election-cmd", new AvroSchema(viewElectionSchema));
-      System.out.println("Registered view election: " + viewElectionId);
-
-      int registerVoteId = client.register("register-vote-cmd", new AvroSchema(registerVoteSchema));
-      System.out.println("Registered register vote: " + registerVoteId);
-
-      int createElectionId = client.register("create-election-cmd", new AvroSchema(CreateElection.getClassSchema()));
-      System.out.println("Registered register vote: " + createElectionId);
-
-
-//      SchemaReference electionCategoryRef = new SchemaReference(ElectionCategory.class.getName(), "election-category", 1);
-//      int electionCreateId = client.register(
-//              "create-election-cmd",
-//              new AvroSchema(
-//                      createElectionSchema,
-//                      Collections.singletonList(electionCategoryRef),
-//                      Collections.singletonMap(ElectionCategory.class.getName(), electionCategorySchema.toString()),
-//                              0, false
-//              )
-//      );
-//      System.out.println("registered create-election-cmd: " + electionCreateId);
-
-//      Map<String, String> name = Map.of(
-//              ElectionCategory.class.getName(), electionCategorySchema.toString(),
-//              CreateElection.class.getName(), createElectionSchema,
-//              ViewElection.class.getName(), viewElectionSchema.toString(),
-//              RegisterVote.class.getName(), registerVoteSchema.toString()
-//      );
-
-      Map<String, String> name = Map.of(
-              CreateElection.class.getName(), CreateElection.getClassSchema().toString(),
-              ViewElection.class.getName(), ViewElection.getClassSchema().toString(),
-              RegisterVote.class.getName(), RegisterVote.getClassSchema().toString()
-      );
-
-      final AvroSchema cmdEventAvroSchema = getAvroSchema(cmdEventSchema, name);
-      int cmdEventId = client.register("test.election.commands-value", cmdEventAvroSchema, true);
-      System.out.println("Registered cmd-event: " + cmdEventId);
-      Thread.sleep(3000);
-
-    } catch (RestClientException e) {
-        throw new RuntimeException(e);
-    } catch (IOException e) {
-        throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-    }
+    registerSchemas();
     consumerHelper = new TestConsumerHelper(kafkaContainer);
-
-  }
-
-  private static @NotNull AvroSchema getAvroSchema(String cmdEventSchema, Map<String, String> name) {
-    final List<SchemaReference> references = Arrays.asList(
-            new SchemaReference(CreateElection.class.getName(), "create-election-cmd", 1),
-            new SchemaReference(ViewElection.class.getName(), "view-election-cmd", 1),
-            new SchemaReference(RegisterVote.class.getName(), "register-vote-cmd", 1)
-    );
-    final AvroSchema cmdEventAvroSchema = new AvroSchema(
-            cmdEventSchema,
-            references,
-            name,
-            -1,
-            false
-    );
-    return cmdEventAvroSchema;
   }
 
   @AfterEach
@@ -163,7 +79,7 @@ class CmdControllerTest extends TestKafkaContext {
             .create(result)
             .verifyComplete();
 
-    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(10, TimeUnit.SECONDS);
+    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(5, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("777:888");
     assertThat(element.getPOrE().getError()).isNull();
     assertThat(element.getPOrE().getPayload().getType()).isEqualTo(RegisterVote.class.getName());
@@ -191,7 +107,7 @@ class CmdControllerTest extends TestKafkaContext {
             .create(result)
             .verifyComplete();
 
-    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(10, TimeUnit.SECONDS);
+    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(5, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("777");
     assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CreateElection.class.getName());
     final CmdEvent payloadData = AvroCloudEventData.dataOf(element.getPOrE().getPayload().getData());
@@ -218,7 +134,7 @@ class CmdControllerTest extends TestKafkaContext {
             .create(result)
             .verifyComplete();
 
-    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
+    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(5, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("778");
     assertThat(element.getPOrE().getError()).isNull();
     assertThat(element.getPOrE().getPayload().getType()).isEqualTo(ViewElection.class.getName());
