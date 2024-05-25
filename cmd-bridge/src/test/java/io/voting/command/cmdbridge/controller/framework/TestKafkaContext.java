@@ -1,5 +1,6 @@
 package io.voting.command.cmdbridge.controller.framework;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
@@ -8,6 +9,7 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 import io.voting.events.cmd.CreateElection;
 import io.voting.events.cmd.RegisterVote;
 import io.voting.events.cmd.ViewElection;
+import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -45,9 +47,23 @@ public abstract class TestKafkaContext {
     try (final SchemaRegistryClient client = new CachedSchemaRegistryClient(schemaRegistryUrl(), 10)) {
       registerEmbeddedOneOfs(client);
       registerCmdEventSchema(client);
+      prettyPrintSchemas();
     } catch (IOException e) {
         throw new RuntimeException(e);
     }
+  }
+
+  private static void prettyPrintSchemas() {
+    final RestTemplate restTemplate = new RestTemplate();
+    final ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      final String srResp = restTemplate.getForObject(TestKafkaContext.schemaRegistryUrl() + "/schemas", String.class);
+      System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(srResp)));
+    } catch (IOException e) {
+      System.err.println("Unexpected error while querying schema registry: " + e.getMessage());
+      throw new RuntimeException(e);
+    }
+
   }
 
   private static void registerCmdEventSchema(final SchemaRegistryClient client) {

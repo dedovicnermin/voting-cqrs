@@ -25,16 +25,15 @@ import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.RestTemplate;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @SpringBootTest
 class CmdControllerTest extends TestKafkaContext {
@@ -146,12 +145,6 @@ class CmdControllerTest extends TestKafkaContext {
     final ViewElection actualData = (ViewElection) cmdEvent.getCmd();
     assertThat(actualData.getEId()).isEqualTo("778");
     assertThat(actualData.getView()).isEqualTo(io.voting.events.enums.ElectionView.OPEN);
-
-    RestTemplate restTemplate = new RestTemplate();
-    String s = restTemplate.getForObject(TestKafkaContext.schemaRegistryUrl() + "/schemas", String.class);
-    System.out.println(s);
-    ObjectMapper objectMapper = new ObjectMapper();
-    System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(s)));
 
   }
 }
