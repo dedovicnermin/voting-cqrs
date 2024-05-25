@@ -75,8 +75,8 @@ class CmdControllerTest extends TestKafkaContext {
 
     try (final CachedSchemaRegistryClient client = new CachedSchemaRegistryClient(TestKafkaContext.schemaRegistryUrl(), 15)) {
 
-      int electionCategoryId = client.register("election-category", new AvroSchema(electionCategorySchema));
-      System.out.println("Registered election category: " + electionCategoryId);
+//      int electionCategoryId = client.register("election-category", new AvroSchema(electionCategorySchema));
+//      System.out.println("Registered election category: " + electionCategoryId);
 
       int viewElectionId = client.register("view-election-cmd", new AvroSchema(viewElectionSchema));
       System.out.println("Registered view election: " + viewElectionId);
@@ -84,24 +84,33 @@ class CmdControllerTest extends TestKafkaContext {
       int registerVoteId = client.register("register-vote-cmd", new AvroSchema(registerVoteSchema));
       System.out.println("Registered register vote: " + registerVoteId);
 
+      int createElectionId = client.register("create-election-cmd", new AvroSchema(CreateElection.getClassSchema()));
+      System.out.println("Registered register vote: " + createElectionId);
 
-      SchemaReference electionCategoryRef = new SchemaReference(ElectionCategory.class.getName(), "election-category", 1);
-      int electionCreateId = client.register(
-              "create-election-cmd",
-              new AvroSchema(
-                      createElectionSchema,
-                      Collections.singletonList(electionCategoryRef),
-                      Collections.singletonMap(ElectionCategory.class.getName(), electionCategorySchema.toString()),
-                              0, false
-              )
-      );
-      System.out.println("registered create-election-cmd: " + electionCreateId);
+
+//      SchemaReference electionCategoryRef = new SchemaReference(ElectionCategory.class.getName(), "election-category", 1);
+//      int electionCreateId = client.register(
+//              "create-election-cmd",
+//              new AvroSchema(
+//                      createElectionSchema,
+//                      Collections.singletonList(electionCategoryRef),
+//                      Collections.singletonMap(ElectionCategory.class.getName(), electionCategorySchema.toString()),
+//                              0, false
+//              )
+//      );
+//      System.out.println("registered create-election-cmd: " + electionCreateId);
+
+//      Map<String, String> name = Map.of(
+//              ElectionCategory.class.getName(), electionCategorySchema.toString(),
+//              CreateElection.class.getName(), createElectionSchema,
+//              ViewElection.class.getName(), viewElectionSchema.toString(),
+//              RegisterVote.class.getName(), registerVoteSchema.toString()
+//      );
 
       Map<String, String> name = Map.of(
-              ElectionCategory.class.getName(), electionCategorySchema.toString(),
-              CreateElection.class.getName(), createElectionSchema,
-              ViewElection.class.getName(), viewElectionSchema.toString(),
-              RegisterVote.class.getName(), registerVoteSchema.toString()
+              CreateElection.class.getName(), CreateElection.getClassSchema().toString(),
+              ViewElection.class.getName(), ViewElection.getClassSchema().toString(),
+              RegisterVote.class.getName(), RegisterVote.getClassSchema().toString()
       );
 
       final AvroSchema cmdEventAvroSchema = getAvroSchema(cmdEventSchema, name);
@@ -122,9 +131,9 @@ class CmdControllerTest extends TestKafkaContext {
 
   private static @NotNull AvroSchema getAvroSchema(String cmdEventSchema, Map<String, String> name) {
     final List<SchemaReference> references = Arrays.asList(
+            new SchemaReference(CreateElection.class.getName(), "create-election-cmd", 1),
             new SchemaReference(ViewElection.class.getName(), "view-election-cmd", 1),
-            new SchemaReference(RegisterVote.class.getName(), "register-vote-cmd", 1),
-            new SchemaReference(CreateElection.class.getName(), "create-election-cmd", 1)
+            new SchemaReference(RegisterVote.class.getName(), "register-vote-cmd", 1)
     );
     final AvroSchema cmdEventAvroSchema = new AvroSchema(
             cmdEventSchema,
