@@ -2,9 +2,7 @@ package io.voting.command.cmdbridge.controller;
 
 import io.cloudevents.CloudEvent;
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
-import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.voting.command.cmdbridge.config.AppConfig;
@@ -22,6 +20,7 @@ import io.voting.events.cmd.ViewElection;
 import io.voting.events.enums.ElectionCategory;
 import lombok.SneakyThrows;
 import org.apache.avro.Schema;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -39,10 +38,7 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.*;
@@ -69,7 +65,7 @@ class CmdControllerTest extends TestKafkaContext {
             .rsocketStrategies(strategies)
             .connectWebSocket(URI.create("ws://localhost:" + port + "/cmd"))
             .block();
-    consumerHelper = new TestConsumerHelper(kafkaContainer);
+
 
     final Schema electionCategorySchema = ElectionCategory.getClassSchema();
     final String createElectionSchema = "{\"type\":\"record\",\"name\":\"CreateElection\",\"doc\":\"Data entered by user when creating a new election\",\"namespace\":\"io.voting.events.cmd\",\"fields\":[{\"name\":\"author\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The username of the client requesting new election be created\"},{\"name\":\"title\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The name of the election\"},{\"name\":\"description\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"A explanation of what the election is targeting from audience, applicable when title is not sufficient\"},{\"name\":\"category\",\"type\":\"io.voting.events.enums.ElectionCategory\",\"doc\":\"The high-level subject/scope of the election\"},{\"name\":\"candidates\",\"type\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}}]}";
@@ -82,31 +78,24 @@ class CmdControllerTest extends TestKafkaContext {
       int electionCategoryId = client.register("election-category", new AvroSchema(electionCategorySchema));
       System.out.println("Registered election category: " + electionCategoryId);
 
-      Thread.sleep(2000);
-
       int viewElectionId = client.register("view-election-cmd", new AvroSchema(viewElectionSchema));
       System.out.println("Registered view election: " + viewElectionId);
-
-//      Thread.sleep(2000);
 
       int registerVoteId = client.register("register-vote-cmd", new AvroSchema(registerVoteSchema));
       System.out.println("Registered register vote: " + registerVoteId);
 
-      Thread.sleep(2000);
 
-      SchemaReference electionCategoryRef = new SchemaReference(ElectionCategory.class.getName(), "election-category", electionCategoryId);
+      SchemaReference electionCategoryRef = new SchemaReference(ElectionCategory.class.getName(), "election-category", 1);
       int electionCreateId = client.register(
               "create-election-cmd",
               new AvroSchema(
                       createElectionSchema,
                       Collections.singletonList(electionCategoryRef),
                       Collections.singletonMap(ElectionCategory.class.getName(), electionCategorySchema.toString()),
-                              -1, true
+                              0, false
               )
       );
       System.out.println("registered create-election-cmd: " + electionCreateId);
-
-//      Thread.sleep(10000);
 
       Map<String, String> name = Map.of(
               ElectionCategory.class.getName(), electionCategorySchema.toString(),
@@ -114,21 +103,9 @@ class CmdControllerTest extends TestKafkaContext {
               ViewElection.class.getName(), viewElectionSchema.toString(),
               RegisterVote.class.getName(), registerVoteSchema.toString()
       );
-      Thread.sleep(1000);
-      Thread.sleep(1000);
-      List<SchemaReference> references = Arrays.asList(
-              new SchemaReference(ViewElection.class.getName(), "view-election-cmd", 1),
-              new SchemaReference(RegisterVote.class.getName(), "register-vote-cmd", 1),
-              new SchemaReference(CreateElection.class.getName(), "create-election-cmd", 1)
-      );
-      AvroSchema cmdEventAvroSchema = new AvroSchema(
-              cmdEventSchema,
-              references,
-              name,
-              -1,
-              true
-      );
-      int cmdEventId = client.register("test.election.commands-value", cmdEventAvroSchema);
+
+      final AvroSchema cmdEventAvroSchema = getAvroSchema(cmdEventSchema, name);
+      int cmdEventId = client.register("test.election.commands-value", cmdEventAvroSchema, true);
       System.out.println("Registered cmd-event: " + cmdEventId);
       Thread.sleep(3000);
 
@@ -139,7 +116,24 @@ class CmdControllerTest extends TestKafkaContext {
     } catch (InterruptedException e) {
         throw new RuntimeException(e);
     }
+    consumerHelper = new TestConsumerHelper(kafkaContainer);
 
+  }
+
+  private static @NotNull AvroSchema getAvroSchema(String cmdEventSchema, Map<String, String> name) {
+    final List<SchemaReference> references = Arrays.asList(
+            new SchemaReference(ViewElection.class.getName(), "view-election-cmd", 1),
+            new SchemaReference(RegisterVote.class.getName(), "register-vote-cmd", 1),
+            new SchemaReference(CreateElection.class.getName(), "create-election-cmd", 1)
+    );
+    final AvroSchema cmdEventAvroSchema = new AvroSchema(
+            cmdEventSchema,
+            references,
+            name,
+            -1,
+            false
+    );
+    return cmdEventAvroSchema;
   }
 
   @AfterEach
