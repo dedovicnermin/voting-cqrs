@@ -36,8 +36,7 @@ import static org.assertj.core.api.Assertions.*;
 
 class TTLTopologyTest {
   static final String ELECTION_COMMANDS = "election.commands";
-  static final String ELECTION_REQUESTS = "election.requests";
-  static final String ELECTION_VOTES = "election.votes";
+  static final String ELECTION_EVENTS = "election.events";
 
   static final Serde<String> STRING_SERDE = Serdes.String();
   static Serde<Object> CLOUD_EVENT_SERDE;
@@ -54,8 +53,7 @@ class TTLTopologyTest {
     properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "election-ttl.test");
     properties.put("election.ttl", "PT15M");
     properties.put("input.topic", ELECTION_COMMANDS);
-    properties.put("output.topic.elections", ELECTION_REQUESTS);
-    properties.put("output.topic.votes", ELECTION_VOTES);
+    properties.put("output.topic", ELECTION_EVENTS);
     properties.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
     properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://mock");
     properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "true");
@@ -76,7 +74,7 @@ class TTLTopologyTest {
   void setup() {
     testDriver = new TopologyTestDriver(topology, properties);
     inputTopic = testDriver.createInputTopic(ELECTION_COMMANDS, STRING_SERDE.serializer(), CLOUD_EVENT_SERDE.serializer());
-    outputTopic = testDriver.createOutputTopic(ELECTION_REQUESTS, STRING_SERDE.deserializer(), CLOUD_EVENT_SERDE.deserializer());
+    outputTopic = testDriver.createOutputTopic(ELECTION_EVENTS, STRING_SERDE.deserializer(), CLOUD_EVENT_SERDE.deserializer());
   }
 
   @Test
@@ -95,10 +93,10 @@ class TTLTopologyTest {
 
     inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ViewElection.newBuilder().setView(io.voting.events.enums.ElectionView.OPEN).setEId(legalElection.key).build()));
     final CloudEvent voteEvent = TestCEBuilder.buildCE(RegisterVote.newBuilder().setEId(legalElection.key).setVotedFor("Foo").build());
-    inputTopic.pipeInput("userId0:" + legalElection.key, voteEvent);
-    inputTopic.pipeInput("userId1:" + legalElection.key, voteEvent);
-    inputTopic.pipeInput("userId2:" + legalElection.key, voteEvent);
-    assertThat(outputTopic.getQueueSize()).isZero();
+    inputTopic.pipeInput("userId0:" + legalElection.key, voteEvent); //legal vote
+    inputTopic.pipeInput("userId1:" + legalElection.key, voteEvent); //legal vote
+    inputTopic.pipeInput("userId2:" + legalElection.key, voteEvent); //legal vote
+    assertThat(outputTopic.readKeyValuesToList()).hasSize(3);
 
     inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ViewElection.newBuilder().setEId(legalElection.key).setView(io.voting.events.enums.ElectionView.PENDING).build()));
     assertThat(outputTopic.getQueueSize()).isOne();

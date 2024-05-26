@@ -42,8 +42,10 @@ import java.util.Properties;
 
 @Slf4j
 public final class ElectionIntegrityTopology {
+  private static final String INPUT_TOPIC_CONFIG = "input.topic";
+  private static final String OUTPUT_TOPIC_CONFIG = "output.topic";
+  private static final String ELECTION_TTL_CONFIG = "election.ttl";
 
-  public static final Serde<String> stringSerde = Serdes.String();
 
   private static final CmdTypeFilter CMD_ELECTION_FILTER = new ElectionCmdFilter();
   private static final CmdTypeFilter CMD_VOTE_FILTER = new VoteCmdFilter();
@@ -74,11 +76,11 @@ public final class ElectionIntegrityTopology {
 
 
   private static Topology getTopology(StreamsBuilder builder, Properties properties, Serde<Object> avroCESerde) {
-    final Produced<String, Object> producedAvroCE = Produced.with(stringSerde, avroCESerde);
+    final Produced<String, Object> producedAvroCE = Produced.with(Serdes.String(), avroCESerde);
 
-    final String inputTopic = properties.getProperty("input.topic");
+    final String inputTopic = properties.getProperty(INPUT_TOPIC_CONFIG);
     final KStream<String, CloudEvent> commandStream = builder
-            .stream(inputTopic, Consumed.with(stringSerde, avroCESerde).withName("election.cmd.src"))
+            .stream(inputTopic, Consumed.with(Serdes.String(), avroCESerde).withName("election.cmd.src"))
             .mapValues(CloudEvent.class::cast);
 
 
@@ -97,8 +99,8 @@ public final class ElectionIntegrityTopology {
 
 
   private static void defineEIntegrity(final Properties properties, final KStream<String, CloudEvent> electionCommands, final Produced<String, Object> producedAvroCE) {
-    final String electionOutputTopic = properties.getProperty("output.topic.elections");
-    final ValueMapper<CreateElection, NewElection> electionEnrichment = new ElectionMapper(properties.getProperty("election.ttl"));
+    final String electionOutputTopic = properties.getProperty(OUTPUT_TOPIC_CONFIG);
+    final ValueMapper<CreateElection, NewElection> electionEnrichment = new ElectionMapper(properties.getProperty(ELECTION_TTL_CONFIG));
     electionCommands
             .mapValues(ce -> (CreateElection) AvroCloudEventData.<CmdEvent>dataOf(ce.getData()).getCmd(), Named.as("ei.unwrap.ce.data"))
             .filterNot(ILLEGAL_ELECTION_FILTER, IllegalContentProcessor.name())
@@ -111,7 +113,7 @@ public final class ElectionIntegrityTopology {
   }
 
   private static void defineVIntegrity(final Properties properties, final KStream<String, CloudEvent> voteCommands, final Produced<String, Object> producedAvroCE) {
-    final String votesOutputTopic = properties.getProperty("output.topic.votes");
+    final String votesOutputTopic = properties.getProperty(OUTPUT_TOPIC_CONFIG);
     voteCommands
             .mapValues(ce -> (RegisterVote) AvroCloudEventData.<CmdEvent>dataOf(ce.getData()).getCmd(), Named.as("vi.unwrap.ce.data"))
             .mapValues(rv -> ElectionVote.of(rv.getEId().toString(), rv.getVotedFor().toString()))
@@ -131,7 +133,7 @@ public final class ElectionIntegrityTopology {
   }
 
   private static void defineElectionTTL(final Properties properties, final KStream<String, CloudEvent> viewCommands, final Produced<String, Object> producedAvroCE) {
-    final String electionOutputTopic = properties.getProperty("output.topic.elections");
+    final String electionOutputTopic = properties.getProperty(OUTPUT_TOPIC_CONFIG);
     viewCommands
             .mapValues(ce -> (ViewElection) AvroCloudEventData.<CmdEvent>dataOf(ce.getData()).getCmd(), Named.as("ttl.unwrap.ce.data"))
             .filter(PENDING_ELECTION_FILTER, PendingElectionFilter.name())

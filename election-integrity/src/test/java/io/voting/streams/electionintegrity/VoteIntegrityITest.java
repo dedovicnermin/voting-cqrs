@@ -57,8 +57,7 @@ class VoteIntegrityITest extends TestKafkaContext {
     properties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
     properties.put("cache.max.bytes.buffering", 0);
     properties.put("input.topic", TestConsumerHelper.INPUT_TOPIC);
-    properties.put("output.topic.elections", TestConsumerHelper.OUTPUT_TOPIC_ELECTION);
-    properties.put("output.topic.votes", "election.votes");
+    properties.put("output.topic", TestConsumerHelper.OUTPUT_TOPIC);
     properties.put("commit.interval.ms", 1000);
     properties.put("election.ttl", "PT5M");
     properties.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
@@ -66,10 +65,11 @@ class VoteIntegrityITest extends TestKafkaContext {
     properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "true");
     properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, "true");
 
-    consumerHelper = new TestConsumerHelper(kafkaContainer, TestConsumerHelper.OUTPUT_TOPIC_VOTES);
+    consumerHelper = new TestConsumerHelper(kafkaContainer, TestConsumerHelper.OUTPUT_TOPIC);
     final Map<String, Object> producerConfigs = KafkaTestUtils.producerProps(kafkaContainer.getBootstrapServers());
     producerConfigs.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
     producerConfigs.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, TestKafkaContext.schemaRegistryUrl());
+    producerConfigs.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, true);
     producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroCloudEventSerializer.class);
     final KafkaProducer<String, CloudEvent> producer = new KafkaProducer<>(producerConfigs);
@@ -116,15 +116,18 @@ class VoteIntegrityITest extends TestKafkaContext {
 
     final List<ReceiveEvent<String, CloudEvent>> actualEvents = new ArrayList<>();
     consumerHelper.getEvents().drainTo(actualEvents);
+    List<ReceiveEvent<String, CloudEvent>> actualTargetEvents = actualEvents.stream()
+            .filter(re -> NewVote.class.getName().equals(re.getPOrE().getPayload().getType()))
+            .toList();
 
-    assertThat(actualEvents).hasSize(4);
+    assertThat(actualTargetEvents).hasSize(4);
 
-    final Set<String> actualEventKeys = actualEvents.stream()
+    final Set<String> actualEventKeys = actualTargetEvents.stream()
             .map(ReceiveEvent::getKey)
             .collect(Collectors.toSet());
     assertThat(actualEventKeys).hasSize(1).containsOnly(eId);
 
-    final Set<String> actualVotedFor = actualEvents.stream()
+    final Set<String> actualVotedFor = actualTargetEvents.stream()
             .map(ReceiveEvent::getPOrE)
             .map(PayloadOrError::getPayload)
             .map(CloudEvent::getData)

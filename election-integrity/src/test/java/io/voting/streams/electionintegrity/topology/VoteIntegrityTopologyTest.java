@@ -45,8 +45,7 @@ class VoteIntegrityTopologyTest {
     properties = new Properties();
     properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "voting.test-"+ UUID.randomUUID());
     properties.put("input.topic", "input");
-    properties.put("output.topic.elections", "output_elections");
-    properties.put("output.topic.votes", "output_votes");
+    properties.put("output.topic", "output");
     properties.put("election.ttl", "P2D");
     properties.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
     properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://mock");
@@ -64,7 +63,7 @@ class VoteIntegrityTopologyTest {
     testDriver = new TopologyTestDriver(topology, properties);
     final Serde<String> stringSerde = Serdes.String();
     inputTopic = testDriver.createInputTopic(properties.getProperty("input.topic"), stringSerde.serializer(), CLOUD_EVENT_SERDE.serializer());
-    outputTopic = testDriver.createOutputTopic(properties.getProperty("output.topic.votes"), stringSerde.deserializer(), CLOUD_EVENT_SERDE.deserializer());
+    outputTopic = testDriver.createOutputTopic(properties.getProperty("output.topic"), stringSerde.deserializer(), CLOUD_EVENT_SERDE.deserializer());
   }
 
 

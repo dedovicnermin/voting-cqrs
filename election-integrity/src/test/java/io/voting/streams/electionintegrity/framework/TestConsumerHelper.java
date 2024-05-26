@@ -3,7 +3,6 @@ package io.voting.streams.electionintegrity.framework;
 import io.cloudevents.CloudEvent;
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.voting.common.library.kafka.clients.serialization.ce.AvroCEPayloadDeserializer;
-import io.voting.common.library.kafka.clients.serialization.ce.CEPayloadDeserializer;
 import io.voting.common.library.kafka.models.PayloadOrError;
 import io.voting.common.library.kafka.models.ReceiveEvent;
 import lombok.Getter;
@@ -23,18 +22,17 @@ import org.testcontainers.containers.KafkaContainer;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class TestConsumerHelper {
 
   public static final String INPUT_TOPIC = "election.requests.raw";
-  public static final String OUTPUT_TOPIC_ELECTION = "election.requests";
-  public static final String OUTPUT_TOPIC_VOTES = "election.votes";
+  public static final String OUTPUT_TOPIC = "election.events";
 
   static final NewTopic IN = new NewTopic(INPUT_TOPIC, 1, (short) 1);
-  static final NewTopic OUT = new NewTopic(OUTPUT_TOPIC_ELECTION, 1, (short) 1);
-  static final NewTopic OUT_VOTES = new NewTopic(OUTPUT_TOPIC_VOTES, 1, (short) 1);
+  static final NewTopic OUTPUT = new NewTopic(OUTPUT_TOPIC, 1, (short) 1);
 
 
   @Getter
@@ -43,13 +41,14 @@ public class TestConsumerHelper {
   public TestConsumerHelper(final KafkaContainer kafkaContainer, final String consumeTopic) {
     final Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
             kafkaContainer.getBootstrapServers(),
-            "eiTest",
+            "eiTest" + UUID.randomUUID(),
             "true"
     );
     consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
     consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, AvroCEPayloadDeserializer.class.getName());
     consumerProps.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,TestKafkaContext.schemaRegistryUrl());
     consumerProps.put("specific.avro.reader", true);
+    consumerProps.put("auto.offset.reset", "latest");
     createTargetTopics(kafkaContainer);
 
     final KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> listenerContainer = getListenerContainer(consumerProps, consumeTopic);
@@ -83,9 +82,9 @@ public class TestConsumerHelper {
 
   private static void createTargetTopics(KafkaContainer kafkaContainer) {
     final KafkaAdmin kafkaAdmin = new KafkaAdmin(Map.of("bootstrap.servers", kafkaContainer.getBootstrapServers()));
-    kafkaAdmin.createOrModifyTopics(IN, OUT, OUT_VOTES);
+    kafkaAdmin.createOrModifyTopics(IN, OUTPUT);
     final Collection<TopicDescription> values = kafkaAdmin.describeTopics(
-            IN.name(), OUT.name(), OUT_VOTES.name()
+            IN.name(), OUTPUT.name()
     ).values();
     values.forEach(td -> System.out.println("TOPIC : " + td));
     kafkaAdmin.setCloseTimeout(1000);

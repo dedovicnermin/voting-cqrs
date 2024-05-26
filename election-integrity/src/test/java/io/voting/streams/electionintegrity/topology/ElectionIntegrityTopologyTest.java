@@ -56,8 +56,7 @@ class ElectionIntegrityTopologyTest {
     properties = new Properties();
     properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "election-integrity.test");
     properties.put("input.topic", INPUT_TOPIC);
-    properties.put("output.topic.elections", OUTPUT_TOPIC);
-    properties.put("output.topic.votes", "election.votes");
+    properties.put("output.topic", OUTPUT_TOPIC);
     properties.put("election.ttl", "P2D");
     properties.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
     properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://mock");

@@ -65,8 +65,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
     properties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
     properties.put("cache.max.bytes.buffering", 0);
     properties.put("input.topic", TestConsumerHelper.INPUT_TOPIC);
-    properties.put("output.topic.elections", TestConsumerHelper.OUTPUT_TOPIC_ELECTION);
-    properties.put("output.topic.votes", "election.votes");
+    properties.put("output.topic", TestConsumerHelper.OUTPUT_TOPIC);
     properties.put("commit.interval.ms", 1000);
     properties.put("election.ttl", "PT5M");
     properties.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
@@ -74,7 +73,7 @@ class ElectionIntegrityApplicationTest extends TestKafkaContext {
     properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "true");
     properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, "true");
 
-    consumerHelper = new TestConsumerHelper(kafkaContainer, TestConsumerHelper.OUTPUT_TOPIC_ELECTION);
+    consumerHelper = new TestConsumerHelper(kafkaContainer, TestConsumerHelper.OUTPUT_TOPIC);
     final Map<String, Object> producerConfigs = KafkaTestUtils.producerProps(kafkaContainer.getBootstrapServers());
     producerConfigs.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
     producerConfigs.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, TestKafkaContext.schemaRegistryUrl());
