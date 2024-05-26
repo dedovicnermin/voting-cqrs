@@ -1,0 +1,74 @@
+{
+  "type": "record",
+  "name": "NewElection",
+  "namespace": "io.voting.events.integrity",
+  "doc": "New legal election to persist",
+  "fields": [
+    {
+      "name": "id",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "Election UUID"
+    },
+    {
+      "name": "author",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "Username of user that created the election"
+    },
+    {
+      "name": "title",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "The name of the election"
+    },
+    {
+      "name": "description",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "A explanation of what the election is targeting from audience, applicable when title is not sufficient"
+    },
+    {
+      "name": "category",
+      "type": "io.voting.events.enums.ElectionCategory",
+      "doc": "The high-level subject/scope of the election"
+    },
+    {
+      "name": "candidates",
+      "type": {
+        "type": "map",
+        "values": "long"
+      },
+      "doc": "Key/Value pairs containing election candidate / votes for election candidate"
+    },
+    {
+      "name": "startTs",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "UTC epoch ms timestamp of election TTL start"
+    },
+    {
+      "name": "endTs",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "UTC epoch ms timestamp of election TTL end"
+    },
+    {
+      "name": "status",
+      "type": "io.voting.events.enums.ElectionStatus",
+      "doc": "The state of the election"
+    }
+  ]
+}

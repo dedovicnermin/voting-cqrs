@@ -1,16 +1,15 @@
 package io.voting.streams.electionintegrity.topology.predicates;
 
-import io.cloudevents.CloudEvent;
-import io.voting.common.library.kafka.utils.StreamUtils;
-import io.voting.common.library.models.ElectionView;
+import io.voting.events.cmd.ViewElection;
+import io.voting.events.enums.ElectionView;
 import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Predicate;
 
-public class PendingElectionFilter implements Predicate<String, CloudEvent> {
+public class PendingElectionFilter implements Predicate<String, ViewElection> {
 
   @Override
-  public boolean test(final String k, final CloudEvent v) {
-    return ElectionView.PENDING == StreamUtils.unwrapCloudEventData(v.getData(), ElectionView.class);
+  public boolean test(final String k, final ViewElection v) {
+    return ElectionView.PENDING == v.getView();
   }
 
   public static Named name() {

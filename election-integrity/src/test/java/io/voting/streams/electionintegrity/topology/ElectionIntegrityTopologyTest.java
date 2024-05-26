@@ -2,10 +2,16 @@ package io.voting.streams.electionintegrity.topology;
 
 import com.github.javafaker.Faker;
 import io.cloudevents.CloudEvent;
+import io.cloudevents.kafka.CloudEventSerializer;
+import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
+import io.voting.common.library.kafka.clients.serialization.avro.AvroCloudEventData;
 import io.voting.common.library.kafka.utils.StreamUtils;
-import io.voting.common.library.models.Election;
-import io.voting.common.library.models.ElectionCreate;
-import io.voting.common.library.models.ElectionStatus;
+import io.voting.events.cmd.CreateElection;
+import io.voting.events.enums.ElectionCategory;
+import io.voting.events.integrity.IntegrityEvent;
+import io.voting.events.integrity.NewElection;
 import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -21,10 +27,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,13 +42,13 @@ class ElectionIntegrityTopologyTest {
   static final String OUTPUT_TOPIC = "election.requests";
 
   static final Serde<String> STRING_SERDE = Serdes.String();
-  static final Serde<CloudEvent> CLOUD_EVENT_SERDE = StreamUtils.getCESerde();
+  static Serde<Object> CLOUD_EVENT_SERDE;
 
   static Topology topology;
   static Properties properties;
   TopologyTestDriver testDriver;
-  TestInputTopic<String, CloudEvent> inputTopic;
-  TestOutputTopic<String, CloudEvent> outputTopic;
+  TestInputTopic<String, Object> inputTopic;
+  TestOutputTopic<String, Object> outputTopic;
 
 
   @BeforeAll
@@ -51,9 +59,15 @@ class ElectionIntegrityTopologyTest {
     properties.put("output.topic.elections", OUTPUT_TOPIC);
     properties.put("output.topic.votes", "election.votes");
     properties.put("election.ttl", "P2D");
+    properties.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
+    properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://mock");
+    properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "true");
+    properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, "true");
+    MockSchemaRegistryClient srClient = new MockSchemaRegistryClient();
+    CLOUD_EVENT_SERDE = StreamUtils.getAvroCESerde(srClient, properties);
 
     final StreamsBuilder builder = new StreamsBuilder();
-    topology = ElectionIntegrityTopology.buildTopology(builder, properties);
+    topology = ElectionIntegrityTopology.buildTopology(builder, properties, srClient);
   }
 
   @BeforeEach
@@ -69,18 +83,36 @@ class ElectionIntegrityTopologyTest {
   @Test
   void test() {
     final Faker fake = Faker.instance();
-    final ElectionCreate legalElection = new ElectionCreate(fake.funnyName().name(), "Good Election", fake.lorem().paragraph(), "GOOD", Arrays.asList(fake.funnyName().name(), fake.funnyName().name()));
-    final ElectionCreate illegalElection = new ElectionCreate(fake.funnyName().name(), "Bad Election", fake.lorem().paragraph() + "ass", "TEST", Arrays.asList(fake.funnyName().name(), fake.funnyName().name(), "FUCK Cillary Hlinton"));
-    final Map<String, Long> candidateMap = new HashMap<>();
+
+    final CreateElection legalElection = CreateElection.newBuilder()
+            .setAuthor(fake.funnyName().name())
+            .setTitle("Good Election")
+            .setDescription(fake.lorem().paragraph())
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(Arrays.asList(fake.funnyName().name(), fake.funnyName().name()))
+            .build();
+
+    final CreateElection illegalElection = CreateElection.newBuilder()
+            .setAuthor(fake.funnyName().name())
+            .setTitle("Bad Election")
+            .setDescription(fake.lorem().paragraph() + "ass")
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(Arrays.asList(fake.funnyName().name(), fake.funnyName().name(), "Asshole Cillary Hlinton"))
+            .build();
+
+    final Map<CharSequence, Long> candidateMap = new HashMap<>();
     legalElection.getCandidates().forEach(c -> candidateMap.put(c, 0L));
 
-    final Election expected = Election.builder()
-            .author(legalElection.getAuthor())
-            .title(legalElection.getTitle())
-            .description(legalElection.getDescription())
-            .category(legalElection.getCategory())
-            .candidates(candidateMap)
-            .status(ElectionStatus.OPEN)
+    final NewElection expected = NewElection.newBuilder()
+            .setId(UUID.randomUUID().toString())
+            .setAuthor(legalElection.getAuthor())
+            .setTitle(legalElection.getTitle())
+            .setDescription(legalElection.getDescription())
+            .setCategory(legalElection.getCategory())
+            .setCandidates(candidateMap)
+            .setStatus(io.voting.events.enums.ElectionStatus.OPEN)
+            .setStartTs(Instant.now())
+            .setEndTs(Instant.now())
             .build();
 
 
@@ -90,17 +122,24 @@ class ElectionIntegrityTopologyTest {
     ));
 
     assertThat(outputTopic.getQueueSize()).isOne();
-    final CloudEvent actual = outputTopic.readKeyValue().value;
-    assertThat(StreamUtils.unwrapCloudEventData(actual.getData(), Election.class))
+    final CloudEvent actual = (CloudEvent) outputTopic.readKeyValue().value;
+    assertThat((NewElection) AvroCloudEventData.<IntegrityEvent>dataOf(actual.getData()).getLegalEvent())
             .satisfies(election -> assertThat(election.getId()).isNotNull())
             .satisfies(election -> assertThat(election.getAuthor()).isEqualTo(expected.getAuthor()))
             .satisfies(election -> assertThat(election.getTitle()).isEqualTo(expected.getTitle()))
             .satisfies(election -> assertThat(election.getDescription()).isEqualTo(expected.getDescription()))
             .satisfies(election -> assertThat(election.getCategory()).isEqualTo(expected.getCategory()))
-            .satisfies(election -> assertThat(election.getCandidates()).isEqualTo(expected.getCandidates()))
             .satisfies(election -> assertThat(election.getStatus()).isEqualTo(expected.getStatus()))
             .satisfies(election -> assertThat(election.getEndTs()).isNotNull())
-            .satisfies(election -> assertThat(election.getStartTs()).isNotNull());
+            .satisfies(election -> assertThat(election.getStartTs()).isNotNull())
+            .satisfies(election -> assertThat(getCandidateMap(election)).isEqualTo(getCandidateMap(expected)));
+  }
+
+  private Map<String, Long> getCandidateMap(NewElection exp) {
+    Map<CharSequence, Long> candidates = exp.getCandidates();
+    Map<String, Long> map = new HashMap<>();
+    candidates.keySet().forEach(cs -> map.put(cs.toString(), candidates.get(cs)));
+    return map;
   }
 
 

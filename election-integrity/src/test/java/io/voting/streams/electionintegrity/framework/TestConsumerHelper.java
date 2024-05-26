@@ -1,12 +1,15 @@
 package io.voting.streams.electionintegrity.framework;
 
 import io.cloudevents.CloudEvent;
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
+import io.voting.common.library.kafka.clients.serialization.ce.AvroCEPayloadDeserializer;
 import io.voting.common.library.kafka.clients.serialization.ce.CEPayloadDeserializer;
 import io.voting.common.library.kafka.models.PayloadOrError;
 import io.voting.common.library.kafka.models.ReceiveEvent;
 import lombok.Getter;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -43,6 +46,10 @@ public class TestConsumerHelper {
             "eiTest",
             "true"
     );
+    consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+    consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, AvroCEPayloadDeserializer.class.getName());
+    consumerProps.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,TestKafkaContext.schemaRegistryUrl());
+    consumerProps.put("specific.avro.reader", true);
     createTargetTopics(kafkaContainer);
 
     final KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> listenerContainer = getListenerContainer(consumerProps, consumeTopic);
@@ -58,7 +65,7 @@ public class TestConsumerHelper {
 
   @NotNull
   private static KafkaMessageListenerContainer<String, PayloadOrError<CloudEvent>> getListenerContainer(Map<String, Object> consumerProps, String consumeTopic) {
-    final DefaultKafkaConsumerFactory<String, PayloadOrError<CloudEvent>> cf = new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), new CEPayloadDeserializer());
+    final DefaultKafkaConsumerFactory<String, PayloadOrError<CloudEvent>> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
     final ContainerProperties containerProperties = new ContainerProperties(consumeTopic);
     return new KafkaMessageListenerContainer<>(cf, containerProperties);
   }

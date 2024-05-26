@@ -20,6 +20,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -42,6 +43,11 @@ public final class StreamUtils {
     return Serdes.serdeFrom(serializer, deserializer);
   }
 
+  public static Serde<Object> getAvroCESerde(final Properties properties) {
+    final Map<String, Object> config = propertiesToMap(properties);
+    return getAvroCESerde(config);
+  }
+
   public static Serde<Object> getAvroCESerde(final Map<String, Object> config) {
     final KafkaAvroCloudEventSerializer serializer = new KafkaAvroCloudEventSerializer();
     final KafkaAvroCloudEventDeserializer deserializer = new KafkaAvroCloudEventDeserializer();
@@ -51,9 +57,12 @@ public final class StreamUtils {
     return Serdes.serdeFrom(serializer, deserializer);
   }
 
-  public static Serde<Object> getAvroCESerde(final SchemaRegistryClient srClient) {
+  public static Serde<Object> getAvroCESerde(final SchemaRegistryClient srClient, final Properties properties) {
+    final Map<String, Object> map = propertiesToMap(properties);
     final KafkaAvroCloudEventSerializer serializer = new KafkaAvroCloudEventSerializer(srClient);
     final KafkaAvroCloudEventDeserializer deserializer = new KafkaAvroCloudEventDeserializer(srClient);
+    serializer.configure(map, false);
+    deserializer.configure(map, false);
     return Serdes.serdeFrom(serializer, deserializer);
   }
 
@@ -66,6 +75,14 @@ public final class StreamUtils {
       log.error("Unable to load file ({}) into properties : {}", file, e.getMessage());
       throw new RuntimeException(e);
     }
+  }
+
+  public static Map<String,Object> propertiesToMap(final Properties properties) {
+    final Map<String, Object> configs = new HashMap<>();
+    properties.forEach(
+            (key, value) -> configs.put((String) key, value)
+    );
+    return configs;
   }
 
   @Deprecated

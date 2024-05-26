@@ -1,11 +1,19 @@
 package io.voting.streams.electionintegrity.topology;
 
 import io.cloudevents.CloudEvent;
-import io.voting.common.library.kafka.utils.CloudEventTypes;
+import io.cloudevents.kafka.CloudEventSerializer;
+import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
+import io.voting.common.library.kafka.clients.serialization.avro.AvroCloudEventData;
 import io.voting.common.library.kafka.utils.StreamUtils;
-import io.voting.common.library.models.ElectionCreate;
-import io.voting.common.library.models.ElectionView;
-import io.voting.common.library.models.ElectionVote;
+import io.voting.events.cmd.CreateElection;
+import io.voting.events.cmd.RegisterVote;
+import io.voting.events.cmd.ViewElection;
+import io.voting.events.enums.ElectionCategory;
+import io.voting.events.enums.ElectionView;
+import io.voting.events.integrity.CloseElection;
+import io.voting.events.integrity.IntegrityEvent;
 import io.voting.streams.electionintegrity.framework.TestCEBuilder;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -32,13 +40,13 @@ class TTLTopologyTest {
   static final String ELECTION_VOTES = "election.votes";
 
   static final Serde<String> STRING_SERDE = Serdes.String();
-  static final Serde<CloudEvent> CLOUD_EVENT_SERDE = StreamUtils.getCESerde();
+  static Serde<Object> CLOUD_EVENT_SERDE;
 
   static Topology topology;
   static Properties properties;
   TopologyTestDriver testDriver;
-  TestInputTopic<String, CloudEvent> inputTopic;
-  TestOutputTopic<String, CloudEvent> outputTopic;
+  TestInputTopic<String, Object> inputTopic;
+  TestOutputTopic<String, Object> outputTopic;
 
   @BeforeAll
   static void build() {
@@ -48,10 +56,15 @@ class TTLTopologyTest {
     properties.put("input.topic", ELECTION_COMMANDS);
     properties.put("output.topic.elections", ELECTION_REQUESTS);
     properties.put("output.topic.votes", ELECTION_VOTES);
-
+    properties.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
+    properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://mock");
+    properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "true");
+    properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, "true");
+    MockSchemaRegistryClient srClient = new MockSchemaRegistryClient();
+    CLOUD_EVENT_SERDE = StreamUtils.getAvroCESerde(srClient, properties);
 
     final StreamsBuilder builder = new StreamsBuilder();
-    topology = ElectionIntegrityTopology.buildTopology(builder, properties);
+    topology = ElectionIntegrityTopology.buildTopology(builder, properties, srClient);
   }
 
   @AfterEach
@@ -68,27 +81,40 @@ class TTLTopologyTest {
 
   @Test
   void test() {
-    final ElectionCreate election = new ElectionCreate("testAuthor", "testTitle", "test desc", "TEST", Arrays.asList("Foo", "Bar"));
+    final CreateElection election = CreateElection.newBuilder()
+            .setAuthor("testAuthor")
+            .setTitle("testTitle")
+            .setDescription("test desc")
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(Arrays.asList("Foo", "Bar"))
+            .build();
+
     inputTopic.pipeInput("userId0", TestCEBuilder.buildCE(election));
-    final KeyValue<String, CloudEvent> legalElection = outputTopic.readKeyValue();
+    final KeyValue<String, Object> legalElection = outputTopic.readKeyValue();
     assertThat(legalElection).isNotNull();
 
-    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ElectionView.OPEN));
-    final CloudEvent voteEvent = TestCEBuilder.buildCE(new ElectionVote(legalElection.key, "Foo"));
+    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ViewElection.newBuilder().setView(io.voting.events.enums.ElectionView.OPEN).setEId(legalElection.key).build()));
+    final CloudEvent voteEvent = TestCEBuilder.buildCE(RegisterVote.newBuilder().setEId(legalElection.key).setVotedFor("Foo").build());
     inputTopic.pipeInput("userId0:" + legalElection.key, voteEvent);
     inputTopic.pipeInput("userId1:" + legalElection.key, voteEvent);
     inputTopic.pipeInput("userId2:" + legalElection.key, voteEvent);
     assertThat(outputTopic.getQueueSize()).isZero();
 
-    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ElectionView.PENDING));
+    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ViewElection.newBuilder().setEId(legalElection.key).setView(io.voting.events.enums.ElectionView.PENDING).build()));
     assertThat(outputTopic.getQueueSize()).isOne();
-    final KeyValue<String, CloudEvent> actualTTLEvent = outputTopic.readKeyValue();
+    final KeyValue<String, Object> actualTTLEvent = outputTopic.readKeyValue();
     assertThat(actualTTLEvent.key).isEqualTo(legalElection.key);
-    assertThat(new String(actualTTLEvent.value.getData().toBytes())).isEqualTo(legalElection.key);
-    assertThat(actualTTLEvent.value.getType()).isEqualTo(CloudEventTypes.ELECTION_EXPIRATION_EVENT);
+
+    final CloudEvent actualRecordValue = (CloudEvent)actualTTLEvent.value;
+    assertThat(actualRecordValue.getType()).isEqualTo(CloseElection.class.getName());
+    assertThat(actualRecordValue.getData()).isInstanceOf(AvroCloudEventData.class);
+
+    final CloseElection actualCEData = (CloseElection)AvroCloudEventData.<IntegrityEvent>dataOf(actualRecordValue.getData()).getLegalEvent();
+
+    assertThat(actualCEData.getEId()).hasToString(legalElection.key);
 
     // only PENDING
-    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ElectionView.CLOSED));
+    inputTopic.pipeInput(legalElection.key, TestCEBuilder.buildCE(legalElection.key, ViewElection.newBuilder().setEId(legalElection.key).setView(ElectionView.CLOSED).build()));
     assertThat(outputTopic.getQueueSize()).isZero();
 
   }

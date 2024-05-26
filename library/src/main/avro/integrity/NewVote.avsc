@@ -1,0 +1,32 @@
+{
+  "type": "record",
+  "name": "NewVote",
+  "namespace": "io.voting.events.integrity",
+  "doc": "New legal election vote to persist",
+  "fields": [
+    {
+      "name": "eId",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "Election ID"
+    },
+    {
+      "name": "candidate",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "The selected candidate from election user is voting for"
+    },
+    {
+      "name": "uId",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "User ID"
+    }
+  ]
+}

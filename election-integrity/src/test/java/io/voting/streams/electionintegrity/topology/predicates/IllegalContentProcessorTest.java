@@ -1,6 +1,7 @@
 package io.voting.streams.electionintegrity.topology.predicates;
 
-import io.voting.common.library.models.ElectionCreate;
+import io.voting.events.cmd.CreateElection;
+import io.voting.events.enums.ElectionCategory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class IllegalContentProcessorTest {
   private static final String TITLE = "good_title";
   private static final String DESC = "good_description";
   private static final String CATEGORY = "good_category";
-  private static final List<String> CANDIDATES = Collections.singletonList("good_candidate");
+  private static final List<CharSequence> CANDIDATES = Collections.singletonList("good_candidate");
 
   private static IllegalContentProcessor processor;
 
@@ -27,34 +28,59 @@ class IllegalContentProcessorTest {
 
   @Test
   void safeEvent() {
-    final ElectionCreate electionCreate = new ElectionCreate(AUTHOR, TITLE, DESC, CATEGORY, CANDIDATES);
+    final CreateElection electionCreate = CreateElection.newBuilder()
+            .setAuthor(AUTHOR)
+            .setTitle(TITLE)
+            .setDescription(DESC)
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(CANDIDATES)
+            .build();
     assertThat(processor.test(null, electionCreate)).isFalse();
   }
 
   @Test
   void illegalTitle() {
-    final ElectionCreate electionCreate = new ElectionCreate(AUTHOR, "asshole", DESC, CATEGORY, CANDIDATES);
+    final CreateElection electionCreate = CreateElection.newBuilder()
+            .setAuthor(AUTHOR)
+            .setTitle("asshole")
+            .setDescription(DESC)
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(CANDIDATES)
+            .build();
     assertThat(processor.test(null, electionCreate)).isTrue();
   }
 
   @Test
   void illegalDescription() {
-    final ElectionCreate electionCreate = new ElectionCreate(AUTHOR, TITLE, "assh0le", CATEGORY, CANDIDATES);
+    final CreateElection electionCreate = CreateElection.newBuilder()
+            .setAuthor(AUTHOR)
+            .setTitle(TITLE)
+            .setDescription("assh0le")
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(CANDIDATES)
+            .build();
     assertThat(processor.test(null, electionCreate)).isTrue();
   }
 
-  @Test
-  void illegalCategory() {
-    final ElectionCreate electionCreate = new ElectionCreate(AUTHOR, TITLE, DESC, "FUCK", CANDIDATES);
-    assertThat(processor.test(null, electionCreate)).isTrue();
-  }
 
   @Test
   void illegalCandidate() {
-    final ElectionCreate electionCreate = new ElectionCreate(AUTHOR, TITLE, DESC, CATEGORY, Arrays.asList("Bob", "Asshton", "Bitch"));
+    final CreateElection electionCreate = CreateElection.newBuilder()
+            .setAuthor(AUTHOR)
+            .setTitle(TITLE)
+            .setDescription(DESC)
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(Arrays.asList("Bob", "Asshton", "Bitch"))
+            .build();
     assertThat(processor.test(null, electionCreate)).isTrue();
 
-    final ElectionCreate actuallySafe = new ElectionCreate(AUTHOR, TITLE, DESC, CATEGORY, Arrays.asList("Bob", "Asshton"));
+    final CreateElection actuallySafe = CreateElection.newBuilder()
+            .setAuthor(AUTHOR)
+            .setTitle(TITLE)
+            .setDescription(DESC)
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(Arrays.asList("Bob", "Asshton"))
+            .build();
     assertThat(processor.test(null, actuallySafe)).isFalse();
   }
 
