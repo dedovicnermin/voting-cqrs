@@ -1,9 +1,10 @@
 package io.voting.persistence.eventsink.config;
 
 import io.cloudevents.CloudEvent;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import io.voting.common.library.kafka.clients.receiver.EventReceiver;
 import io.voting.common.library.kafka.clients.receiver.ReceiverCloser;
-import io.voting.common.library.kafka.clients.serialization.ce.CEPayloadDeserializer;
+import io.voting.common.library.kafka.clients.serialization.ce.AvroCEPayloadDeserializer;
 import io.voting.common.library.kafka.models.PayloadOrError;
 import io.voting.persistence.eventsink.receiver.CloudEventReceiver;
 import lombok.Getter;
@@ -50,10 +51,15 @@ public class KafkaConfig {
             .ifPresent(id -> config.put(ConsumerConfig.CLIENT_ID_CONFIG, id));
     config.putAll(consumer);
     config.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+    config.putIfAbsent(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    config.putIfAbsent(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, AvroCEPayloadDeserializer.class);
+    config.putIfAbsent(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
     config.putIfAbsent("poll.duration", "1000");
     if (config.containsKey("config.providers")) {
       config.computeIfPresent("sasl.jaas.config", configProviderReMap);
       config.computeIfPresent("ssl.truststore.password", configProviderReMap);
+      config.computeIfPresent("schema.registry.ssl.truststore.password", configProviderReMap);
+      config.computeIfPresent("schema.registry.basic.auth.user.info", configProviderReMap);
     }
     return config;
   }
@@ -61,7 +67,7 @@ public class KafkaConfig {
   @Bean
   public EventReceiver<String, CloudEvent> eventReceiver() {
     final Map<String, Object> configs = consumerConfigs();
-    final KafkaConsumer<String, PayloadOrError<CloudEvent>> kafkaConsumer = new KafkaConsumer<>(configs, new StringDeserializer(), new CEPayloadDeserializer());
+    final KafkaConsumer<String, PayloadOrError<CloudEvent>> kafkaConsumer = new KafkaConsumer<>(configs);
     final CloudEventReceiver receiver = new CloudEventReceiver(kafkaConsumer, consumerTopics, Duration.ofMillis(Long.parseLong((String) configs.get("poll.duration"))));
     Runtime.getRuntime().addShutdownHook(new Thread(new ReceiverCloser<>(receiver)));
     new Thread(receiver).start();
