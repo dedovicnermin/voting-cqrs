@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -32,21 +33,23 @@ public class KafkaAvroCloudEventSerializer extends KafkaAvroSerializer {
   private final CloudEventSerializer serializer = new CloudEventSerializer();
   private String schemaRegistryUrl;
 
-  public KafkaAvroCloudEventSerializer() {}
+  public KafkaAvroCloudEventSerializer() {
+  }
+
   public KafkaAvroCloudEventSerializer(SchemaRegistryClient client) {
     super(client);
   }
 
-  private Encoding encodingOf(Map<String, ?> configs){
+  private Encoding encodingOf(Map<String, ?> configs) {
     log.debug("Serializer config: {}", configs);
 
     Object encodingConfig = configs.get(CloudEventSerializer.ENCODING_CONFIG);
     Encoding encoding = null;
 
-    if (encodingConfig instanceof String) {
-      encoding = Encoding.valueOf((String) encodingConfig);
-    } else if (encodingConfig instanceof Encoding) {
-      encoding = (Encoding) encodingConfig;
+    if (encodingConfig instanceof String ec) {
+      encoding = Encoding.valueOf(ec);
+    } else if (encodingConfig instanceof Encoding ec) {
+      encoding = ec;
     } else if (encodingConfig != null) {
       throw new IllegalArgumentException(CloudEventSerializer.ENCODING_CONFIG + " can be of type String or " + Encoding.class.getCanonicalName());
     }
@@ -58,7 +61,7 @@ public class KafkaAvroCloudEventSerializer extends KafkaAvroSerializer {
   public void configure(Map<String, ?> configs, boolean isKey) {
     final Encoding encoding = encodingOf(configs);
 
-    if(encoding == Encoding.BINARY){
+    if (encoding == Encoding.BINARY) {
       super.configure(configs, isKey);
       serializer.configure(configs, isKey);
       schemaRegistryUrl = (String) configs.get(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG);
@@ -71,45 +74,32 @@ public class KafkaAvroCloudEventSerializer extends KafkaAvroSerializer {
 
   @Override
   public byte[] serialize(String topic, Headers headers, Object event) {
-    if( !(event instanceof CloudEvent ceEvent)){
+    if (!(event instanceof CloudEvent ceEvent)) {
       throw new IllegalArgumentException("event argument must be an instance of " + CloudEvent.class);
     }
 
     serializer.serialize(topic, headers, ceEvent);
-    log.debug("CloudEvent headers {}", headers);
+    log.debug("CloudEvent headers : {}", headers);
 
 
-    if(ceEvent.getData() instanceof AvroCloudEventData<?> data) {
+    if (ceEvent.getData() instanceof AvroCloudEventData<?> data) {
       final IndexedRecord value = data.getValue();
       final Class<? extends IndexedRecord> valueType = value.getClass();
       log.debug("Payload to serialize as avro {}", value);
 
       final byte[] bytes = super.serialize(topic, headers, data.getValue());
 
-      final SubjectNameStrategy strategy = (SubjectNameStrategy) super.valueSubjectNameStrategy;
-      log.debug("SubjectNameStrategy {}", strategy);
+      final String subjectName = getSubjectName(topic, valueType);
+      log.trace("SubjectName {}", subjectName);
 
-      final String subjectName = strategy.subjectName(
-              topic,
-              Boolean.FALSE,
-              new NoSchema(valueType.getPackageName(), valueType.getSimpleName())
-      );
-      log.info("SubjectName {}", subjectName);
+      final int version = getSubjectVersion(subjectName);
+      log.trace("Schema versionId {}", version);
 
-      try {
-        final List<Integer> versions = super.schemaRegistry.getAllVersions(subjectName);
-        final Integer version = versions.get(versions.size() - 1);
-        log.debug("Schema versionId {}", version);
+      final String dataschema = schemaRegistryUrl + "/subjects/" + subjectName + "/versions/" + version + "/schema";
+      log.debug("{}={}", DATA_SCHEMA_HEADER, dataschema);
 
-        final String dataschema = schemaRegistryUrl + "/subjects/" + subjectName + "/versions/" + version + "/schema";
-        log.debug("{}={}", DATA_SCHEMA_HEADER, dataschema);
-
-        headers.remove(DATA_SCHEMA_HEADER);
-        headers.add(DATA_SCHEMA_HEADER, dataschema.getBytes());
-
-      }catch(IOException | RestClientException e){
-        throw new SerializationException(e.getMessage(), e);
-      }
+      headers.remove(DATA_SCHEMA_HEADER);
+      headers.add(DATA_SCHEMA_HEADER, dataschema.getBytes());
 
       return bytes;
 
@@ -117,6 +107,39 @@ public class KafkaAvroCloudEventSerializer extends KafkaAvroSerializer {
       throw new IllegalArgumentException("CloudEvent data attribute must be an instance of "
               + AvroCloudEventData.class.getName());
     }
+  }
+
+  private Integer getSubjectVersion(String subjectName) {
+    log.trace("Attempt to get subject version for {}", subjectName);
+    final Optional<SubjectSchema> cachedSchemaData = super.latestVersions.asMap()
+            .keySet()
+            .stream()
+            .filter(ss -> ss.getSubject().equals(subjectName))
+            .findAny();
+    log.debug("Cached schema data is present : {}", cachedSchemaData.isPresent());
+    return cachedSchemaData
+            .map(ss -> super.latestVersions.asMap().get(ss))
+            .map(ParsedSchema::version)
+            .orElseGet(() -> {
+              try {
+                log.debug("Querying for subject version for {}", subjectName);
+                final List<Integer> versions = super.schemaRegistry.getAllVersions(subjectName);
+                return versions.get(versions.size() - 1);
+              } catch (IOException | RestClientException e) {
+                throw new SerializationException(e.getMessage(), e);
+              }
+            });
+  }
+
+  private String getSubjectName(String topic, Class<? extends IndexedRecord> valueType) {
+    final SubjectNameStrategy strategy = (SubjectNameStrategy) super.valueSubjectNameStrategy;
+    log.debug("SubjectNameStrategy {}", strategy);
+
+    return strategy.subjectName(
+            topic,
+            Boolean.FALSE,
+            new NoSchema(valueType.getPackageName(), valueType.getSimpleName())
+    );
   }
 
   private static final class NoSchema implements ParsedSchema {
