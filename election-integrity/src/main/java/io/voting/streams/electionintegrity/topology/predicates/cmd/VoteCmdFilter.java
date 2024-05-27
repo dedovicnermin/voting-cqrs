@@ -1,12 +1,12 @@
 package io.voting.streams.electionintegrity.topology.predicates.cmd;
 
-import io.voting.common.library.kafka.utils.CloudEventTypes;
+import io.voting.events.cmd.RegisterVote;
 import org.apache.kafka.streams.kstream.Named;
 
 public class VoteCmdFilter implements CmdTypeFilter {
   @Override
   public String ceTypeTarget() {
-    return CloudEventTypes.ELECTION_VOTE_CMD;
+    return RegisterVote.class.getName();
   }
 
   @Override

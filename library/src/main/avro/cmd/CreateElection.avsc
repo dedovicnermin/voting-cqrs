@@ -1,0 +1,47 @@
+{
+  "type": "record",
+  "name": "CreateElection",
+  "doc": "Data entered by user when creating a new election",
+  "namespace": "io.voting.events.cmd",
+  "fields": [
+    {
+      "name": "author",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "The username of the client requesting new election be created"
+    },
+    {
+      "name": "title",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "The name of the election"
+    },
+    {
+      "name": "description",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "A explanation of what the election is targeting from audience, applicable when title is not sufficient"
+    },
+    {
+      "name": "category",
+      "type": "io.voting.events.enums.ElectionCategory",
+      "doc": "The high-level subject/scope of the election"
+    },
+    {
+      "name": "candidates",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "avro.java.string": "String"
+        }
+      }
+    }
+  ]
+}

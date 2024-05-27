@@ -27,12 +27,12 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                - key: kubernetes.io/arch
-                  operator: In
-                  values:
-                    - amd64
-                - key: node-role.kubernetes.io/master
-                  operator: DoesNotExist
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                  - key: node-role.kubernetes.io/master
+                    operator: DoesNotExist
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
@@ -47,7 +47,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: election-integrity
-          image: registry.nermdev.io/apps/election-integrity
+          image: registry.nermdev.io/edv/election-integrity
           imagePullPolicy: Always
           args:
             - /mnt/application/application.properties
@@ -72,6 +72,8 @@ spec:
               mountPath: /mnt/application
             - name: kafka-secrets
               mountPath: /mnt/kafka-secrets
+            - name: tls
+              mountPath: /mnt/tls
           resources:
             requests:
               cpu: 1.0
@@ -86,6 +88,9 @@ spec:
         - name: kafka-secrets
           secret:
             secretName: kafka-secrets
+        - name: tls
+          secret:
+            secretName: tls-nermin
   volumeClaimTemplates:
     - metadata:
         name: eintegrity-state

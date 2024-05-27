@@ -4,9 +4,9 @@ import io.cloudevents.CloudEvent;
 import io.voting.common.library.kafka.clients.listener.EventListener;
 import io.voting.common.library.kafka.clients.receiver.EventReceiver;
 import io.voting.common.library.kafka.models.ReceiveEvent;
-import io.voting.common.library.kafka.utils.CloudEventTypes;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionStatus;
+import io.voting.events.integrity.CloseElection;
 import io.voting.persistence.eventsink.dao.ElectionDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,9 +30,9 @@ public class ElectionTTLListener implements EventListener<String, CloudEvent> {
     final Optional<CloudEvent> cloudEvent = Optional.of(event)
             .filter(e -> Objects.isNull(e.getPOrE().getError()))
             .map(e -> e.getPOrE().getPayload())
-            .filter(payload -> CloudEventTypes.ELECTION_EXPIRATION_EVENT.equals(payload.getType()));
+            .filter(payload -> CloseElection.class.getName().equals(payload.getType()));
     if (cloudEvent.isPresent()) {
-      log.debug("Processing {} : {}", CloudEventTypes.ELECTION_EXPIRATION_EVENT, event);
+      log.debug("Processing {} : {}", CloseElection.class.getName(), event);
       try {
         final Election election = dao.updateElectionStatus(cloudEvent.get().getId(), ElectionStatus.CLOSED);
         log.debug("Result of Election TTL event : {}", election);

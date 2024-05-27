@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: query-service
-          image: registry.nermdev.io/apps/query-service
+          image: registry.nermdev.io/edv/query-service
           imagePullPolicy: Always
           resources:
             requests:

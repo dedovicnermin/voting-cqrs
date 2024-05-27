@@ -12,12 +12,23 @@
 
     <groupId>io.voting.common</groupId>
     <artifactId>library</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+<!--        <schema.registry.url>http://localhost:8081</schema.registry.url>-->
+        <schema.registry.url>https://sr.local.nermdev.io</schema.registry.url>
+        <truststore.password></truststore.password>
+        <schema.registry.basic.auth.user.info></schema.registry.basic.auth.user.info>
     </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -44,10 +55,157 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
+                            <imports>
+                                <import>${project.basedir}/src/main/avro/enums/ElectionCategory.avsc</import>
+                                <import>${project.basedir}/src/main/avro/enums/ElectionStatus.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</import>
+                                <import>${project.basedir}/src/main/avro/cmd/CmdEvent.avsc</import>
+                                <import>${project.basedir}/src/main/avro/integrity/NewElection.avsc</import>
+                                <import>${project.basedir}/src/main/avro/integrity/NewVote.avsc</import>
+                                <import>${project.basedir}/src/main/avro/integrity/CloseElection.avsc</import>
+                                <import>${project.basedir}/src/main/avro/integrity/IntegrityEvent.avsc</import>
+                            </imports>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-schema-registry-maven-plugin</artifactId>
+                <version>${confluent.version}</version>
+                <configuration>
+                    <schemaRegistryUrls>${schema.registry.url}</schemaRegistryUrls>
+                    <subjects>
+                        <edv.election-category>${project.basedir}/src/main/avro/enums/ElectionCategory.avsc</edv.election-category>
+                        <edv.create-election-cmd>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</edv.create-election-cmd>
+                        <edv.view-election-cmd>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</edv.view-election-cmd>
+                        <edv.register-vote-cmd>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</edv.register-vote-cmd>
+                        <edv.election.commands-value>${project.basedir}/src/main/avro/cmd/CmdEvent.avsc</edv.election.commands-value>
+                        <edv.election-status>${project.basedir}/src/main/avro/enums/ElectionStatus.avsc</edv.election-status>
+                        <edv.new-election-integrity>${project.basedir}/src/main/avro/integrity/NewElection.avsc</edv.new-election-integrity>
+                        <edv.new-vote-integrity>${project.basedir}/src/main/avro/integrity/NewVote.avsc</edv.new-vote-integrity>
+                        <edv.close-election-integrity>${project.basedir}/src/main/avro/integrity/CloseElection.avsc</edv.close-election-integrity>
+                        <edv.election.events-value>${project.basedir}/src/main/avro/integrity/IntegrityEvent.avsc</edv.election.events-value>
+                    </subjects>
+                    <references>
+                        <edv.create-election-cmd>
+                            <reference>
+                                <name>io.voting.events.enums.ElectionCategory</name>
+                                <subject>edv.election-category</subject>
+                            </reference>
+                        </edv.create-election-cmd>
+                        <edv.election.commands-value>
+                            <reference>
+                                <name>io.voting.events.cmd.ElectionCreate</name>
+                                <subject>edv.create-election-cmd</subject>
+                            </reference>
+                            <reference>
+                                <name>io.voting.events.cmd.ViewElection</name>
+                                <subject>edv.view-election-cmd</subject>
+                            </reference>
+                            <reference>
+                                <name>io.voting.events.cmd.RegisterVote</name>
+                                <subject>edv.register-vote-cmd</subject>
+                            </reference>
+                        </edv.election.commands-value>
+
+                        <edv.new-election-integrity>
+                            <reference>
+                                <name>io.voting.events.enums.ElectionCategory</name>
+                                <subject>edv.election-category</subject>
+                            </reference>
+                            <reference>
+                                <name>io.voting.events.enums.ElectionStatus</name>
+                                <subject>edv.election-status</subject>
+                            </reference>
+                        </edv.new-election-integrity>
+                        <edv.election.events-value>
+                            <reference>
+                                <name>io.voting.events.integrity.NewElection</name>
+                                <subject>edv.new-election-integrity</subject>
+                            </reference>
+                            <reference>
+                                <name>io.voting.events.integrity.NewVote</name>
+                                <subject>edv.new-vote-integrity</subject>
+                            </reference>
+                            <reference>
+                                <name>io.voting.events.integrity.CloseElection</name>
+                                <subject>edv.close-election-integrity</subject>
+                            </reference>
+                        </edv.election.events-value>
+                    </references>
+                    <schemaTypes>
+                        <edv.election-category>AVRO</edv.election-category>
+                        <edv.create-election-cmd>AVRO</edv.create-election-cmd>
+                        <edv.view-election-cmd>AVRO</edv.view-election-cmd>
+                        <edv.register-vote-cmd>AVRO</edv.register-vote-cmd>
+                        <edv.election.commands-value>AVRO</edv.election.commands-value>
+                        <edv.election-status>AVRO</edv.election-status>
+                        <edv.new-election-integrity>AVRO</edv.new-election-integrity>
+                        <edv.new-vote-integrity>AVRO</edv.new-vote-integrity>
+                        <edv.close-election-integrity>AVRO</edv.close-election-integrity>
+                        <edv.election.events-value>AVRO</edv.election.events-value>
+                    </schemaTypes>
+                    <compatibilityLevels>
+                        <edv.election-category>BACKWARD</edv.election-category>
+                        <edv.create-election-cmd>BACKWARD</edv.create-election-cmd>
+                        <edv.view-election-cmd>BACKWARD</edv.view-election-cmd>
+                        <edv.register-vote-cmd>BACKWARD</edv.register-vote-cmd>
+                        <edv.election.commands-value>BACKWARD</edv.election.commands-value>
+                        <edv.election-status>BACKWARD</edv.election-status>
+                        <edv.new-election-integrity>BACKWARD</edv.new-election-integrity>
+                        <edv.new-vote-integrity>BACKWARD</edv.new-vote-integrity>
+                        <edv.close-election-integrity>BACKWARD</edv.close-election-integrity>
+                        <edv.election.events-value>BACKWARD</edv.election.events-value>
+                    </compatibilityLevels>
+                    <messagePath/>
+                    <outputDirectory/>
+                    <outputPath/>
+                    <previousSchemaPaths/>
+                    <schemas/>
+                    <userInfoConfig>${schema.registry.basic.auth.user.info}</userInfoConfig>
+                    <configs>
+                        <schema.registry.ssl.truststore.location>/Users/nerm/PycharmProjects/homelab/workspace/kafka/auth/nermin/truststore.jks</schema.registry.ssl.truststore.location>
+                        <schema.registry.ssl.truststore.password>${truststore.password}</schema.registry.ssl.truststore.password>
+                    </configs>
+                </configuration>
+            </plugin>
+
+
+
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>

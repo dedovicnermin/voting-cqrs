@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "IntegrityEvent",
+  "namespace": "io.voting.events.integrity",
+  "doc": "Events emitted from election-integrity component",
+  "fields": [
+    {
+      "name": "legalEvent",
+      "type": [
+        "io.voting.events.integrity.NewElection",
+        "io.voting.events.integrity.NewVote",
+        "io.voting.events.integrity.CloseElection"
+      ]
+    }
+  ]
+}

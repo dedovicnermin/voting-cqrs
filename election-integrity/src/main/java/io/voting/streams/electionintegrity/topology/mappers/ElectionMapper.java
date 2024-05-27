@@ -1,8 +1,8 @@
 package io.voting.streams.electionintegrity.topology.mappers;
 
-import io.voting.common.library.models.Election;
-import io.voting.common.library.models.ElectionCreate;
-import io.voting.common.library.models.ElectionStatus;
+import io.voting.events.cmd.CreateElection;
+import io.voting.events.enums.ElectionStatus;
+import io.voting.events.integrity.NewElection;
 import io.voting.streams.electionintegrity.topology.util.TTLPairs;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.kstream.Named;
@@ -10,13 +10,14 @@ import org.apache.kafka.streams.kstream.ValueMapper;
 import org.javatuples.Pair;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
-public class ElectionMapper implements ValueMapper<ElectionCreate, Election> {
+public class ElectionMapper implements ValueMapper<CreateElection, NewElection> {
 
   private final Duration ttlDuration;
 
@@ -30,29 +31,29 @@ public class ElectionMapper implements ValueMapper<ElectionCreate, Election> {
   }
 
   @Override
-  public Election apply(ElectionCreate electionCreate) {
+  public NewElection apply(CreateElection electionCreate) {
     return Optional.of(electionCreate)
-            .map(ElectionCreate::getCandidates)
+            .map(CreateElection::getCandidates)
             .map(cList -> {
-              final Map<String, Long> scoreInit = new HashMap<>();
-              for (final String candidate : cList) {
+              final Map<CharSequence, Long> scoreInit = new HashMap<>();
+              for (final CharSequence candidate : cList) {
                 scoreInit.put(candidate, 0L);
               }
               log.debug("Initialized candidate scores : {}", cList);
               return scoreInit;
             })
             .map(scoreInit -> {
-              final Pair<Long, Long> ttlPair = TTLPairs.now(ttlDuration);
-              final Election election = Election.builder()
-                      .id(UUID.randomUUID().toString())
-                      .author(electionCreate.getAuthor())
-                      .title(electionCreate.getTitle())
-                      .description(electionCreate.getDescription())
-                      .category(electionCreate.getCategory())
-                      .candidates(scoreInit)
-                      .status(ElectionStatus.OPEN)
-                      .startTs(ttlPair.getValue0())
-                      .endTs(ttlPair.getValue1())
+              final Pair<Instant, Instant> ttlPair = TTLPairs.now(ttlDuration);
+              final NewElection election = NewElection.newBuilder()
+                      .setId(UUID.randomUUID().toString())
+                      .setAuthor(electionCreate.getAuthor())
+                      .setTitle(electionCreate.getTitle())
+                      .setDescription(electionCreate.getDescription())
+                      .setCategory(electionCreate.getCategory())
+                      .setCandidates(scoreInit)
+                      .setStatus(ElectionStatus.OPEN)
+                      .setStartTs(ttlPair.getValue0())
+                      .setEndTs(ttlPair.getValue1())
                       .build();
               log.trace("Enrichment result : {}", election);
               return election;

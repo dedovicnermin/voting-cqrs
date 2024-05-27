@@ -3,6 +3,7 @@ package io.voting.persistence.eventsink.listener;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.v1.CloudEventBuilder;
 import io.voting.common.library.kafka.clients.listener.EventListener;
+import io.voting.common.library.kafka.clients.serialization.avro.AvroCloudEventData;
 import io.voting.common.library.kafka.models.PayloadOrError;
 import io.voting.common.library.kafka.models.ReceiveEvent;
 import io.voting.common.library.kafka.utils.CloudEventTypes;
@@ -10,6 +11,8 @@ import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionStatus;
 import io.voting.common.library.models.ElectionVote;
+import io.voting.events.integrity.IntegrityEvent;
+import io.voting.events.integrity.NewVote;
 import io.voting.persistence.eventsink.dao.ElectionDao;
 import io.voting.persistence.eventsink.framework.TestReceiver;
 import org.junit.jupiter.api.Assertions;
@@ -34,13 +37,13 @@ class ElectionVoteListenerTest {
 
   @Test
   void testOnElectionVoteEvent() {
-    final ElectionVote electionVote = new ElectionVote(UUID.randomUUID().toString(), "foo");
+    final NewVote electionVote = NewVote.newBuilder().setEId(UUID.randomUUID().toString()).setCandidate("foo").setUId("xyz").build();
     final CloudEvent ce = new CloudEventBuilder()
             .withId(UUID.randomUUID().toString())
             .withSource(URI.create("http://test"))
             .withSubject("TEST")
-            .withType(CloudEventTypes.ELECTION_VOTE_EVENT)
-            .withData(StreamUtils.wrapCloudEventData(electionVote))
+            .withType(NewVote.class.getName())
+            .withData(AvroCloudEventData.MIME_TYPE, new AvroCloudEventData<>(new IntegrityEvent(electionVote)))
             .build();
 
     listener.onEvent(new ReceiveEvent<>("test", 0, 0L, 0L, null, new PayloadOrError<>(ce, null, "unit test event")));

@@ -1,0 +1,24 @@
+{
+  "type": "record",
+  "name": "RegisterVote",
+  "namespace": "io.voting.events.cmd",
+  "doc": "Data sent by frontend when user submits election vote",
+  "fields": [
+    {
+      "name": "eId",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "Election ID"
+    },
+    {
+      "name": "votedFor",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      },
+      "doc": "Candidate selected from election"
+    }
+  ]
+}

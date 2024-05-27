@@ -1,0 +1,26 @@
+spring:
+  rsocket:
+    server:
+      transport: websocket
+      mapping-path: /cmd
+      port: 7000
+
+kafka:
+  properties:
+    bootstrap.servers: localhost:9092
+    auto.register.schemas: false
+    use.latest.version: true
+    latest.compatibility.strict: false
+    schema.registry.url: http://localhost:8081
+    cloudevents.serializer.encoding: BINARY
+  producer:
+    linger.ms: 15
+    acks: all
+    enable.idempotence: true
+  topics:
+    NEW_VOTE: election.commands
+    NEW_ELECTION: election.commands
+    NEW_VIEW: election.commands
+
+
+

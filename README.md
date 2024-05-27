@@ -24,6 +24,8 @@ An event-driven voting system adhering to the [CQRS design pattern](https://mart
 - [Project Lombok](https://projectlombok.org/)
 - [Apache Kafka](https://kafka.apache.org/)
 - [RSocket](https://rsocket.io/)
+- [Apache Avro](https://avro.apache.org/)
+- [cloudevents-kafka-avro-serializer](https://github.com/kattlo/cloudevents-kafka-avro-serializer)
 
 ### NodeJS
 - [React](https://react.dev/)
