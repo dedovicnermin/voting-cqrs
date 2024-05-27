@@ -2,19 +2,23 @@ package io.voting.persistence.eventsink;
 
 import com.github.javafaker.Faker;
 import io.cloudevents.CloudEvent;
-import io.cloudevents.CloudEventData;
 import io.cloudevents.core.v1.CloudEventBuilder;
+import io.cloudevents.kafka.CloudEventSerializer;
+import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
 import io.voting.common.library.kafka.clients.sender.EventSender;
-import io.voting.common.library.kafka.clients.serialization.ce.CESerializer;
+import io.voting.common.library.kafka.clients.serialization.avro.AvroCloudEventData;
+import io.voting.common.library.kafka.clients.serialization.avro.KafkaAvroCloudEventSerializer;
 import io.voting.common.library.kafka.test.TestSender;
-import io.voting.common.library.kafka.utils.CloudEventTypes;
-import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.Election;
 import io.voting.common.library.models.ElectionStatus;
-import io.voting.common.library.models.ElectionVote;
+import io.voting.events.enums.ElectionCategory;
+import io.voting.events.integrity.IntegrityEvent;
+import io.voting.events.integrity.NewElection;
+import io.voting.events.integrity.NewVote;
 import io.voting.persistence.eventsink.framework.TestKafkaContext;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
@@ -33,7 +37,9 @@ import org.springframework.test.context.DynamicPropertySource;
 
 import java.net.URI;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,36 +52,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class EventSinkApplicationTest extends TestKafkaContext {
 
-  static final String VOTE_TOPIC = "election.votes";
-  static final String ELECTION_TOPIC = "election.requests";
+  static final String INPUT_TOPIC = "election.events";
   static final Faker fake = Faker.instance();
 
   @DynamicPropertySource
   static void registerKafkaProperties(final DynamicPropertyRegistry dynamicPropertyRegistry) {
     dynamicPropertyRegistry.add("kafka.properties.bootstrap.servers", kafkaContainer::getBootstrapServers);
+    dynamicPropertyRegistry.add("kafka.properties.schema.registry.url", TestKafkaContext::schemaRegistryUrl);
   }
 
-  static EventSender<String, CloudEvent> electionSender;
-  static EventSender<String, CloudEvent> voteSender;
+  static EventSender<String, CloudEvent> eventSender;
 
   @SneakyThrows
   @BeforeAll
   static void init() {
-    final KafkaProducer<String, CloudEvent> producer = new KafkaProducer<>(
-            KafkaTestUtils.producerProps(kafkaContainer.getBootstrapServers()),
-            new StringSerializer(),
-            new CESerializer()
-    );
-    electionSender = new TestSender<>(ELECTION_TOPIC, producer);
-    voteSender = new TestSender<>(VOTE_TOPIC, producer);
+    final Map<String, Object> producerConfigs = KafkaTestUtils.producerProps(kafkaContainer.getBootstrapServers());
+    producerConfigs.put(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
+    producerConfigs.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, TestKafkaContext.schemaRegistryUrl());
+    producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroCloudEventSerializer.class);
+    final KafkaProducer<String, CloudEvent> producer = new KafkaProducer<>(producerConfigs);
+    eventSender = new TestSender<>(INPUT_TOPIC, producer);
     Thread.sleep(1000);
   }
 
   @SneakyThrows
   @AfterAll
   static void shutdown() {
-    electionSender.close();
-    voteSender.close();
+    eventSender.close();
     kafkaContainer.close();
 
   }
@@ -92,7 +96,7 @@ class EventSinkApplicationTest extends TestKafkaContext {
   @MethodSource
   void testElectionCreateEvents(CloudEvent electionCreate) {
     assertThat(template.findAll(Election.class)).isEmpty();
-    electionSender.blockingSend(electionCreate);
+    eventSender.blockingSend(electionCreate);
 
     Awaitility.waitAtMost(Duration.ofSeconds(3)).untilAsserted(
             () -> assertThat(template.findAll(Election.class)).hasSize(1)
@@ -115,21 +119,33 @@ class EventSinkApplicationTest extends TestKafkaContext {
   }
 
   static CloudEvent buildElectionCreate(final Map<String, Long> candidates) {
-    final Election election = new Election(null, fake.funnyName().name(), fake.harryPotter().spell(), fake.lorem().paragraph(), "TEST", candidates, 0L, 0L, ElectionStatus.OPEN);
-    return CloudEventHelper.buildCloudEvent(CloudEventTypes.ELECTION_CREATE_EVENT, StreamUtils.wrapCloudEventData(election));
+    final Map<CharSequence, Long> cMap = new HashMap<>(candidates);
+    final NewElection election = NewElection.newBuilder()
+            .setId(UUID.randomUUID().toString())
+            .setAuthor(fake.funnyName().name())
+            .setTitle(fake.harryPotter().spell())
+            .setDescription(fake.lorem().paragraph())
+            .setCategory(ElectionCategory.Random)
+            .setCandidates(cMap)
+            .setStartTs(Instant.now())
+            .setEndTs(Instant.now())
+            .setStatus(io.voting.events.enums.ElectionStatus.OPEN)
+            .build();
+    return CloudEventHelper.builder.withId("123").withType(NewElection.class.getName()).withData(AvroCloudEventData.MIME_TYPE, new AvroCloudEventData<>(new IntegrityEvent(election))).build();
   }
 
 
   @ParameterizedTest
   @MethodSource
-  void testElectionUpdateEvents(Map<String, Long> candidates, List<ElectionVote> votes, Map<String, Long> expectedResults) {
+  void testElectionUpdateEvents(Map<String, Long> candidates, List<String> votes, Map<String, Long> expectedResults) {
     final Election election = template.insert(
             new Election(null, fake.funnyName().name(), fake.harryPotter().spell(), fake.lorem().paragraph(), "TEST", candidates, 0L, 0L, ElectionStatus.OPEN));
     assertThat(election.getId()).isNotNull();
 
-    for (ElectionVote vote : votes) {
-      vote.setElectionId(election.getId());
-      voteSender.blockingSend(CloudEventHelper.buildCloudEvent(CloudEventTypes.ELECTION_VOTE_EVENT, StreamUtils.wrapCloudEventData(vote)));
+    for (String vote : votes) {
+      final NewVote newVote = NewVote.newBuilder().setEId(election.getId()).setCandidate(vote).setUId("someUser").build();
+      final CloudEvent ce = CloudEventHelper.builder.withId(election.getId()).withType(NewVote.class.getName()).withData(AvroCloudEventData.MIME_TYPE, new AvroCloudEventData<>(new IntegrityEvent(newVote))).build();
+      eventSender.blockingSend(ce);
     }
 
     Awaitility.waitAtMost(Duration.ofSeconds(5)).untilAsserted(
@@ -144,59 +160,59 @@ class EventSinkApplicationTest extends TestKafkaContext {
         Arguments.of(
                 Map.of(CandidateTypes.FooBar.FOO, 0L, CandidateTypes.FooBar.BAR, 0L),
                 Arrays.asList(
-                        new ElectionVote(null, CandidateTypes.FooBar.FOO),
-                        new ElectionVote(null, CandidateTypes.FooBar.FOO),
-                        new ElectionVote(null, CandidateTypes.FooBar.FOO),
-                        new ElectionVote(null, CandidateTypes.FooBar.FOO),
-                        new ElectionVote(null, CandidateTypes.FooBar.FOO),
-                        new ElectionVote(null, CandidateTypes.FooBar.BAR),
-                        new ElectionVote(null, CandidateTypes.FooBar.BAR),
-                        new ElectionVote(null, CandidateTypes.FooBar.BAR),
-                        new ElectionVote(null, CandidateTypes.FooBar.BAR),
-                        new ElectionVote(null, CandidateTypes.FooBar.BAR)
+                        CandidateTypes.FooBar.FOO,
+                        CandidateTypes.FooBar.FOO,
+                        CandidateTypes.FooBar.FOO,
+                        CandidateTypes.FooBar.FOO,
+                        CandidateTypes.FooBar.FOO,
+                        CandidateTypes.FooBar.BAR,
+                        CandidateTypes.FooBar.BAR,
+                        CandidateTypes.FooBar.BAR,
+                        CandidateTypes.FooBar.BAR,
+                        CandidateTypes.FooBar.BAR
                 ),
                 Map.of(CandidateTypes.FooBar.FOO, 5L, CandidateTypes.FooBar.BAR, 5L)
         ),
         Arguments.of(
                 Map.of(CandidateTypes.Food.HAMBURGER, 0L, CandidateTypes.Food.HOTDOG, 0L, CandidateTypes.Food.PIZZA, 0L, CandidateTypes.Food.STEAK, 0L),
                 Arrays.asList(
-                        new ElectionVote(null, CandidateTypes.Food.HAMBURGER),
-                        new ElectionVote(null, CandidateTypes.Food.HOTDOG),
-                        new ElectionVote(null, CandidateTypes.Food.HOTDOG),
-                        new ElectionVote(null, CandidateTypes.Food.PIZZA),
-                        new ElectionVote(null, CandidateTypes.Food.PIZZA),
-                        new ElectionVote(null, CandidateTypes.Food.PIZZA),
-                        new ElectionVote(null, CandidateTypes.Food.STEAK),
-                        new ElectionVote(null, CandidateTypes.Food.STEAK),
-                        new ElectionVote(null, CandidateTypes.Food.STEAK),
-                        new ElectionVote(null, CandidateTypes.Food.STEAK)
+                        CandidateTypes.Food.HAMBURGER,
+                        CandidateTypes.Food.HOTDOG,
+                        CandidateTypes.Food.HOTDOG,
+                        CandidateTypes.Food.PIZZA,
+                        CandidateTypes.Food.PIZZA,
+                        CandidateTypes.Food.PIZZA,
+                        CandidateTypes.Food.STEAK,
+                        CandidateTypes.Food.STEAK,
+                        CandidateTypes.Food.STEAK,
+                        CandidateTypes.Food.STEAK
                 ),
                 Map.of(CandidateTypes.Food.HAMBURGER, 1L, CandidateTypes.Food.HOTDOG, 2L, CandidateTypes.Food.PIZZA, 3L, CandidateTypes.Food.STEAK, 4L)
         ),
         Arguments.of(
                 Map.of(CandidateTypes.FastFood.ARBYS, 0L, CandidateTypes.FastFood.BURGERKING, 0L, CandidateTypes.FastFood.CULVERS, 0L, CandidateTypes.FastFood.MCDONALDS, 0L, CandidateTypes.FastFood.SUBWAY, 0L, CandidateTypes.FastFood.WENDYS, 0L),
                 Arrays.asList(
-                  new ElectionVote(null, CandidateTypes.FastFood.ARBYS),
-                  new ElectionVote(null, CandidateTypes.FastFood.BURGERKING),
-                  new ElectionVote(null, CandidateTypes.FastFood.BURGERKING),
-                  new ElectionVote(null, CandidateTypes.FastFood.CULVERS),
-                  new ElectionVote(null, CandidateTypes.FastFood.CULVERS),
-                  new ElectionVote(null, CandidateTypes.FastFood.CULVERS),
-                  new ElectionVote(null, CandidateTypes.FastFood.MCDONALDS),
-                  new ElectionVote(null, CandidateTypes.FastFood.MCDONALDS),
-                  new ElectionVote(null, CandidateTypes.FastFood.MCDONALDS),
-                  new ElectionVote(null, CandidateTypes.FastFood.MCDONALDS),
-                  new ElectionVote(null, CandidateTypes.FastFood.SUBWAY),
-                  new ElectionVote(null, CandidateTypes.FastFood.SUBWAY),
-                  new ElectionVote(null, CandidateTypes.FastFood.SUBWAY),
-                  new ElectionVote(null, CandidateTypes.FastFood.SUBWAY),
-                  new ElectionVote(null, CandidateTypes.FastFood.SUBWAY),
-                  new ElectionVote(null, CandidateTypes.FastFood.WENDYS),
-                  new ElectionVote(null, CandidateTypes.FastFood.WENDYS),
-                  new ElectionVote(null, CandidateTypes.FastFood.WENDYS),
-                  new ElectionVote(null, CandidateTypes.FastFood.WENDYS),
-                  new ElectionVote(null, CandidateTypes.FastFood.WENDYS),
-                  new ElectionVote(null, CandidateTypes.FastFood.WENDYS)
+                  CandidateTypes.FastFood.ARBYS,
+                  CandidateTypes.FastFood.BURGERKING,
+                  CandidateTypes.FastFood.BURGERKING,
+                  CandidateTypes.FastFood.CULVERS,
+                  CandidateTypes.FastFood.CULVERS,
+                  CandidateTypes.FastFood.CULVERS,
+                  CandidateTypes.FastFood.MCDONALDS,
+                  CandidateTypes.FastFood.MCDONALDS,
+                  CandidateTypes.FastFood.MCDONALDS,
+                  CandidateTypes.FastFood.MCDONALDS,
+                  CandidateTypes.FastFood.SUBWAY,
+                  CandidateTypes.FastFood.SUBWAY,
+                  CandidateTypes.FastFood.SUBWAY,
+                  CandidateTypes.FastFood.SUBWAY,
+                  CandidateTypes.FastFood.SUBWAY,
+                  CandidateTypes.FastFood.WENDYS,
+                  CandidateTypes.FastFood.WENDYS,
+                  CandidateTypes.FastFood.WENDYS,
+                  CandidateTypes.FastFood.WENDYS,
+                  CandidateTypes.FastFood.WENDYS,
+                  CandidateTypes.FastFood.WENDYS
                 ),
                 Map.of(CandidateTypes.FastFood.ARBYS, 1L, CandidateTypes.FastFood.BURGERKING, 2L, CandidateTypes.FastFood.CULVERS, 3L, CandidateTypes.FastFood.MCDONALDS, 4L, CandidateTypes.FastFood.SUBWAY, 5L, CandidateTypes.FastFood.WENDYS, 6L)
         )
@@ -205,18 +221,11 @@ class EventSinkApplicationTest extends TestKafkaContext {
 
 
   static class CloudEventHelper {
-    private static final CloudEventBuilder builder = new CloudEventBuilder()
+    public static final CloudEventBuilder builder = new CloudEventBuilder()
             .newBuilder()
             .withSource(URI.create("http://" + EventSinkApplicationTest.class.getSimpleName()))
             .withSubject("TEST");
 
-    public static CloudEvent buildCloudEvent(final String type, final CloudEventData data) {
-      return builder
-              .withId(UUID.randomUUID().toString())
-              .withType(type)
-              .withData(data)
-              .build();
-    }
   }
 
   interface CandidateTypes {

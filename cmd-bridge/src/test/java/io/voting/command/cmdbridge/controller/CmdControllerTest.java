@@ -4,14 +4,17 @@ import io.cloudevents.CloudEvent;
 import io.voting.command.cmdbridge.config.AppConfig;
 import io.voting.command.cmdbridge.controller.framework.TestConsumerHelper;
 import io.voting.command.cmdbridge.controller.framework.TestKafkaContext;
+import io.voting.common.library.kafka.clients.serialization.avro.AvroCloudEventData;
 import io.voting.common.library.kafka.models.ReceiveEvent;
-import io.voting.common.library.kafka.utils.CloudEventTypes;
-import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.common.library.models.ElectionCreate;
 import io.voting.common.library.models.ElectionView;
 import io.voting.common.library.models.ElectionVote;
+import io.voting.events.cmd.CmdEvent;
+import io.voting.events.cmd.CreateElection;
+import io.voting.events.cmd.RegisterVote;
+import io.voting.events.cmd.ViewElection;
+import io.voting.events.enums.ElectionCategory;
 import lombok.SneakyThrows;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,7 +32,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @SpringBootTest
 class CmdControllerTest extends TestKafkaContext {
@@ -37,10 +41,10 @@ class CmdControllerTest extends TestKafkaContext {
   private static TestConsumerHelper consumerHelper;
   private static RSocketRequester requester;
 
-
   @DynamicPropertySource
   static void registerKafkaProperties(final DynamicPropertyRegistry dynamicPropertyRegistry) {
     dynamicPropertyRegistry.add("kafka.properties.bootstrap.servers", kafkaContainer::getBootstrapServers);
+    dynamicPropertyRegistry.add("kafka.properties.schema.registry.url", TestKafkaContext::schemaRegistryUrl);
   }
 
   @BeforeAll
@@ -52,6 +56,7 @@ class CmdControllerTest extends TestKafkaContext {
             .rsocketStrategies(strategies)
             .connectWebSocket(URI.create("ws://localhost:" + port + "/cmd"))
             .block();
+    registerSchemas();
     consumerHelper = new TestConsumerHelper(kafkaContainer);
   }
 
@@ -72,27 +77,47 @@ class CmdControllerTest extends TestKafkaContext {
     StepVerifier
             .create(result)
             .verifyComplete();
-    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
+
+    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(5, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("777:888");
-    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CloudEventTypes.ELECTION_VOTE_CMD);
+    assertThat(element.getPOrE().getError()).isNull();
+    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(RegisterVote.class.getName());
+
+    final CmdEvent payloadData = AvroCloudEventData.dataOf(element.getPOrE().getPayload().getData());
+    assertThat(payloadData.getCmd()).isNotNull().isInstanceOf(RegisterVote.class);
+
+    final RegisterVote actualCmd = (RegisterVote) payloadData.getCmd();
+    assertThat(actualCmd.getEId()).isEqualTo("888");
+    assertThat(actualCmd.getVotedFor()).isEqualTo("Doug");
+
   }
 
   @SneakyThrows
   @Test
   void testElectionCmd() {
+    final ElectionCreate expectedCmdData = new ElectionCreate("testAuthor", "testTitle", "testDesc", "Gaming", Arrays.asList("Doug", "Carter", "testUser"));
     final Mono<Void> result = requester
             .route("new-election")
             .metadata("777", AppConfig.CMD_MIMETYPE)
-            .data(new ElectionCreate("testAuthor", "testTitle", "testDesc", "TEST", Arrays.asList("Doug", "Carter", "testUser")))
+            .data(expectedCmdData)
             .retrieveMono(Void.class);
 
     StepVerifier
             .create(result)
             .verifyComplete();
 
-    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
+    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(5, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("777");
-    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CloudEventTypes.ELECTION_CREATE_CMD);
+    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(CreateElection.class.getName());
+    final CmdEvent payloadData = AvroCloudEventData.dataOf(element.getPOrE().getPayload().getData());
+
+    assertThat(payloadData.getCmd()).isNotNull().isInstanceOf(CreateElection.class);
+    final CreateElection actualPayloadData = (CreateElection) payloadData.getCmd();
+    assertThat(actualPayloadData.getAuthor()).isEqualTo(expectedCmdData.getAuthor());
+    assertThat(actualPayloadData.getTitle()).isEqualTo(expectedCmdData.getTitle());
+    assertThat(actualPayloadData.getDescription()).isEqualTo(expectedCmdData.getDescription());
+    assertThat(actualPayloadData.getCategory()).isEqualTo(ElectionCategory.Gaming);
+    assertThat(actualPayloadData.getCandidates()).isEqualTo(expectedCmdData.getCandidates());
   }
 
   @SneakyThrows
@@ -108,12 +133,18 @@ class CmdControllerTest extends TestKafkaContext {
             .create(result)
             .verifyComplete();
 
-    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(3, TimeUnit.SECONDS);
+    final ReceiveEvent<String, CloudEvent> element = consumerHelper.getEvents().poll(5, TimeUnit.SECONDS);
     assertThat(element.getKey()).isEqualTo("778");
-    final CloudEvent payload = element.getPOrE().getPayload();
-    assertThat(payload.getType()).isEqualTo(CloudEventTypes.ELECTION_VIEW_CMD);
-    assertThat(payload.getSubject()).isEqualTo("778");
-    assertThat(StreamUtils.unwrapCloudEventData(payload.getData(), ElectionView.class)).isEqualTo(ElectionView.OPEN);
+    assertThat(element.getPOrE().getError()).isNull();
+    assertThat(element.getPOrE().getPayload().getType()).isEqualTo(ViewElection.class.getName());
+    assertThat(element.getPOrE().getPayload().getSubject()).isEqualTo("778");
+
+    final CmdEvent cmdEvent = AvroCloudEventData.dataOf(element.getPOrE().getPayload().getData());
+    assertThat(cmdEvent.getCmd()).isNotNull().isInstanceOf(ViewElection.class);
+
+    final ViewElection actualData = (ViewElection) cmdEvent.getCmd();
+    assertThat(actualData.getEId()).isEqualTo("778");
+    assertThat(actualData.getView()).isEqualTo(io.voting.events.enums.ElectionView.OPEN);
 
   }
 }

@@ -45,11 +45,13 @@ spec:
         runAsUser: 1000
       containers:
         - name: cmd-bridge
-          image: registry.nermdev.io/apps/cmd-bridge
+          image: registry.nermdev.io/edv/cmd-bridge
           imagePullPolicy: Always
           volumeMounts:
             - name: kafka-secrets
               mountPath: /mnt/kafka-secrets
+            - name: tls
+              mountPath: /mnt/tls
           resources:
             requests:
               cpu: 1.0
@@ -61,3 +63,6 @@ spec:
         - name: kafka-secrets
           secret:
             secretName: kafka-secrets
+        - name: tls
+          secret:
+            secretName: tls-nermin

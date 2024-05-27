@@ -1,5 +1,8 @@
 package io.voting.streams.electionintegrity;
 
+import io.cloudevents.kafka.CloudEventSerializer;
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import io.voting.common.library.kafka.utils.StreamUtils;
 import io.voting.streams.electionintegrity.topology.ElectionIntegrityTopology;
 import lombok.extern.slf4j.Slf4j;
@@ -51,11 +54,14 @@ public class ElectionIntegrityApplication {
   }
 
   private static KafkaStreams buildStreams(final Properties properties) {
-    if (Objects.isNull(properties.getProperty("input.topic")) || Objects.isNull(properties.getProperty("output.topic.elections")) || Objects.isNull(properties.getProperty("output.topic.votes"))) {
+    if (Objects.isNull(properties.getProperty("input.topic")) || Objects.isNull(properties.getProperty("output.topic"))) {
       throw new RuntimeException("Missing input/output topic configuration");
     }
 
     properties.putIfAbsent("election.ttl", "P1D"); // default 1D TTL
+    properties.putIfAbsent(AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
+    properties.putIfAbsent(CloudEventSerializer.ENCODING_CONFIG, "BINARY");
+    properties.putIfAbsent(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
 
     final Topology topology = ElectionIntegrityTopology.buildTopology(new StreamsBuilder(), properties);
     return new KafkaStreams(topology, properties);

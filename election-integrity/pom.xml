@@ -11,7 +11,7 @@
 
     <groupId>io.voting.streams</groupId>
     <artifactId>election-integrity</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>io.voting.common</groupId>
             <artifactId>library</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>

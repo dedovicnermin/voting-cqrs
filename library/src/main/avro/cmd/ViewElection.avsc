@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "name": "ViewElection",
+  "namespace": "io.voting.events.cmd",
+  "doc": "Data sent each time user queries a specific election",
+  "fields": [
+    {
+      "name": "eId",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      }
+    },
+    {
+      "name": "view",
+      "type": {
+        "type": "enum",
+        "name": "io.voting.events.enums.ElectionView",
+        "symbols": [
+          "OPEN", "PENDING", "CLOSED", "UNKNOWN"
+        ],
+        "default": "UNKNOWN"
+      },
+      "default": "UNKNOWN"
+    }
+  ]
+}

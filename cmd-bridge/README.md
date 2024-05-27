@@ -24,7 +24,7 @@ rsc --debug --fnf \
     "author": "Leonardo",
     "title": "NBA Playoffs MVP",
     "description": "The best player in the NBA playoffs",
-    "category": "SPORTS",
+    "category": "Sports",
     "candidates": ["Luka Doncic", "Nikola Jokic", "Anthony Edwards", "Brunson"]
     }' \
   --stacktrace ws://cmd-bridge.test.nermdev.io/cmd

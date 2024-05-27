@@ -9,10 +9,9 @@ public final class TTLPairs {
 
   private TTLPairs() {}
 
-  public static Pair<Long, Long> now(final Duration duration) {
-    final Instant now = Instant.now();
-    final long begin = now.toEpochMilli();
-    final long end = now.plus(duration).toEpochMilli();
+  public static Pair<Instant, Instant> now(final Duration duration) {
+    final Instant begin = Instant.now();
+    final Instant end = begin.plus(duration);
     return Pair.with(begin, end);
   }
 }

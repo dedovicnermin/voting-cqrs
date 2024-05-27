@@ -22,11 +22,13 @@ spec:
     spec:
       containers:
         - name: event-sink
-          image: registry.nermdev.io/apps/event-sink
+          image: registry.nermdev.io/edv/event-sink
           imagePullPolicy: Always
           volumeMounts:
             - name: kafka-secrets
               mountPath: /mnt/kafka-secrets
+            - name: tls
+              mountPath: /mnt/tls
           resources:
             requests:
               cpu: 500m
@@ -38,6 +40,9 @@ spec:
         - name: kafka-secrets
           secret:
             secretName: kafka-secrets
+        - name: tls
+          secret:
+            secretName: tls-nermin
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

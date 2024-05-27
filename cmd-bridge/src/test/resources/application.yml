@@ -8,12 +8,16 @@ spring:
 kafka:
   properties:
     bootstrap.servers: bootstrap.replace.in.itest:443
+    auto.register.schemas: false
+    use.latest.version: true
+    latest.compatibility.strict: false
+    schema.registry.url: http://willbereplaced:8081
   producer:
     linger.ms: 1
     acks: all
   topics:
-    NEW_VOTE: test.election.votes.raw
-    NEW_ELECTION: test.election.requests.raw
+    NEW_VOTE: test.election.commands
+    NEW_ELECTION: test.election.commands
 
 
 
