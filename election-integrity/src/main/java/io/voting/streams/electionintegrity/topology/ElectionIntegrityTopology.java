@@ -81,7 +81,7 @@ public final class ElectionIntegrityTopology {
     final String inputTopic = properties.getProperty(INPUT_TOPIC_CONFIG);
     final KStream<String, CloudEvent> commandStream = builder
             .stream(inputTopic, Consumed.with(Serdes.String(), avroCESerde).withName("election.cmd.src"))
-            .mapValues(CloudEvent.class::cast);
+            .mapValues(CloudEvent.class::cast, Named.as("global.ce.upcast"));
 
 
     final KStream<String, CloudEvent> electionCommands = commandStream.filter(CMD_ELECTION_FILTER, CMD_ELECTION_FILTER.name());
@@ -116,7 +116,7 @@ public final class ElectionIntegrityTopology {
     final String votesOutputTopic = properties.getProperty(OUTPUT_TOPIC_CONFIG);
     voteCommands
             .mapValues(ce -> (RegisterVote) AvroCloudEventData.<CmdEvent>dataOf(ce.getData()).getCmd(), Named.as("vi.unwrap.ce.data"))
-            .mapValues(rv -> ElectionVote.of(rv.getEId().toString(), rv.getVotedFor().toString()))
+            .mapValues(rv -> ElectionVote.of(rv.getEId().toString(), rv.getVotedFor().toString()), Named.as("vi.dao.ce.data"))
             .groupByKey()
             .aggregate(
                     VoteAggregator.initializer(),

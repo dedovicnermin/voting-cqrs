@@ -115,20 +115,8 @@
                         <new-election-integrity>${project.basedir}/src/main/avro/integrity/NewElection.avsc</new-election-integrity>
                         <new-vote-integrity>${project.basedir}/src/main/avro/integrity/NewVote.avsc</new-vote-integrity>
                         <close-election-integrity>${project.basedir}/src/main/avro/integrity/CloseElection.avsc</close-election-integrity>
-                        <election.commands.legal-value>${project.basedir}/src/main/avro/integrity/IntegrityEvent.avsc</election.commands.legal-value>
+                        <election.events-value>${project.basedir}/src/main/avro/integrity/IntegrityEvent.avsc</election.events-value>
                     </subjects>
-                    <schemaTypes>
-                        <election-category>AVRO</election-category>
-                        <create-election-cmd>AVRO</create-election-cmd>
-                        <view-election-cmd>AVRO</view-election-cmd>
-                        <register-vote-cmd>AVRO</register-vote-cmd>
-                        <election.commands-value>AVRO</election.commands-value>
-                        <election-status>AVRO</election-status>
-                        <new-election-integrity>AVRO</new-election-integrity>
-                        <new-vote-integrity>AVRO</new-vote-integrity>
-                        <close-election-integrity>AVRO</close-election-integrity>
-                        <election.commands.legal-value>AVRO</election.commands.legal-value>
-                    </schemaTypes>
                     <references>
                         <create-election-cmd>
                             <reference>
@@ -151,8 +139,7 @@
                             </reference>
                         </election.commands-value>
 
-
-                        <new-vote-integrity>
+                        <new-election-integrity>
                             <reference>
                                 <name>io.voting.events.enums.ElectionCategory</name>
                                 <subject>election-category</subject>
@@ -161,8 +148,8 @@
                                 <name>io.voting.events.enums.ElectionStatus</name>
                                 <subject>election-status</subject>
                             </reference>
-                        </new-vote-integrity>
-                        <election.commands.legal-value>
+                        </new-election-integrity>
+                        <election.events-value>
                             <reference>
                                 <name>io.voting.events.integrity.NewElection</name>
                                 <subject>new-election-integrity</subject>
@@ -175,10 +162,32 @@
                                 <name>io.voting.events.integrity.CloseElection</name>
                                 <subject>close-election-integrity</subject>
                             </reference>
-                        </election.commands.legal-value>
+                        </election.events-value>
                     </references>
-
-                    <compatibilityLevels/>
+                    <schemaTypes>
+                        <election-category>AVRO</election-category>
+                        <create-election-cmd>AVRO</create-election-cmd>
+                        <view-election-cmd>AVRO</view-election-cmd>
+                        <register-vote-cmd>AVRO</register-vote-cmd>
+                        <election.commands-value>AVRO</election.commands-value>
+                        <election-status>AVRO</election-status>
+                        <new-election-integrity>AVRO</new-election-integrity>
+                        <new-vote-integrity>AVRO</new-vote-integrity>
+                        <close-election-integrity>AVRO</close-election-integrity>
+                        <election.events-value>AVRO</election.events-value>
+                    </schemaTypes>
+                    <compatibilityLevels>
+                        <election-category>BACKWARD</election-category>
+                        <create-election-cmd>BACKWARD</create-election-cmd>
+                        <view-election-cmd>BACKWARD</view-election-cmd>
+                        <register-vote-cmd>BACKWARD</register-vote-cmd>
+                        <election.commands-value>BACKWARD</election.commands-value>
+                        <election-status>BACKWARD</election-status>
+                        <new-election-integrity>BACKWARD</new-election-integrity>
+                        <new-vote-integrity>BACKWARD</new-vote-integrity>
+                        <close-election-integrity>BACKWARD</close-election-integrity>
+                        <election.events-value>BACKWARD</election.events-value>
+                    </compatibilityLevels>
                     <messagePath/>
                     <outputDirectory/>
                     <outputPath/>
