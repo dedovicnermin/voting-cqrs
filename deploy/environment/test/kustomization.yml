@@ -3,8 +3,6 @@ kind: Kustomization
 
 namespace: test
 
-commonLabels:
-  project: edv
 
 resources:
   - ../../overlay/test/client
@@ -16,12 +14,12 @@ resources:
 images:
   - name: registry.nermdev.io/apps/edv-client
     newTag: 0.0.1
-  - name: registry.nermdev.io/apps/cmd-bridge
-    newTag: 0.0.1-SNAPSHOT
-  - name: registry.nermdev.io/apps/election-integrity
-    newTag: 0.0.1-SNAPSHOT
-  - name: registry.nermdev.io/apps/event-sink
-    newTag: 0.0.1-SNAPSHOT
-  - name: registry.nermdev.io/apps/query-service
-    newTag: 0.0.1-SNAPSHOT
+  - name: registry.nermdev.io/edv/cmd-bridge
+    newTag: 0.1.0-SNAPSHOT
+  - name: registry.nermdev.io/edv/election-integrity
+    newTag: 0.1.0-SNAPSHOT
+  - name: registry.nermdev.io/edv/event-sink
+    newTag: 0.1.0-SNAPSHOT
+  - name: registry.nermdev.io/edv/query-service
+    newTag: 0.1.0-SNAPSHOT
 

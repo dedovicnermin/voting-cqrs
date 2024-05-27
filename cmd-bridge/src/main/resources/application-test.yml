@@ -13,13 +13,20 @@ kafka:
     security.protocol: SASL_PLAINTEXT
     sasl.mechanism: PLAIN
     sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="{file:/mnt/kafka-secrets/secrets.txt:username}" password="{file:/mnt/kafka-secrets/secrets.txt:password}";
+    schema.registry.url: https://sr.cfk.svc.cluster.local:8081
+    schema.registry.basic.auth.user.info: {file:/mnt/kafka-secrets/secrets.txt:username}:{file:/mnt/kafka-secrets/secrets.txt:password}
+    schema.registry.basic.auth.credentials.source: USER_INFO
+    schema.registry.ssl.truststore.location: /mnt/tls/truststore.jks
+    schema.registry.ssl.truststore.password: {file:/mnt/kafka-secrets/secrets.txt:trust_password}
+    auto.register.schemas: false
+    cloudevents.serializer.encoding: BINARY
   producer:
     linger.ms: 15
     acks: all
     enable.idempotence: true
   topics:
-    NEW_VOTE: test.election.commands
-    NEW_ELECTION: test.election.commands
+    NEW_VOTE: edv.election.commands
+    NEW_ELECTION: edv.election.commands
 
 
 

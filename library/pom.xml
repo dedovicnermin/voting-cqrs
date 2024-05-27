@@ -17,7 +17,10 @@
 
     <properties>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-        <schema.registry.url>http://localhost:8081</schema.registry.url>
+<!--        <schema.registry.url>http://localhost:8081</schema.registry.url>-->
+        <schema.registry.url>https://sr.local.nermdev.io</schema.registry.url>
+        <truststore.password></truststore.password>
+        <schema.registry.basic.auth.user.info></schema.registry.basic.auth.user.info>
     </properties>
 
     <pluginRepositories>
@@ -106,97 +109,97 @@
                 <configuration>
                     <schemaRegistryUrls>${schema.registry.url}</schemaRegistryUrls>
                     <subjects>
-                        <election-category>${project.basedir}/src/main/avro/enums/ElectionCategory.avsc</election-category>
-                        <create-election-cmd>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</create-election-cmd>
-                        <view-election-cmd>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</view-election-cmd>
-                        <register-vote-cmd>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</register-vote-cmd>
-                        <election.commands-value>${project.basedir}/src/main/avro/cmd/CmdEvent.avsc</election.commands-value>
-                        <election-status>${project.basedir}/src/main/avro/enums/ElectionStatus.avsc</election-status>
-                        <new-election-integrity>${project.basedir}/src/main/avro/integrity/NewElection.avsc</new-election-integrity>
-                        <new-vote-integrity>${project.basedir}/src/main/avro/integrity/NewVote.avsc</new-vote-integrity>
-                        <close-election-integrity>${project.basedir}/src/main/avro/integrity/CloseElection.avsc</close-election-integrity>
-                        <election.events-value>${project.basedir}/src/main/avro/integrity/IntegrityEvent.avsc</election.events-value>
+                        <edv.election-category>${project.basedir}/src/main/avro/enums/ElectionCategory.avsc</edv.election-category>
+                        <edv.create-election-cmd>${project.basedir}/src/main/avro/cmd/CreateElection.avsc</edv.create-election-cmd>
+                        <edv.view-election-cmd>${project.basedir}/src/main/avro/cmd/ViewElection.avsc</edv.view-election-cmd>
+                        <edv.register-vote-cmd>${project.basedir}/src/main/avro/cmd/RegisterVote.avsc</edv.register-vote-cmd>
+                        <edv.election.commands-value>${project.basedir}/src/main/avro/cmd/CmdEvent.avsc</edv.election.commands-value>
+                        <edv.election-status>${project.basedir}/src/main/avro/enums/ElectionStatus.avsc</edv.election-status>
+                        <edv.new-election-integrity>${project.basedir}/src/main/avro/integrity/NewElection.avsc</edv.new-election-integrity>
+                        <edv.new-vote-integrity>${project.basedir}/src/main/avro/integrity/NewVote.avsc</edv.new-vote-integrity>
+                        <edv.close-election-integrity>${project.basedir}/src/main/avro/integrity/CloseElection.avsc</edv.close-election-integrity>
+                        <edv.election.events-value>${project.basedir}/src/main/avro/integrity/IntegrityEvent.avsc</edv.election.events-value>
                     </subjects>
                     <references>
-                        <create-election-cmd>
+                        <edv.create-election-cmd>
                             <reference>
                                 <name>io.voting.events.enums.ElectionCategory</name>
-                                <subject>election-category</subject>
+                                <subject>edv.election-category</subject>
                             </reference>
-                        </create-election-cmd>
-                        <election.commands-value>
+                        </edv.create-election-cmd>
+                        <edv.election.commands-value>
                             <reference>
                                 <name>io.voting.events.cmd.ElectionCreate</name>
-                                <subject>create-election-cmd</subject>
+                                <subject>edv.create-election-cmd</subject>
                             </reference>
                             <reference>
                                 <name>io.voting.events.cmd.ViewElection</name>
-                                <subject>view-election-cmd</subject>
+                                <subject>edv.view-election-cmd</subject>
                             </reference>
                             <reference>
                                 <name>io.voting.events.cmd.RegisterVote</name>
-                                <subject>register-vote-cmd</subject>
+                                <subject>edv.register-vote-cmd</subject>
                             </reference>
-                        </election.commands-value>
+                        </edv.election.commands-value>
 
-                        <new-election-integrity>
+                        <edv.new-election-integrity>
                             <reference>
                                 <name>io.voting.events.enums.ElectionCategory</name>
-                                <subject>election-category</subject>
+                                <subject>edv.election-category</subject>
                             </reference>
                             <reference>
                                 <name>io.voting.events.enums.ElectionStatus</name>
-                                <subject>election-status</subject>
+                                <subject>edv.election-status</subject>
                             </reference>
-                        </new-election-integrity>
-                        <election.events-value>
+                        </edv.new-election-integrity>
+                        <edv.election.events-value>
                             <reference>
                                 <name>io.voting.events.integrity.NewElection</name>
-                                <subject>new-election-integrity</subject>
+                                <subject>edv.new-election-integrity</subject>
                             </reference>
                             <reference>
                                 <name>io.voting.events.integrity.NewVote</name>
-                                <subject>new-vote-integrity</subject>
+                                <subject>edv.new-vote-integrity</subject>
                             </reference>
                             <reference>
                                 <name>io.voting.events.integrity.CloseElection</name>
-                                <subject>close-election-integrity</subject>
+                                <subject>edv.close-election-integrity</subject>
                             </reference>
-                        </election.events-value>
+                        </edv.election.events-value>
                     </references>
                     <schemaTypes>
-                        <election-category>AVRO</election-category>
-                        <create-election-cmd>AVRO</create-election-cmd>
-                        <view-election-cmd>AVRO</view-election-cmd>
-                        <register-vote-cmd>AVRO</register-vote-cmd>
-                        <election.commands-value>AVRO</election.commands-value>
-                        <election-status>AVRO</election-status>
-                        <new-election-integrity>AVRO</new-election-integrity>
-                        <new-vote-integrity>AVRO</new-vote-integrity>
-                        <close-election-integrity>AVRO</close-election-integrity>
-                        <election.events-value>AVRO</election.events-value>
+                        <edv.election-category>AVRO</edv.election-category>
+                        <edv.create-election-cmd>AVRO</edv.create-election-cmd>
+                        <edv.view-election-cmd>AVRO</edv.view-election-cmd>
+                        <edv.register-vote-cmd>AVRO</edv.register-vote-cmd>
+                        <edv.election.commands-value>AVRO</edv.election.commands-value>
+                        <edv.election-status>AVRO</edv.election-status>
+                        <edv.new-election-integrity>AVRO</edv.new-election-integrity>
+                        <edv.new-vote-integrity>AVRO</edv.new-vote-integrity>
+                        <edv.close-election-integrity>AVRO</edv.close-election-integrity>
+                        <edv.election.events-value>AVRO</edv.election.events-value>
                     </schemaTypes>
                     <compatibilityLevels>
-                        <election-category>BACKWARD</election-category>
-                        <create-election-cmd>BACKWARD</create-election-cmd>
-                        <view-election-cmd>BACKWARD</view-election-cmd>
-                        <register-vote-cmd>BACKWARD</register-vote-cmd>
-                        <election.commands-value>BACKWARD</election.commands-value>
-                        <election-status>BACKWARD</election-status>
-                        <new-election-integrity>BACKWARD</new-election-integrity>
-                        <new-vote-integrity>BACKWARD</new-vote-integrity>
-                        <close-election-integrity>BACKWARD</close-election-integrity>
-                        <election.events-value>BACKWARD</election.events-value>
+                        <edv.election-category>BACKWARD</edv.election-category>
+                        <edv.create-election-cmd>BACKWARD</edv.create-election-cmd>
+                        <edv.view-election-cmd>BACKWARD</edv.view-election-cmd>
+                        <edv.register-vote-cmd>BACKWARD</edv.register-vote-cmd>
+                        <edv.election.commands-value>BACKWARD</edv.election.commands-value>
+                        <edv.election-status>BACKWARD</edv.election-status>
+                        <edv.new-election-integrity>BACKWARD</edv.new-election-integrity>
+                        <edv.new-vote-integrity>BACKWARD</edv.new-vote-integrity>
+                        <edv.close-election-integrity>BACKWARD</edv.close-election-integrity>
+                        <edv.election.events-value>BACKWARD</edv.election.events-value>
                     </compatibilityLevels>
                     <messagePath/>
                     <outputDirectory/>
                     <outputPath/>
                     <previousSchemaPaths/>
                     <schemas/>
-<!--                    <userInfoConfig>${schema.registry.basic.auth.user.info}</userInfoConfig>-->
+                    <userInfoConfig>${schema.registry.basic.auth.user.info}</userInfoConfig>
                     <configs>
-<!--                        <schema.registry.ssl.truststore.location>/Users/ndedovic/PycharmProjects/homelab/workspace/kafka/auth/nermin/truststore.jks</schema.registry.ssl.truststore.location>-->
-<!--                        <schema.registry.ssl.truststore.password>mystorepassword</schema.registry.ssl.truststore.password>-->
+                        <schema.registry.ssl.truststore.location>/Users/nerm/PycharmProjects/homelab/workspace/kafka/auth/nermin/truststore.jks</schema.registry.ssl.truststore.location>
+                        <schema.registry.ssl.truststore.password>${truststore.password}</schema.registry.ssl.truststore.password>
                     </configs>
                 </configuration>
             </plugin>
