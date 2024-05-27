@@ -39,7 +39,7 @@
         <cloudevent.version>2.3.0</cloudevent.version>
         <confluent.version>7.6.0</confluent.version>
         <avro.version>1.11.3</avro.version>
-        <image>registry.nermdev.io/apps/${project.artifactId}:${project.version}</image>
+        <image>registry.nermdev.io/edv/${project.artifactId}:${project.version}</image>
     </properties>
 
     <repositories>
