@@ -47,7 +47,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: election-integrity
-          image: registry.nermdev.io/apps/election-integrity
+          image: registry.nermdev.io/edv/election-integrity
           imagePullPolicy: Always
           args:
             - /mnt/application/application.properties

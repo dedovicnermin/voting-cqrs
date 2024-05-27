@@ -45,7 +45,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: cmd-bridge
-          image: registry.nermdev.io/apps/cmd-bridge
+          image: registry.nermdev.io/edv/cmd-bridge
           imagePullPolicy: Always
           volumeMounts:
             - name: kafka-secrets

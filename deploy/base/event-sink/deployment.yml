@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: event-sink
-          image: registry.nermdev.io/apps/event-sink
+          image: registry.nermdev.io/edv/event-sink
           imagePullPolicy: Always
           volumeMounts:
             - name: kafka-secrets
